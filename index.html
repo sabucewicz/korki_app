@@ -3,415 +3,524 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Harmonogram Korepetycji</title>
+  <title>TutorFlow Pro — Harmonogram Korepetycji</title>
 
-  <!-- Google Font: Outfit -->
+  <!-- Google Font: Plus Jakarta Sans / Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #0b0d11;
-      --card-bg: #14171f;
-      --card-inner: #1a1e29;
-      --border: #232938;
-      --text: #f3f5f9;
-      --text-muted: #8b94a5;
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --danger: #ef4444;
+      --bg: #090a0f;
+      --card-bg: rgba(18, 21, 31, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-glow: rgba(99, 102, 241, 0.3);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --danger: #f43f5e;
       --success: #10b981;
 
       /* Kolory poziomów */
-      --cat-base-bg: #132e22;
-      --cat-base-border: #1f513c;
-      --cat-base-text: #6ee7b7;
+      --col-podstawowka-bg: rgba(16, 185, 129, 0.12);
+      --col-podstawowka-border: rgba(16, 185, 129, 0.4);
+      --col-podstawowka-text: #6ee7b7;
 
-      --cat-high-bg: #332b14;
-      --cat-high-border: #57471d;
-      --cat-high-text: #fde047;
+      --col-liceum-podst-bg: rgba(245, 158, 11, 0.12);
+      --col-liceum-podst-border: rgba(245, 158, 11, 0.4);
+      --col-liceum-podst-text: #fcd34d;
 
-      --cat-it-bg: #381921;
-      --cat-it-border: #5e2634;
-      --cat-it-text: #fca5a5;
+      --col-liceum-rozsz-bg: rgba(139, 92, 246, 0.14);
+      --col-liceum-rozsz-border: rgba(139, 92, 246, 0.45);
+      --col-liceum-rozsz-text: #c4b5fd;
 
-      --cat-empty-bg: #11131a;
-      --cat-empty-border: #1d222e;
+      --col-inf-rozsz-bg: rgba(6, 182, 212, 0.14);
+      --col-inf-rozsz-border: rgba(6, 182, 212, 0.45);
+      --col-inf-rozsz-text: #67e8f9;
+
+      /* Lekcja jednorazowa */
+      --col-once-bg: rgba(236, 72, 153, 0.18);
+      --col-once-border: #ec4899;
+      --col-once-text: #fbcfe8;
+
+      --row-height: 52px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
       background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.08) 0%, transparent 40%);
       color: var(--text);
       min-height: 100vh;
-      padding: 16px;
       display: flex;
       justify-content: center;
+      padding: 12px;
     }
 
-    .app-wrapper {
+    .app-layout {
       width: 100%;
-      max-width: 1400px;
+      max-width: 1560px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+      height: calc(100vh - 24px);
     }
 
-    /* Pasek górny */
+    /* Pasek górny (Header) */
     header {
       background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 14px 20px;
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 10px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
       gap: 12px;
     }
 
-    header h1 {
-      font-size: 1.6rem;
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366f1, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #ffffff 40%, #60a5fa 100%);
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    .badge-cookie {
-      font-size: 0.75rem;
-      background: rgba(59, 130, 246, 0.12);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      color: #93c5fd;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: 600;
+    .kpi-bar {
       display: flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    /* Kafelki podsumowania finansowego */
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
     }
 
-    .sum-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .sum-card .label {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .sum-card .val {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text);
-    }
-
-    .sum-card.highlight .val {
-      color: var(--success);
-    }
-
-    /* Główny układ Dashboardu */
-    .main-grid {
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 16px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .card-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-
-    /* Przełącznik dni widoczny na smartfonach */
-    .mobile-day-selector {
-      display: none;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-    .mobile-day-selector::-webkit-scrollbar {
-      display: none;
-    }
-
-    .day-tab {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 8px 14px;
+    .kpi-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
       border-radius: 12px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .day-tab.active {
-      background: var(--accent);
-      border-color: var(--accent);
+    .kpi-chip .label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .kpi-chip .value {
+      font-size: 1.05rem;
+      font-weight: 800;
       color: #fff;
     }
 
-    /* Widok harmonogramu (Desktop) */
-    .schedule-table-wrap {
-      overflow-x: auto;
-      border-radius: 14px;
-      border: 1px solid var(--border);
+    .kpi-chip.highlight .value {
+      color: var(--success);
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
     }
 
-    .schedule-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 760px;
-    }
-
-    .schedule-table th, .schedule-table td {
-      border: 1px solid var(--border);
-      padding: 8px;
-      text-align: center;
-    }
-
-    .schedule-table th {
-      background: #11141b;
+    .live-clock-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-size: 0.8rem;
+      color: #38bdf8;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .live-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #06b6d4;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(6, 182, 212, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+    }
+
+    /* Układ główny */
+    .dashboard-body {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 12px;
+      flex: 1;
+      min-height: 0; /* Kluczowe dla laptopa */
+    }
+
+    .panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Kalendarz Desktop */
+    .calendar-container {
+      position: relative;
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: 65px repeat(7, 1fr);
+      min-width: 820px;
+      border-collapse: collapse;
+      position: relative;
+    }
+
+    .cal-header-cell {
+      background: rgba(14, 17, 24, 0.95);
+      border-bottom: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+      padding: 10px 4px;
+      text-align: center;
+      font-size: 0.75rem;
       font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
-      padding: 12px 6px;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    .schedule-table td.time-cell {
-      background: #11141b;
+    .cal-header-cell.today-col {
+      color: #38bdf8;
+      background: rgba(6, 182, 212, 0.12);
+      border-bottom: 2px solid #06b6d4;
+    }
+
+    .time-slot-label {
+      height: var(--row-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
       font-weight: 700;
-      font-size: 0.88rem;
-      width: 70px;
-      color: var(--text);
+      color: var(--text-muted);
+      border-right: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(11, 14, 20, 0.6);
     }
 
-    /* Slot lekcji */
-    .lesson-slot {
-      min-height: 54px;
-      border-radius: 10px;
-      padding: 6px 8px;
+    .cal-cell {
+      height: var(--row-height);
+      border-right: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--card-border);
+      position: relative;
+      padding: 3px;
+    }
+
+    .cal-cell.today-col {
+      background: rgba(99, 102, 241, 0.03);
+    }
+
+    /* Kafelek lekcji */
+    .slot-card {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 2px;
       cursor: pointer;
-      transition: transform 0.1s ease, filter 0.15s ease;
-      background: var(--cat-empty-bg);
-      border: 1px dashed var(--cat-empty-border);
-      color: #3b4458;
+      border: 1px dashed rgba(255, 255, 255, 0.06);
+      transition: all 0.15s ease;
+      background: rgba(255, 255, 255, 0.015);
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 0.8rem;
+      padding: 2px 4px;
+      text-align: center;
     }
 
-    .lesson-slot:hover {
-      filter: brightness(1.2);
+    .slot-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
-    .lesson-slot:active {
-      transform: scale(0.96);
-    }
-
-    .lesson-slot.occupied {
+    .slot-card.occupied {
       border-style: solid;
       border-width: 1px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-    .lesson-slot.level-podstawowka {
-      background: var(--cat-base-bg);
-      border-color: var(--cat-base-border);
-      color: var(--cat-base-text);
+    .slot-card.level-podstawowka {
+      background: var(--col-podstawowka-bg);
+      border-color: var(--col-podstawowka-border);
+      color: var(--col-podstawowka-text);
+    }
+    .slot-card.level-liceum-podst {
+      background: var(--col-liceum-podst-bg);
+      border-color: var(--col-liceum-podst-border);
+      color: var(--col-liceum-podst-text);
+    }
+    .slot-card.level-liceum-rozsz {
+      background: var(--col-liceum-rozsz-bg);
+      border-color: var(--col-liceum-rozsz-border);
+      color: var(--col-liceum-rozsz-text);
+    }
+    .slot-card.level-inf-rozsz {
+      background: var(--col-inf-rozsz-bg);
+      border-color: var(--col-inf-rozsz-border);
+      color: var(--col-inf-rozsz-text);
     }
 
-    .lesson-slot.level-liceum {
-      background: var(--cat-high-bg);
-      border-color: var(--cat-high-border);
-      color: var(--cat-high-text);
+    /* Lekcja jednorazowa */
+    .slot-card.is-once {
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(236, 72, 153, 0.14),
+        rgba(236, 72, 153, 0.14) 8px,
+        rgba(236, 72, 153, 0.22) 8px,
+        rgba(236, 72, 153, 0.22) 16px
+      ) !important;
+      border-color: var(--col-once-border) !important;
+      color: var(--col-once-text) !important;
     }
 
-    .lesson-slot.level-informatyka {
-      background: var(--cat-it-bg);
-      border-color: var(--cat-it-border);
-      color: var(--cat-it-text);
-    }
-
-    .slot-name {
-      font-size: 0.86rem;
+    .slot-card .s-name {
+      font-size: 0.8rem;
       font-weight: 700;
-      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 95%;
+      line-height: 1.1;
     }
 
-    .slot-price {
-      font-size: 0.72rem;
-      opacity: 0.8;
-      font-weight: 500;
-    }
-
-    /* Widok harmonogramu na smartfonie */
-    .mobile-schedule-list {
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .mobile-slot-card {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 14px;
+    .slot-card .s-meta {
+      font-size: 0.68rem;
+      font-weight: 600;
+      opacity: 0.85;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      cursor: pointer;
+      gap: 4px;
     }
 
-    .mobile-slot-time {
+    .badge-once {
+      background: var(--col-once-border);
+      color: #fff;
+      font-size: 0.58rem;
+      padding: 1px 4px;
+      border-radius: 4px;
       font-weight: 800;
-      font-size: 1.05rem;
-      color: var(--text-muted);
-      width: 60px;
+      text-transform: uppercase;
     }
 
-    .mobile-slot-status {
+    /* Czerwona linia bieżącego czasu (jak MS Teams) */
+    #current-time-line {
+      position: absolute;
+      left: 65px;
+      right: 0;
+      height: 2px;
+      background: #f43f5e;
+      z-index: 25;
+      pointer-events: none;
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.8);
+      display: none;
+    }
+
+    #current-time-line::before {
+      content: "";
+      position: absolute;
+      left: -5px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f43f5e;
+      box-shadow: 0 0 8px #f43f5e;
+    }
+
+    /* Prawy panel: Baza uczniów */
+    .students-scroll {
       flex: 1;
-      padding: 8px 12px;
-      border-radius: 10px;
-      margin-left: 10px;
+      overflow-y: auto;
+      padding: 10px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    /* Baza uczniów */
-    .btn-action {
+    .student-item {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.15s ease;
+    }
+
+    .student-item:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .st-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .st-pill {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .st-pill.podstawowka { background: #10b981; box-shadow: 0 0 6px #10b981; }
+    .st-pill.liceum-podst { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+    .st-pill.liceum-rozsz { background: #8b5cf6; box-shadow: 0 0 6px #8b5cf6; }
+    .st-pill.inf-rozsz { background: #06b6d4; box-shadow: 0 0 6px #06b6d4; }
+
+    .st-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .st-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .st-rate {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--success);
+      margin-right: 6px;
+    }
+
+    .btn-icon-del {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+    .btn-icon-del:hover {
+      color: var(--danger);
+    }
+
+    .btn-add-primary {
       background: var(--accent);
       color: #fff;
       border: none;
-      border-radius: 10px;
-      padding: 8px 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
       font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
       transition: background 0.15s;
     }
-
-    .btn-action:hover {
+    .btn-add-primary:hover {
       background: var(--accent-hover);
     }
 
-    .students-scroll {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 530px;
-      overflow-y: auto;
-      padding-right: 4px;
+    /* Mobilny selektor dni */
+    .mobile-day-tabs {
+      display: none;
+      padding: 8px 12px;
+      gap: 6px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--card-border);
+      scrollbar-width: none;
     }
+    .mobile-day-tabs::-webkit-scrollbar { display: none; }
 
-    .student-card {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .stud-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .dot.podstawowka { background: #6ee7b7; box-shadow: 0 0 8px rgba(110, 231, 183, 0.4); }
-    .dot.liceum { background: #fde047; box-shadow: 0 0 8px rgba(253, 224, 71, 0.4); }
-    .dot.informatyka { background: #fca5a5; box-shadow: 0 0 8px rgba(252, 165, 165, 0.4); }
-
-    .stud-title {
-      font-weight: 700;
-      font-size: 0.92rem;
-    }
-
-    .stud-sub {
-      font-size: 0.74rem;
+    .m-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
       color: var(--text-muted);
-    }
-
-    .stud-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .stud-rate {
-      font-weight: 700;
-      color: var(--success);
-      font-size: 0.95rem;
-    }
-
-    .btn-del {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      color: var(--danger);
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 6px 12px;
+      border-radius: 10px;
       font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .m-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .m-tab.is-today {
+      border-color: #06b6d4;
+      color: #38bdf8;
     }
 
     /* Modale */
@@ -419,187 +528,224 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
       justify-content: center;
       align-items: flex-start;
-      padding: 20px 16px;
+      padding: 30px 16px;
       z-index: 999;
       overflow-y: auto;
     }
-
     .modal-backdrop.open {
       display: flex;
     }
 
-    .modal-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
+    .modal-dialog {
+      background: #151822;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 18px;
       width: 100%;
-      max-width: 440px;
-      padding: 22px 18px;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.6);
-      margin-top: env(safe-area-inset-top, 20px);
-      animation: popIn 0.15s ease-out;
+      max-width: 420px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      animation: modalFade 0.15s ease-out;
     }
 
-    @keyframes popIn {
-      from { transform: scale(0.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    @keyframes modalFade {
+      from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .modal-box h3 {
-      font-size: 1.15rem;
+    .modal-dialog h3 {
+      font-size: 1.1rem;
       margin-bottom: 14px;
+      font-weight: 700;
     }
 
-    .form-group {
+    .fg {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       margin-bottom: 12px;
     }
 
-    .form-group label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 700;
+    .fg label {
+      font-size: 0.72rem;
       text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
     }
 
-    .form-control {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+    .ctrl-input, .ctrl-select {
+      background: #0d0f16;
+      border: 1px solid var(--card-border);
       color: var(--text);
-      padding: 12px 14px;
-      font-size: 0.95rem;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 0.9rem;
       outline: none;
       width: 100%;
     }
-
-    .form-control:focus {
+    .ctrl-input:focus, .ctrl-select:focus {
       border-color: var(--accent);
     }
 
-    .modal-actions {
+    /* Stylizowany checkbox */
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(236, 72, 153, 0.08);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 12px 0;
+    }
+
+    .checkbox-container input {
+      accent-color: #ec4899;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .checkbox-container span {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fbcfe8;
+    }
+
+    .modal-btns {
       display: flex;
       gap: 8px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
-    .btn-modal-cancel {
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
+    .btn-m {
       flex: 1;
-    }
-
-    .btn-modal-danger {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: var(--danger);
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-modal-confirm {
-      background: var(--accent);
-      border: none;
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
-      flex: 1;
+      border: none;
+    }
+    .btn-m-cancel {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+    .btn-m-clear {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: var(--danger);
+    }
+    .btn-m-submit {
+      background: var(--accent);
+      color: #fff;
     }
 
-    /* RWD dla smartfonów */
-    @media (max-width: 900px) {
-      .summary-grid {
+    /* RWD dla telefonów */
+    @media (max-width: 960px) {
+      body {
+        padding: 8px;
+        height: auto;
+      }
+      .app-layout {
+        height: auto;
+      }
+      .dashboard-body {
         grid-template-columns: 1fr;
-        gap: 8px;
       }
-      .main-grid {
-        grid-template-columns: 1fr;
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
       }
-      .schedule-table-wrap {
-        display: none;
+      .kpi-bar {
+        width: 100%;
+        justify-content: space-between;
       }
-      .mobile-day-selector {
+      .mobile-day-tabs {
         display: flex;
       }
-      .mobile-schedule-list {
-        display: flex;
+      .calendar-grid {
+        min-width: 100%;
+        grid-template-columns: 55px 1fr !important;
+      }
+      .cal-header-cell:not(.mobile-visible-header) {
+        display: none !important;
+      }
+      .cal-cell:not(.mobile-visible-col) {
+        display: none !important;
+      }
+      #current-time-line {
+        left: 55px;
       }
     }
   </style>
 </head>
 <body>
 
-  <div class="app-wrapper">
-    <!-- Header -->
+  <div class="app-layout">
+    <!-- Pasek górny -->
     <header>
-      <h1>Harmonogram Korepetycji</h1>
-      <div class="badge-cookie">🍪 Zapis w Cookies</div>
+      <div class="brand">
+        <div class="brand-logo">🎓</div>
+        <div>
+          <div class="brand-title">TutorFlow Pro</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">Zarządzanie lekcjami i grafik korepetytora</div>
+        </div>
+      </div>
+
+      <div class="kpi-bar">
+        <div class="kpi-chip">
+          <span class="label">Lekcje w tyg.</span>
+          <span class="value" id="kpi-count">0</span>
+        </div>
+        <div class="kpi-chip highlight">
+          <span class="label">Zarobek tyg.</span>
+          <span class="value" id="kpi-earnings">0 zł</span>
+        </div>
+        <div class="live-clock-badge">
+          <span class="live-pulse"></span>
+          <span id="live-time-display">--:--:--</span>
+        </div>
+      </div>
     </header>
 
-    <!-- Podsumowanie zarobków -->
-    <div class="summary-grid">
-      <div class="sum-card">
-        <span class="label">Liczba lekcji w tygodniu</span>
-        <span class="val" id="sum-count">0</span>
-      </div>
-      <div class="sum-card highlight">
-        <span class="label">Zarobek tygodniowy</span>
-        <span class="val" id="sum-week">0 zł</span>
-      </div>
-      <div class="sum-card">
-        <span class="label">Zarobek miesięczny (x4)</span>
-        <span class="val" id="sum-month">0 zł</span>
-      </div>
-    </div>
-
-    <!-- Siatka robocza -->
-    <div class="main-grid">
-      <!-- Harmonogram -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Kalendarz zajęć</span>
+    <!-- Główny pulpit roboczy -->
+    <div class="dashboard-body">
+      <!-- Kalendarz -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📅 Harmonogram tygodniowy</span>
+          </div>
+          <div style="font-size: 0.72rem; color: var(--text-muted);">Czas: Kraków / Polska (CET/CEST)</div>
         </div>
 
-        <!-- Przełącznik dni na smartfony -->
-        <div class="mobile-day-selector" id="mobile-tabs"></div>
+        <!-- Mobilny pasek dni -->
+        <div class="mobile-day-tabs" id="mobile-tabs-bar"></div>
 
-        <!-- Tabela PC -->
-        <div class="schedule-table-wrap">
-          <table class="schedule-table">
-            <thead>
-              <tr id="desktop-thead-tr">
-                <th>Godz.</th>
-                <!-- Generowane przez JS -->
-              </tr>
-            </thead>
-            <tbody id="desktop-tbody"></tbody>
-          </table>
+        <div class="calendar-container" id="cal-scroll-area">
+          <!-- Wskaźnik linii czasu MS Teams -->
+          <div id="current-time-line"></div>
+
+          <div class="calendar-grid" id="main-grid">
+            <!-- Renderowane dynamicznie -->
+          </div>
         </div>
-
-        <!-- Lista slotów na telefonie -->
-        <div class="mobile-schedule-list" id="mobile-schedule-container"></div>
       </div>
 
-      <!-- Baza uczniów -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Baza Uczniów</span>
-          <button class="btn-action" onclick="openNewStudentModal()">+ Dodaj</button>
+      <!-- Prawy panel: Baza uczniów -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>👥 Baza Uczniów</span>
+          </div>
+          <button class="btn-add-primary" onclick="openStudentModal()">+ Nowy Uczeń</button>
         </div>
 
         <div class="students-scroll" id="students-container"></div>
@@ -607,62 +753,69 @@
     </div>
   </div>
 
-  <!-- MODAL: Przypisanie ucznia do terminu -->
+  <!-- MODAL: Przypisywanie terminu + Lekcja jednorazowa -->
   <div class="modal-backdrop" id="modal-assign">
-    <div class="modal-box">
-      <h3 id="assign-heading">Termin lekcji</h3>
-      <div class="form-group">
+    <div class="modal-dialog">
+      <h3 id="assign-title">Termin lekcji</h3>
+
+      <div class="fg">
         <label>Uczeń</label>
-        <select id="assign-select" class="form-control"></select>
+        <select id="assign-student" class="ctrl-select"></select>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn-modal-cancel" onclick="closeModal('modal-assign')">Anuluj</button>
-        <button class="btn-modal-danger" onclick="clearSlot()">Wyczyść</button>
-        <button class="btn-modal-confirm" onclick="applySlot()">Zapisz</button>
+      <label class="checkbox-container">
+        <input type="checkbox" id="assign-is-once" />
+        <span>⚡ Oznacz jako lekcję jednorazową (inny kolor)</span>
+      </label>
+
+      <div class="modal-btns">
+        <button class="btn-m btn-m-cancel" onclick="closeModal('modal-assign')">Anuluj</button>
+        <button class="btn-m btn-m-clear" onclick="clearSlot()">Wyczyść slot</button>
+        <button class="btn-m btn-m-submit" onclick="saveSlot()">Zapisz</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: Dodanie nowego ucznia -->
+  <!-- MODAL: Nowy uczeń (4 poziomy) -->
   <div class="modal-backdrop" id="modal-new-student">
-    <div class="modal-box">
-      <h3>Nowy Uczeń</h3>
-      
-      <div class="form-group">
-        <label>Imię i nazwisko / Oznaczenie</label>
-        <input type="text" id="new-stud-name" class="form-control" placeholder="np. Dawid D, Filip K*" />
+    <div class="modal-dialog">
+      <h3>Dodaj ucznia do bazy</h3>
+
+      <div class="fg">
+        <label>Imię i nazwisko / Pseudonim</label>
+        <input type="text" id="stud-name" class="ctrl-input" placeholder="np. Filip K*" />
       </div>
 
-      <div class="form-group">
+      <div class="fg">
         <label>Poziom kształcenia</label>
-        <select id="new-stud-level" class="form-control">
+        <select id="stud-level" class="ctrl-select">
           <option value="podstawowka">Podstawówka</option>
-          <option value="liceum">Liceum podstawa</option>
-          <option value="informatyka">Informatyka</option>
+          <option value="liceum-podst">Liceum podstawa</option>
+          <option value="liceum-rozsz">Liceum rozszerzenie</option>
+          <option value="inf-rozsz">Informatyka rozszerzenie</option>
         </select>
       </div>
 
-      <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;">
+      <div style="display: flex; gap: 8px;">
+        <div class="fg" style="flex: 1;">
           <label>Klasa</label>
-          <input type="text" id="new-stud-grade" class="form-control" placeholder="np. 7, 4, INF 03" />
+          <input type="text" id="stud-grade" class="ctrl-input" placeholder="np. 7, 4, INF 03" />
         </div>
-        <div class="form-group" style="flex: 1;">
+        <div class="fg" style="flex: 1;">
           <label>Stawka zł/h</label>
-          <input type="number" id="new-stud-rate" class="form-control" placeholder="50" />
+          <input type="number" id="stud-rate" class="ctrl-input" placeholder="np. 60" />
         </div>
       </div>
 
-      <div class="modal-actions">
-        <button class="btn-modal-cancel" onclick="closeModal('modal-new-student')">Anuluj</button>
-        <button class="btn-modal-confirm" onclick="addNewStudent()">Dodaj ucznia</button>
+      <div class="modal-btns">
+        <button class="btn-m btn-m-cancel" onclick="closeModal('modal-new-student')">Anuluj</button>
+        <button class="btn-m btn-m-submit" onclick="saveStudent()">Dodaj</button>
       </div>
     </div>
   </div>
 
   <script>
-    // --- OBSŁUGA COOKIES ---
+    // --- OBSŁUGA COOKIES (365 DNI) ---
     function setCookie(name, value, days = 365) {
       const d = new Date();
       d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -681,254 +834,298 @@
       return null;
     }
 
-    // --- STAŁE I DANE STARTOWE (Z Twojego arkusza) ---
     const DAYS = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
     const HOURS = ["15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
 
-    const DEFAULT_STUDENTS = [
-      { id: "s1", name: "Filip K*", level: "liceum", grade: "3", rate: 50 },
-      { id: "s2", name: "Wojtek W*", level: "podstawowka", grade: "7", rate: 50 },
-      { id: "s3", name: "Klara P*", level: "liceum", grade: "4", rate: 50 },
-      { id: "s4", name: "Alex S*", level: "liceum", grade: "2", rate: 50 },
-      { id: "s5", name: "Lilianna L*", level: "podstawowka", grade: "7", rate: 50 },
-      { id: "s6", name: "Natan N", level: "podstawowka", grade: "6", rate: 45 },
-      { id: "s7", name: "Maja O", level: "liceum", grade: "3", rate: 45 },
-      { id: "s8", name: "Weronika W", level: "liceum", grade: "4", rate: 45 },
-      { id: "s9", name: "Daniel D", level: "podstawowka", grade: "8", rate: 45 },
-      { id: "s10", name: "Emilka E*", level: "liceum", grade: "1", rate: 50 },
-      { id: "s11", name: "Dawid D", level: "liceum", grade: "4", rate: 45 },
-      { id: "s12", name: "Bartek B", level: "liceum", grade: "4", rate: 45 },
-      { id: "s13", name: "Natalia N", level: "liceum", grade: "4", rate: 45 },
-      { id: "s14", name: "Dawid A^", level: "liceum", grade: "4", rate: 40 },
-      { id: "s15", name: "Michael M", level: "liceum", grade: "4", rate: 45 },
-      { id: "s16", name: "Oskar O**", level: "informatyka", grade: "INF 03", rate: 60 },
-      { id: "s17", name: "Wojtek Ww*", level: "liceum", grade: "4", rate: 50 }
-    ];
-
-    const DEFAULT_SCHEDULE = {
-      "15:00_Wtorek": "s9",
-      "16:00_Wtorek": "s6",
-      "16:00_Piątek": "s5",
-      "17:00_Poniedziałek": "s13",
-      "17:00_Wtorek": "s3",
-      "17:00_Środa": "s11",
-      "17:00_Czwartek": "s12",
-      "17:00_Piątek": "s12",
-      "18:00_Poniedziałek": "s14",
-      "18:00_Wtorek": "s2",
-      "18:00_Środa": "s9",
-      "18:00_Czwartek": "s4",
-      "18:00_Piątek": "s6",
-      "19:00_Poniedziałek": "s11",
-      "19:00_Wtorek": "s8",
-      "19:00_Środa": "s5",
-      "19:00_Czwartek": "s7",
-      "19:00_Piątek": "s10",
-      "19:00_Sobota": "s15",
-      "19:00_Niedziela": "s16",
-      "20:00_Sobota": "s17",
-      "20:00_Niedziela": "s16"
+    // Poziomy kształcenia
+    const LEVEL_LABELS = {
+      "podstawowka": "Podstawówka",
+      "liceum-podst": "Liceum podstawa",
+      "liceum-rozsz": "Liceum rozszerzenie",
+      "inf-rozsz": "Informatyka rozszerzenie"
     };
 
-    let students = getCookie("app_korki_students") || DEFAULT_STUDENTS;
-    let schedule = getCookie("app_korki_schedule") || DEFAULT_SCHEDULE;
+    // Domyślna baza uczniów zaktualizowana pod Twoje 4 poziomy
+    const DEFAULT_STUDENTS = [
+      { id: "s1", name: "Filip K*", level: "liceum-podst", grade: "3", rate: 50 },
+      { id: "s2", name: "Wojtek W*", level: "podstawowka", grade: "7", rate: 50 },
+      { id: "s3", name: "Klara P*", level: "liceum-podst", grade: "4", rate: 50 },
+      { id: "s4", name: "Alex S*", level: "liceum-podst", grade: "2", rate: 50 },
+      { id: "s5", name: "Lilianna L*", level: "podstawowka", grade: "7", rate: 50 },
+      { id: "s6", name: "Natan N", level: "podstawowka", grade: "6", rate: 45 },
+      { id: "s7", name: "Maja O", level: "liceum-podst", grade: "3", rate: 45 },
+      { id: "s8", name: "Weronika W", level: "liceum-podst", grade: "4", rate: 45 },
+      { id: "s9", name: "Daniel D", level: "podstawowka", grade: "8", rate: 45 },
+      { id: "s10", name: "Emilka E*", level: "liceum-podst", grade: "1", rate: 50 },
+      { id: "s11", name: "Dawid D", level: "liceum-rozsz", grade: "4", rate: 55 },
+      { id: "s12", name: "Bartek B", level: "liceum-rozsz", grade: "4", rate: 55 },
+      { id: "s13", name: "Natalia N", level: "liceum-podst", grade: "4", rate: 45 },
+      { id: "s14", name: "Dawid A^", level: "liceum-podst", grade: "4", rate: 40 },
+      { id: "s15", name: "Michael M", level: "liceum-podst", grade: "4", rate: 45 },
+      { id: "s16", name: "Oskar O**", level: "inf-rozsz", grade: "INF 03", rate: 60 },
+      { id: "s17", name: "Wojtek Ww*", level: "liceum-podst", grade: "4", rate: 50 }
+    ];
+
+    // Domyślny harmonogram: przechowuje { studentId, isOnce: boolean }
+    const DEFAULT_SCHEDULE = {
+      "15:00_Wtorek": { studentId: "s9", isOnce: false },
+      "16:00_Wtorek": { studentId: "s6", isOnce: false },
+      "16:00_Piątek": { studentId: "s5", isOnce: true },
+      "17:00_Poniedziałek": { studentId: "s13", isOnce: false },
+      "17:00_Wtorek": { studentId: "s3", isOnce: false },
+      "17:00_Środa": { studentId: "s11", isOnce: false },
+      "17:00_Czwartek": { studentId: "s12", isOnce: false },
+      "17:00_Piątek": { studentId: "s12", isOnce: false },
+      "18:00_Poniedziałek": { studentId: "s14", isOnce: false },
+      "18:00_Wtorek": { studentId: "s2", isOnce: false },
+      "18:00_Środa": { studentId: "s9", isOnce: false },
+      "18:00_Czwartek": { studentId: "s4", isOnce: false },
+      "18:00_Piątek": { studentId: "s6", isOnce: false },
+      "19:00_Poniedziałek": { studentId: "s11", isOnce: false },
+      "19:00_Wtorek": { studentId: "s8", isOnce: false },
+      "19:00_Środa": { studentId: "s5", isOnce: false },
+      "19:00_Czwartek": { studentId: "s7", isOnce: false },
+      "19:00_Piątek": { studentId: "s10", isOnce: false },
+      "19:00_Sobota": { studentId: "s15", isOnce: false },
+      "19:00_Niedziela": { studentId: "s16", isOnce: false },
+      "20:00_Sobota": { studentId: "s17", isOnce: false },
+      "20:00_Niedziela": { studentId: "s16", isOnce: false }
+    };
+
+    let students = getCookie("tf_students_v3") || DEFAULT_STUDENTS;
+    let schedule = getCookie("tf_schedule_v3") || DEFAULT_SCHEDULE;
     let selectedSlotKey = null;
-    let activeMobileDay = "Poniedziałek";
+    let activeMobileDayIndex = getCurrentPolandDayIndex(); // 0 = Poniedziałek
 
     function saveState() {
-      setCookie("app_korki_students", students);
-      setCookie("app_korki_schedule", schedule);
+      setCookie("tf_students_v3", students);
+      setCookie("tf_schedule_v3", schedule);
       renderAll();
     }
 
+    // --- LOGIKA CZASU W POLSCE (KRAKÓW / CET) ---
+    function getPolandDate() {
+      const now = new Date();
+      // Konwersja czasu do Europe/Warsaw
+      const polandString = now.toLocaleString("en-US", { timeZone: "Europe/Warsaw" });
+      return new Date(polandString);
+    }
+
+    function getCurrentPolandDayIndex() {
+      const pDay = getPolandDate().getDay(); // 0 = Nd, 1 = Pn, 2 = Wt ...
+      return pDay === 0 ? 6 : pDay - 1; // Konwersja do 0 = Pn ... 6 = Nd
+    }
+
+    // --- RENDEROWANIE GŁÓWNE ---
     function renderAll() {
-      renderDesktopTable();
+      renderCalendarGrid();
       renderMobileTabs();
-      renderMobileSchedule();
       renderStudentsList();
-      renderSummary();
+      updateKPIs();
+      updateLiveTimeAndIndicator();
     }
 
-    // --- DESKTOP TABLE ---
-    function initDesktopHeaders() {
-      const tr = document.getElementById("desktop-thead-tr");
-      DAYS.forEach(day => {
-        const th = document.createElement("th");
-        th.textContent = day;
-        tr.appendChild(th);
+    function renderCalendarGrid() {
+      const grid = document.getElementById("main-grid");
+      grid.innerHTML = "";
+
+      const todayIndex = getCurrentPolandDayIndex();
+
+      // Nagłówek pusty nad godzinami
+      const cornerHeader = document.createElement("div");
+      cornerHeader.className = "cal-header-cell";
+      cornerHeader.textContent = "GODZ.";
+      grid.appendChild(cornerHeader);
+
+      // Nagłówki dni
+      DAYS.forEach((day, index) => {
+        const th = document.createElement("div");
+        const isToday = index === todayIndex;
+        th.className = `cal-header-cell ${isToday ? 'today-col' : ''} ${index === activeMobileDayIndex ? 'mobile-visible-header' : ''}`;
+        th.innerHTML = `${day} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
+        grid.appendChild(th);
       });
-    }
 
-    function renderDesktopTable() {
-      const tbody = document.getElementById("desktop-tbody");
-      tbody.innerHTML = "";
-
+      // Wiersze godzinowe
       HOURS.forEach(hour => {
-        const tr = document.createElement("tr");
+        const timeCell = document.createElement("div");
+        timeCell.className = "time-slot-label";
+        timeCell.textContent = hour;
+        grid.appendChild(timeCell);
 
-        const timeTd = document.createElement("td");
-        timeTd.className = "time-cell";
-        timeTd.textContent = hour;
-        tr.appendChild(timeTd);
-
-        DAYS.forEach(day => {
-          const td = document.createElement("td");
+        DAYS.forEach((day, dayIndex) => {
           const slotKey = `${hour}_${day}`;
-          const studentId = schedule[slotKey];
-          const student = students.find(s => s.id === studentId);
+          const isToday = dayIndex === todayIndex;
 
-          const slotDiv = document.createElement("div");
-          slotDiv.className = "lesson-slot";
+          const cell = document.createElement("div");
+          cell.className = `cal-cell ${isToday ? 'today-col' : ''} ${dayIndex === activeMobileDayIndex ? 'mobile-visible-col' : ''}`;
+
+          const slotData = schedule[slotKey];
+          const student = slotData ? students.find(s => s.id === (slotData.studentId || slotData)) : null;
+          const isOnce = slotData && slotData.isOnce;
+
+          const card = document.createElement("div");
+          card.className = "slot-card";
 
           if (student) {
-            slotDiv.classList.add("occupied", `level-${student.level}`);
-            slotDiv.innerHTML = `
-              <span class="slot-name">${escapeHtml(student.name)}</span>
-              <span class="slot-price">${student.rate} zł/h</span>
+            card.classList.add("occupied", `level-${student.level}`);
+            if (isOnce) card.classList.add("is-once");
+
+            card.innerHTML = `
+              <div class="s-name">${escapeHtml(student.name)}</div>
+              <div class="s-meta">
+                ${isOnce ? '<span class="badge-once">1x</span>' : ''}
+                <span>${student.rate} zł</span>
+              </div>
             `;
           } else {
-            slotDiv.innerHTML = `<span>—</span>`;
+            card.innerHTML = `<span>+</span>`;
           }
 
-          slotDiv.onclick = () => openAssignModal(slotKey, hour, day);
-          td.appendChild(slotDiv);
-          tr.appendChild(td);
+          card.onclick = () => openAssignModal(slotKey, hour, day);
+          cell.appendChild(card);
+          grid.appendChild(cell);
         });
-
-        tbody.appendChild(tr);
       });
     }
 
-    // --- WIDOK SMARTFON ---
     function renderMobileTabs() {
-      const container = document.getElementById("mobile-tabs");
+      const container = document.getElementById("mobile-tabs-bar");
       container.innerHTML = "";
+      const todayIndex = getCurrentPolandDayIndex();
 
-      DAYS.forEach(day => {
-        const tab = document.createElement("button");
-        tab.className = `day-tab ${day === activeMobileDay ? "active" : ""}`;
-        tab.textContent = day;
-        tab.onclick = () => {
-          activeMobileDay = day;
-          renderMobileTabs();
-          renderMobileSchedule();
+      DAYS.forEach((day, idx) => {
+        const btn = document.createElement("button");
+        btn.className = `m-tab ${idx === activeMobileDayIndex ? 'active' : ''} ${idx === todayIndex ? 'is-today' : ''}`;
+        btn.textContent = day + (idx === todayIndex ? ' •' : '');
+        btn.onclick = () => {
+          activeMobileDayIndex = idx;
+          renderAll();
         };
-        container.appendChild(tab);
+        container.appendChild(btn);
       });
     }
 
-    function renderMobileSchedule() {
-      const container = document.getElementById("mobile-schedule-container");
-      container.innerHTML = "";
-
-      HOURS.forEach(hour => {
-        const slotKey = `${hour}_${activeMobileDay}`;
-        const studentId = schedule[slotKey];
-        const student = students.find(s => s.id === studentId);
-
-        const card = document.createElement("div");
-        card.className = "mobile-slot-card";
-        card.onclick = () => openAssignModal(slotKey, hour, activeMobileDay);
-
-        let statusHtml = "";
-        if (student) {
-          statusHtml = `
-            <div class="mobile-slot-status lesson-slot occupied level-${student.level}">
-              <span class="slot-name">${escapeHtml(student.name)}</span>
-              <span class="slot-price">${student.rate} zł/h</span>
-            </div>
-          `;
-        } else {
-          statusHtml = `
-            <div class="mobile-slot-status lesson-slot">
-              <span>Wolny termin (kliknij)</span>
-            </div>
-          `;
-        }
-
-        card.innerHTML = `
-          <div class="mobile-slot-time">${hour}</div>
-          ${statusHtml}
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // --- BAZA UCZNIÓW ---
     function renderStudentsList() {
       const container = document.getElementById("students-container");
       container.innerHTML = "";
 
       if (students.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px;">Brak uczniów w bazie.</div>`;
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8rem; padding: 10px;">Brak uczniów w bazie.</div>`;
         return;
       }
 
       students.forEach(st => {
-        const div = document.createElement("div");
-        div.className = "student-card";
-        div.innerHTML = `
-          <div class="stud-left">
-            <div class="dot ${st.level}"></div>
-            <div>
-              <div class="stud-title">${escapeHtml(st.name)}</div>
-              <div class="stud-sub">${st.level} • Klasa: ${escapeHtml(st.grade || '—')}</div>
+        const item = document.createElement("div");
+        item.className = "student-item";
+        item.innerHTML = `
+          <div class="st-left">
+            <span class="st-pill ${st.level}"></span>
+            <div style="min-width:0;">
+              <div class="st-name">${escapeHtml(st.name)}</div>
+              <div class="st-desc">${LEVEL_LABELS[st.level] || st.level} • Kl. ${escapeHtml(st.grade || '—')}</div>
             </div>
           </div>
-          <div class="stud-right">
-            <span class="stud-rate">${st.rate} zł</span>
-            <button class="btn-del" onclick="deleteStudent('${st.id}')" title="Usuń ucznia">✕</button>
+          <div style="display: flex; align-items: center;">
+            <span class="st-rate">${st.rate} zł</span>
+            <button class="btn-icon-del" onclick="deleteStudent('${st.id}')" title="Usuń ucznia">✕</button>
           </div>
         `;
-        container.appendChild(div);
+        container.appendChild(item);
       });
     }
 
-    // --- PODSUMOWANIE ---
-    function renderSummary() {
+    function updateKPIs() {
       let count = 0;
-      let weekly = 0;
+      let totalWeekly = 0;
 
-      Object.values(schedule).forEach(studentId => {
-        const student = students.find(s => s.id === studentId);
+      Object.values(schedule).forEach(slotData => {
+        if (!slotData) return;
+        const sId = slotData.studentId || slotData;
+        const student = students.find(s => s.id === sId);
         if (student) {
           count++;
-          weekly += Number(student.rate) || 0;
+          totalWeekly += Number(student.rate) || 0;
         }
       });
 
-      const monthly = weekly * 4;
-
-      document.getElementById("sum-count").textContent = count;
-      document.getElementById("sum-week").textContent = `${weekly.toLocaleString("pl-PL")} zł`;
-      document.getElementById("sum-month").textContent = `${monthly.toLocaleString("pl-PL")} zł`;
+      document.getElementById("kpi-count").textContent = count;
+      document.getElementById("kpi-earnings").textContent = `${totalWeekly.toLocaleString("pl-PL")} zł`;
     }
 
-    // --- MODAL: PRZYPISYWANIE ---
+    // --- CZERWONA LINIA CZASU JAK W TEAMS ---
+    function updateLiveTimeAndIndicator() {
+      const nowPoland = getPolandDate();
+      
+      // Zegar w nagłówku
+      const timeStr = nowPoland.toLocaleTimeString("pl-PL", { hour12: false });
+      document.getElementById("live-time-display").textContent = timeStr;
+
+      const hour = nowPoland.getHours();
+      const minutes = nowPoland.getMinutes();
+      const line = document.getElementById("current-time-line");
+
+      // Sprawdzenie czy jesteśmy w oknie harmonogramu: 15:00 - 22:00
+      const startHour = 15;
+      const endHour = 22; // do końca slotu 21:00
+
+      if (hour >= startHour && hour < endHour) {
+        const minutesFromStart = (hour - startHour) * 60 + minutes;
+        const totalMinutes = (endHour - startHour) * 60;
+        const percent = minutesFromStart / totalMinutes;
+
+        const rowHeightPx = 52; // var(--row-height)
+        const headerOffsetPx = 41; // wysokość wiersza nagłówka dni
+
+        const topPosition = headerOffsetPx + (minutesFromStart / 60) * rowHeightPx;
+
+        line.style.display = "block";
+        line.style.top = `${topPosition}px`;
+      } else {
+        line.style.display = "none";
+      }
+    }
+
+    // Aktualizacja zegara i paska co sekundę
+    setInterval(updateLiveTimeAndIndicator, 1000);
+
+    // --- MODAL: PRZYPISANIE / ZMIANA SLOTU ---
     function openAssignModal(slotKey, hour, day) {
       selectedSlotKey = slotKey;
-      document.getElementById("assign-heading").textContent = `${day}, ${hour}`;
-      const select = document.getElementById("assign-select");
-      select.innerHTML = `<option value="">-- Brak / Wolny termin --</option>`;
+      document.getElementById("assign-title").textContent = `${day}, ${hour}`;
+      
+      const select = document.getElementById("assign-student");
+      select.innerHTML = `<option value="">-- Wolny slot --</option>`;
+
+      const currentData = schedule[slotKey];
+      const currentStudentId = currentData ? (currentData.studentId || currentData) : null;
+      const isOnce = currentData ? currentData.isOnce : false;
 
       students.forEach(st => {
         const opt = document.createElement("option");
         opt.value = st.id;
-        opt.textContent = `${st.name} (${st.level}, ${st.rate} zł/h)`;
-        if (schedule[slotKey] === st.id) opt.selected = true;
+        opt.textContent = `${st.name} [${LEVEL_LABELS[st.level] || st.level}] — ${st.rate} zł/h`;
+        if (st.id === currentStudentId) opt.selected = true;
         select.appendChild(opt);
       });
 
+      document.getElementById("assign-is-once").checked = Boolean(isOnce);
       openModal("modal-assign");
     }
 
-    function applySlot() {
-      const chosenId = document.getElementById("assign-select").value;
-      if (chosenId) {
-        schedule[selectedSlotKey] = chosenId;
+    function saveSlot() {
+      const studentId = document.getElementById("assign-student").value;
+      const isOnce = document.getElementById("assign-is-once").checked;
+
+      if (studentId) {
+        schedule[selectedSlotKey] = {
+          studentId: studentId,
+          isOnce: isOnce
+        };
       } else {
         delete schedule[selectedSlotKey];
       }
+
       closeModal("modal-assign");
       saveState();
     }
@@ -941,22 +1138,22 @@
       }
     }
 
-    // --- MODAL: NOWY UCZEŃ ---
-    function openNewStudentModal() {
-      document.getElementById("new-stud-name").value = "";
-      document.getElementById("new-stud-grade").value = "";
-      document.getElementById("new-stud-rate").value = "";
+    // --- MODAL: DODANIE NOWEGO UCZNIA ---
+    function openStudentModal() {
+      document.getElementById("stud-name").value = "";
+      document.getElementById("stud-grade").value = "";
+      document.getElementById("stud-rate").value = "";
       openModal("modal-new-student");
     }
 
-    function addNewStudent() {
-      const name = document.getElementById("new-stud-name").value.trim();
-      const level = document.getElementById("new-stud-level").value;
-      const grade = document.getElementById("new-stud-grade").value.trim();
-      const rate = parseFloat(document.getElementById("new-stud-rate").value);
+    function saveStudent() {
+      const name = document.getElementById("stud-name").value.trim();
+      const level = document.getElementById("stud-level").value;
+      const grade = document.getElementById("stud-grade").value.trim();
+      const rate = parseFloat(document.getElementById("stud-rate").value);
 
-      if (!name) return alert("Podaj imię i nazwisko ucznia.");
-      if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę godzinową (powyżej 0).");
+      if (!name) return alert("Podaj imię lub oznaczenie ucznia.");
+      if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę godzinową w zł.");
 
       const newStudent = {
         id: "s_" + Date.now(),
@@ -973,16 +1170,18 @@
 
     function deleteStudent(id) {
       const st = students.find(s => s.id === id);
-      if (confirm(`Czy na pewno usunąć ucznia: ${st ? st.name : ""}? Spowoduje to wyczyszczenie jego lekcji z harmonogramu.`)) {
+      if (confirm(`Czy na pewno usunąć ucznia: ${st ? st.name : ""}? Spowoduje to wyczyszczenie jego lekcji z grafiku.`)) {
         students = students.filter(s => s.id !== id);
         Object.keys(schedule).forEach(k => {
-          if (schedule[k] === id) delete schedule[k];
+          if (schedule[k] && (schedule[k].studentId === id || schedule[k] === id)) {
+            delete schedule[k];
+          }
         });
         saveState();
       }
     }
 
-    // --- HELPERY UI ---
+    // --- FUNKCJE POMOCNICZE UI ---
     function openModal(id) {
       document.getElementById(id).classList.add("open");
     }
@@ -1004,7 +1203,6 @@
     });
 
     // Start
-    initDesktopHeaders();
     renderAll();
   </script>
 </body>
