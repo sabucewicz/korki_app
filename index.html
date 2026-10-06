@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Harmonogram Korepetycji</title>
+
+  <!-- Google Font: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b0d11;
+      --card-bg: #14171f;
+      --card-inner: #1a1e29;
+      --border: #232938;
+      --text: #f3f5f9;
+      --text-muted: #8b94a5;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --danger: #ef4444;
+      --success: #10b981;
+
+      /* Kolory poziomów */
+      --cat-base-bg: #132e22;
+      --cat-base-border: #1f513c;
+      --cat-base-text: #6ee7b7;
+
+      --cat-high-bg: #332b14;
+      --cat-high-border: #57471d;
+      --cat-high-text: #fde047;
+
+      --cat-it-bg: #381921;
+      --cat-it-border: #5e2634;
+      --cat-it-text: #fca5a5;
+
+      --cat-empty-bg: #11131a;
+      --cat-empty-border: #1d222e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      max-width: 1400px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Pasek górny */
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge-cookie {
+      font-size: 0.75rem;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Kafelki podsumowania finansowego */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .sum-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sum-card .label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .sum-card .val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .sum-card.highlight .val {
+      color: var(--success);
+    }
+
+    /* Główny układ Dashboardu */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    /* Przełącznik dni widoczny na smartfonach */
+    .mobile-day-selector {
+      display: none;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .mobile-day-selector::-webkit-scrollbar {
+      display: none;
+    }
+
+    .day-tab {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .day-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Widok harmonogramu (Desktop) */
+    .schedule-table-wrap {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    .schedule-table th, .schedule-table td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: center;
+    }
+
+    .schedule-table th {
+      background: #11141b;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 12px 6px;
+    }
+
+    .schedule-table td.time-cell {
+      background: #11141b;
+      font-weight: 700;
+      font-size: 0.88rem;
+      width: 70px;
+      color: var(--text);
+    }
+
+    /* Slot lekcji */
+    .lesson-slot {
+      min-height: 54px;
+      border-radius: 10px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: transform 0.1s ease, filter 0.15s ease;
+      background: var(--cat-empty-bg);
+      border: 1px dashed var(--cat-empty-border);
+      color: #3b4458;
+    }
+
+    .lesson-slot:hover {
+      filter: brightness(1.2);
+    }
+
+    .lesson-slot:active {
+      transform: scale(0.96);
+    }
+
+    .lesson-slot.occupied {
+      border-style: solid;
+      border-width: 1px;
+    }
+
+    .lesson-slot.level-podstawowka {
+      background: var(--cat-base-bg);
+      border-color: var(--cat-base-border);
+      color: var(--cat-base-text);
+    }
+
+    .lesson-slot.level-liceum {
+      background: var(--cat-high-bg);
+      border-color: var(--cat-high-border);
+      color: var(--cat-high-text);
+    }
+
+    .lesson-slot.level-informatyka {
+      background: var(--cat-it-bg);
+      border-color: var(--cat-it-border);
+      color: var(--cat-it-text);
+    }
+
+    .slot-name {
+      font-size: 0.86rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .slot-price {
+      font-size: 0.72rem;
+      opacity: 0.8;
+      font-weight: 500;
+    }
+
+    /* Widok harmonogramu na smartfonie */
+    .mobile-schedule-list {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mobile-slot-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .mobile-slot-time {
+      font-weight: 800;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      width: 60px;
+    }
+
+    .mobile-slot-status {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 10px;
+      margin-left: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Baza uczniów */
+    .btn-action {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-action:hover {
+      background: var(--accent-hover);
+    }
+
+    .students-scroll {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 530px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .student-card {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stud-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot.podstawowka { background: #6ee7b7; box-shadow: 0 0 8px rgba(110, 231, 183, 0.4); }
+    .dot.liceum { background: #fde047; box-shadow: 0 0 8px rgba(253, 224, 71, 0.4); }
+    .dot.informatyka { background: #fca5a5; box-shadow: 0 0 8px rgba(252, 165, 165, 0.4); }
+
+    .stud-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .stud-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .stud-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stud-rate {
+      font-weight: 700;
+      color: var(--success);
+      font-size: 0.95rem;
+    }
+
+    .btn-del {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: var(--danger);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+
+    /* Modale */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px 16px;
+      z-index: 999;
+      overflow-y: auto;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 440px;
+      padding: 22px 18px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+      margin-top: env(safe-area-inset-top, 20px);
+      animation: popIn 0.15s ease-out;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-box h3 {
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .form-control {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 0.95rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .btn-modal-cancel {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn-modal-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-modal-confirm {
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    /* RWD dla smartfonów */
+    @media (max-width: 900px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .schedule-table-wrap {
+        display: none;
+      }
+      .mobile-day-selector {
+        display: flex;
+      }
+      .mobile-schedule-list {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header>
+      <h1>Harmonogram Korepetycji</h1>
+      <div class="badge-cookie">🍪 Zapis w Cookies</div>
+    </header>
+
+    <!-- Podsumowanie zarobków -->
+    <div class="summary-grid">
+      <div class="sum-card">
+        <span class="label">Liczba lekcji w tygodniu</span>
+        <span class="val" id="sum-count">0</span>
+      </div>
+      <div class="sum-card highlight">
+        <span class="label">Zarobek tygodniowy</span>
+        <span class="val" id="sum-week">0 zł</span>
+      </div>
+      <div class="sum-card">
+        <span class="label">Zarobek miesięczny (x4)</span>
+        <span class="val" id="sum-month">0 zł</span>
+      </div>
+    </div>
+
+    <!-- Siatka robocza -->
+    <div class="main-grid">
+      <!-- Harmonogram -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Kalendarz zajęć</span>
+        </div>
+
+        <!-- Przełącznik dni na smartfony -->
+        <div class="mobile-day-selector" id="mobile-tabs"></div>
+
+        <!-- Tabela PC -->
+        <div class="schedule-table-wrap">
+          <table class="schedule-table">
+            <thead>
+              <tr id="desktop-thead-tr">
+                <th>Godz.</th>
+                <!-- Generowane przez JS -->
+              </tr>
+            </thead>
+            <tbody id="desktop-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Lista slotów na telefonie -->
+        <div class="mobile-schedule-list" id="mobile-schedule-container"></div>
+      </div>
+
+      <!-- Baza uczniów -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Baza Uczniów</span>
+          <button class="btn-action" onclick="openNewStudentModal()">+ Dodaj</button>
+        </div>
+
+        <div class="students-scroll" id="students-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Przypisanie ucznia do terminu -->
+  <div class="modal-backdrop" id="modal-assign">
+    <div class="modal-box">
+      <h3 id="assign-heading">Termin lekcji</h3>
+      <div class="form-group">
+        <label>Uczeń</label>
+        <select id="assign-select" class="form-control"></select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeModal('modal-assign')">Anuluj</button>
+        <button class="btn-modal-danger" onclick="clearSlot()">Wyczyść</button>
+        <button class="btn-modal-confirm" onclick="applySlot()">Zapisz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Dodanie nowego ucznia -->
+  <div class="modal-backdrop" id="modal-new-student">
+    <div class="modal-box">
+      <h3>Nowy Uczeń</h3>
+      
+      <div class="form-group">
+        <label>Imię i nazwisko / Oznaczenie</label>
+        <input type="text" id="new-stud-name" class="form-control" placeholder="np. Dawid D, Filip K*" />
+      </div>
+
+      <div class="form-group">
+        <label>Poziom kształcenia</label>
+        <select id="new-stud-level" class="form-control">
+          <option value="podstawowka">Podstawówka</option>
+          <option value="liceum">Liceum podstawa</option>
+          <option value="informatyka">Informatyka</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+          <label>Klasa</label>
+          <input type="text" id="new-stud-grade" class="form-control" placeholder="np. 7, 4, INF 03" />
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label>Stawka zł/h</label>
+          <input type="number" id="new-stud-rate" class="form-control" placeholder="50" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeModal('modal-new-student')">Anuluj</button>
+        <button class="btn-modal-confirm" onclick="addNewStudent()">Dodaj ucznia</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- OBSŁUGA COOKIES ---
+    function setCookie(name, value, days = 365) {
+      const d = new Date();
+      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      if (match) {
+        try {
+          return JSON.parse(decodeURIComponent(match[2]));
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    // --- STAŁE I DANE STARTOWE (Z Twojego arkusza) ---
+    const DAYS = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
+    const HOURS = ["15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
+
+    const DEFAULT_STUDENTS = [
+      { id: "s1", name: "Filip K*", level: "liceum", grade: "3", rate: 50 },
+      { id: "s2", name: "Wojtek W*", level: "podstawowka", grade: "7", rate: 50 },
+      { id: "s3", name: "Klara P*", level: "liceum", grade: "4", rate: 50 },
+      { id: "s4", name: "Alex S*", level: "liceum", grade: "2", rate: 50 },
+      { id: "s5", name: "Lilianna L*", level: "podstawowka", grade: "7", rate: 50 },
+      { id: "s6", name: "Natan N", level: "podstawowka", grade: "6", rate: 45 },
+      { id: "s7", name: "Maja O", level: "liceum", grade: "3", rate: 45 },
+      { id: "s8", name: "Weronika W", level: "liceum", grade: "4", rate: 45 },
+      { id: "s9", name: "Daniel D", level: "podstawowka", grade: "8", rate: 45 },
+      { id: "s10", name: "Emilka E*", level: "liceum", grade: "1", rate: 50 },
+      { id: "s11", name: "Dawid D", level: "liceum", grade: "4", rate: 45 },
+      { id: "s12", name: "Bartek B", level: "liceum", grade: "4", rate: 45 },
+      { id: "s13", name: "Natalia N", level: "liceum", grade: "4", rate: 45 },
+      { id: "s14", name: "Dawid A^", level: "liceum", grade: "4", rate: 40 },
+      { id: "s15", name: "Michael M", level: "liceum", grade: "4", rate: 45 },
+      { id: "s16", name: "Oskar O**", level: "informatyka", grade: "INF 03", rate: 60 },
+      { id: "s17", name: "Wojtek Ww*", level: "liceum", grade: "4", rate: 50 }
+    ];
+
+    const DEFAULT_SCHEDULE = {
+      "15:00_Wtorek": "s9",
+      "16:00_Wtorek": "s6",
+      "16:00_Piątek": "s5",
+      "17:00_Poniedziałek": "s13",
+      "17:00_Wtorek": "s3",
+      "17:00_Środa": "s11",
+      "17:00_Czwartek": "s12",
+      "17:00_Piątek": "s12",
+      "18:00_Poniedziałek": "s14",
+      "18:00_Wtorek": "s2",
+      "18:00_Środa": "s9",
+      "18:00_Czwartek": "s4",
+      "18:00_Piątek": "s6",
+      "19:00_Poniedziałek": "s11",
+      "19:00_Wtorek": "s8",
+      "19:00_Środa": "s5",
+      "19:00_Czwartek": "s7",
+      "19:00_Piątek": "s10",
+      "19:00_Sobota": "s15",
+      "19:00_Niedziela": "s16",
+      "20:00_Sobota": "s17",
+      "20:00_Niedziela": "s16"
+    };
+
+    let students = getCookie("app_korki_students") || DEFAULT_STUDENTS;
+    let schedule = getCookie("app_korki_schedule") || DEFAULT_SCHEDULE;
+    let selectedSlotKey = null;
+    let activeMobileDay = "Poniedziałek";
+
+    function saveState() {
+      setCookie("app_korki_students", students);
+      setCookie("app_korki_schedule", schedule);
+      renderAll();
+    }
+
+    function renderAll() {
+      renderDesktopTable();
+      renderMobileTabs();
+      renderMobileSchedule();
+      renderStudentsList();
+      renderSummary();
+    }
+
+    // --- DESKTOP TABLE ---
+    function initDesktopHeaders() {
+      const tr = document.getElementById("desktop-thead-tr");
+      DAYS.forEach(day => {
+        const th = document.createElement("th");
+        th.textContent = day;
+        tr.appendChild(th);
+      });
+    }
+
+    function renderDesktopTable() {
+      const tbody = document.getElementById("desktop-tbody");
+      tbody.innerHTML = "";
+
+      HOURS.forEach(hour => {
+        const tr = document.createElement("tr");
+
+        const timeTd = document.createElement("td");
+        timeTd.className = "time-cell";
+        timeTd.textContent = hour;
+        tr.appendChild(timeTd);
+
+        DAYS.forEach(day => {
+          const td = document.createElement("td");
+          const slotKey = `${hour}_${day}`;
+          const studentId = schedule[slotKey];
+          const student = students.find(s => s.id === studentId);
+
+          const slotDiv = document.createElement("div");
+          slotDiv.className = "lesson-slot";
+
+          if (student) {
+            slotDiv.classList.add("occupied", `level-${student.level}`);
+            slotDiv.innerHTML = `
+              <span class="slot-name">${escapeHtml(student.name)}</span>
+              <span class="slot-price">${student.rate} zł/h</span>
+            `;
+          } else {
+            slotDiv.innerHTML = `<span>—</span>`;
+          }
+
+          slotDiv.onclick = () => openAssignModal(slotKey, hour, day);
+          td.appendChild(slotDiv);
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- WIDOK SMARTFON ---
+    function renderMobileTabs() {
+      const container = document.getElementById("mobile-tabs");
+      container.innerHTML = "";
+
+      DAYS.forEach(day => {
+        const tab = document.createElement("button");
+        tab.className = `day-tab ${day === activeMobileDay ? "active" : ""}`;
+        tab.textContent = day;
+        tab.onclick = () => {
+          activeMobileDay = day;
+          renderMobileTabs();
+          renderMobileSchedule();
+        };
+        container.appendChild(tab);
+      });
+    }
+
+    function renderMobileSchedule() {
+      const container = document.getElementById("mobile-schedule-container");
+      container.innerHTML = "";
+
+      HOURS.forEach(hour => {
+        const slotKey = `${hour}_${activeMobileDay}`;
+        const studentId = schedule[slotKey];
+        const student = students.find(s => s.id === studentId);
+
+        const card = document.createElement("div");
+        card.className = "mobile-slot-card";
+        card.onclick = () => openAssignModal(slotKey, hour, activeMobileDay);
+
+        let statusHtml = "";
+        if (student) {
+          statusHtml = `
+            <div class="mobile-slot-status lesson-slot occupied level-${student.level}">
+              <span class="slot-name">${escapeHtml(student.name)}</span>
+              <span class="slot-price">${student.rate} zł/h</span>
+            </div>
+          `;
+        } else {
+          statusHtml = `
+            <div class="mobile-slot-status lesson-slot">
+              <span>Wolny termin (kliknij)</span>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="mobile-slot-time">${hour}</div>
+          ${statusHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- BAZA UCZNIÓW ---
+    function renderStudentsList() {
+      const container = document.getElementById("students-container");
+      container.innerHTML = "";
+
+      if (students.length === 0) {
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 10px;">Brak uczniów w bazie.</div>`;
+        return;
+      }
+
+      students.forEach(st => {
+        const div = document.createElement("div");
+        div.className = "student-card";
+        div.innerHTML = `
+          <div class="stud-left">
+            <div class="dot ${st.level}"></div>
+            <div>
+              <div class="stud-title">${escapeHtml(st.name)}</div>
+              <div class="stud-sub">${st.level} • Klasa: ${escapeHtml(st.grade || '—')}</div>
+            </div>
+          </div>
+          <div class="stud-right">
+            <span class="stud-rate">${st.rate} zł</span>
+            <button class="btn-del" onclick="deleteStudent('${st.id}')" title="Usuń ucznia">✕</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // --- PODSUMOWANIE ---
+    function renderSummary() {
+      let count = 0;
+      let weekly = 0;
+
+      Object.values(schedule).forEach(studentId => {
+        const student = students.find(s => s.id === studentId);
+        if (student) {
+          count++;
+          weekly += Number(student.rate) || 0;
+        }
+      });
+
+      const monthly = weekly * 4;
+
+      document.getElementById("sum-count").textContent = count;
+      document.getElementById("sum-week").textContent = `${weekly.toLocaleString("pl-PL")} zł`;
+      document.getElementById("sum-month").textContent = `${monthly.toLocaleString("pl-PL")} zł`;
+    }
+
+    // --- MODAL: PRZYPISYWANIE ---
+    function openAssignModal(slotKey, hour, day) {
+      selectedSlotKey = slotKey;
+      document.getElementById("assign-heading").textContent = `${day}, ${hour}`;
+      const select = document.getElementById("assign-select");
+      select.innerHTML = `<option value="">-- Brak / Wolny termin --</option>`;
+
+      students.forEach(st => {
+        const opt = document.createElement("option");
+        opt.value = st.id;
+        opt.textContent = `${st.name} (${st.level}, ${st.rate} zł/h)`;
+        if (schedule[slotKey] === st.id) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      openModal("modal-assign");
+    }
+
+    function applySlot() {
+      const chosenId = document.getElementById("assign-select").value;
+      if (chosenId) {
+        schedule[selectedSlotKey] = chosenId;
+      } else {
+        delete schedule[selectedSlotKey];
+      }
+      closeModal("modal-assign");
+      saveState();
+    }
+
+    function clearSlot() {
+      if (selectedSlotKey) {
+        delete schedule[selectedSlotKey];
+        closeModal("modal-assign");
+        saveState();
+      }
+    }
+
+    // --- MODAL: NOWY UCZEŃ ---
+    function openNewStudentModal() {
+      document.getElementById("new-stud-name").value = "";
+      document.getElementById("new-stud-grade").value = "";
+      document.getElementById("new-stud-rate").value = "";
+      openModal("modal-new-student");
+    }
+
+    function addNewStudent() {
+      const name = document.getElementById("new-stud-name").value.trim();
+      const level = document.getElementById("new-stud-level").value;
+      const grade = document.getElementById("new-stud-grade").value.trim();
+      const rate = parseFloat(document.getElementById("new-stud-rate").value);
+
+      if (!name) return alert("Podaj imię i nazwisko ucznia.");
+      if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę godzinową (powyżej 0).");
+
+      const newStudent = {
+        id: "s_" + Date.now(),
+        name,
+        level,
+        grade,
+        rate
+      };
+
+      students.push(newStudent);
+      closeModal("modal-new-student");
+      saveState();
+    }
+
+    function deleteStudent(id) {
+      const st = students.find(s => s.id === id);
+      if (confirm(`Czy na pewno usunąć ucznia: ${st ? st.name : ""}? Spowoduje to wyczyszczenie jego lekcji z harmonogramu.`)) {
+        students = students.filter(s => s.id !== id);
+        Object.keys(schedule).forEach(k => {
+          if (schedule[k] === id) delete schedule[k];
+        });
+        saveState();
+      }
+    }
+
+    // --- HELPERY UI ---
+    function openModal(id) {
+      document.getElementById(id).classList.add("open");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("open");
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    window.addEventListener("click", e => {
+      if (e.target.classList.contains("modal-backdrop")) {
+        e.target.classList.remove("open");
+      }
+    });
+
+    // Start
+    initDesktopHeaders();
+    renderAll();
+  </script>
+</body>
+</html>
