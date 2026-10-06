@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>TutorFlow Pro — Harmonogram Korepetycji</title>
+  <!-- Favicon w karcie przeglądarki -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
 
   <!-- Google Font: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -368,16 +370,15 @@
       flex-shrink: 0;
     }
 
-    /* Linia bieżącego czasu */
+    /* Subtelna linia bieżącego czasu */
     #current-time-line {
       position: absolute;
       left: 70px;
       right: 6px;
-      height: 2px;
-      background: #f43f5e;
+      height: 1.5px;
+      background: rgba(244, 63, 94, 0.45);
       z-index: 25;
       pointer-events: none;
-      box-shadow: 0 0 12px rgba(244, 63, 94, 0.9);
       display: none;
       border-radius: 99px;
     }
@@ -385,13 +386,13 @@
     #current-time-line::before {
       content: "";
       position: absolute;
-      left: -6px;
-      top: -4px;
-      width: 10px;
-      height: 10px;
+      left: -4px;
+      top: -3px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      background: #f43f5e;
-      box-shadow: 0 0 8px #f43f5e;
+      background: rgba(244, 63, 94, 0.7);
+      box-shadow: 0 0 5px rgba(244, 63, 94, 0.5);
     }
 
     /* Baza uczniów */
@@ -853,59 +854,15 @@
       "inf-rozsz": "Informatyka rozszerzenie"
     };
 
-    const DEFAULT_STUDENTS = [
-      { id: "s1", name: "Filip K*", level: "liceum-podst", grade: "3", rate: 50 },
-      { id: "s2", name: "Wojtek W*", level: "podstawowka", grade: "7", rate: 50 },
-      { id: "s3", name: "Klara P*", level: "liceum-podst", grade: "4", rate: 50 },
-      { id: "s4", name: "Alex S*", level: "liceum-podst", grade: "2", rate: 50 },
-      { id: "s5", name: "Lilianna L*", level: "podstawowka", grade: "7", rate: 50 },
-      { id: "s6", name: "Natan N", level: "podstawowka", grade: "6", rate: 45 },
-      { id: "s7", name: "Maja O", level: "liceum-podst", grade: "3", rate: 45 },
-      { id: "s8", name: "Weronika W", level: "liceum-podst", grade: "4", rate: 45 },
-      { id: "s9", name: "Daniel D", level: "podstawowka", grade: "8", rate: 45 },
-      { id: "s10", name: "Emilka E*", level: "liceum-podst", grade: "1", rate: 50 },
-      { id: "s11", name: "Dawid D", level: "liceum-rozsz", grade: "4", rate: 55 },
-      { id: "s12", name: "Bartek B", level: "liceum-rozsz", grade: "4", rate: 55 },
-      { id: "s13", name: "Natalia N", level: "liceum-podst", grade: "4", rate: 45 },
-      { id: "s14", name: "Dawid A^", level: "liceum-podst", grade: "4", rate: 40 },
-      { id: "s15", name: "Michael M", level: "liceum-podst", grade: "4", rate: 45 },
-      { id: "s16", name: "Oskar O**", level: "inf-rozsz", grade: "INF 03", rate: 60 },
-      { id: "s17", name: "Wojtek Ww*", level: "liceum-podst", grade: "4", rate: 50 }
-    ];
-
-    const DEFAULT_SCHEDULE = {
-      "15:00_Wtorek": { studentId: "s9", isOnce: false },
-      "16:00_Wtorek": { studentId: "s6", isOnce: false },
-      "16:00_Piątek": { studentId: "s5", isOnce: true },
-      "17:00_Poniedziałek": { studentId: "s13", isOnce: false },
-      "17:00_Wtorek": { studentId: "s3", isOnce: false },
-      "17:00_Środa": { studentId: "s11", isOnce: false },
-      "17:00_Czwartek": { studentId: "s12", isOnce: false },
-      "17:00_Piątek": { studentId: "s12", isOnce: false },
-      "18:00_Poniedziałek": { studentId: "s14", isOnce: false },
-      "18:00_Wtorek": { studentId: "s2", isOnce: false },
-      "18:00_Środa": { studentId: "s9", isOnce: false },
-      "18:00_Czwartek": { studentId: "s4", isOnce: false },
-      "18:00_Piątek": { studentId: "s6", isOnce: false },
-      "19:00_Poniedziałek": { studentId: "s11", isOnce: false },
-      "19:00_Wtorek": { studentId: "s8", isOnce: false },
-      "19:00_Środa": { studentId: "s5", isOnce: false },
-      "19:00_Czwartek": { studentId: "s7", isOnce: false },
-      "19:00_Piątek": { studentId: "s10", isOnce: false },
-      "19:00_Sobota": { studentId: "s15", isOnce: false },
-      "19:00_Niedziela": { studentId: "s16", isOnce: false },
-      "20:00_Sobota": { studentId: "s17", isOnce: false },
-      "20:00_Niedziela": { studentId: "s16", isOnce: false }
-    };
-
-    let students = getCookie("tf_students_v5") || DEFAULT_STUDENTS;
-    let schedule = getCookie("tf_schedule_v5") || DEFAULT_SCHEDULE;
+    // PUSTY START (BRAK DANYCH DOMYŚLNYCH)
+    let students = getCookie("tf_students_clean") || [];
+    let schedule = getCookie("tf_schedule_clean") || {};
     let selectedSlotKey = null;
     let activeMobileDayIndex = getCurrentPolandDayIndex();
 
     function saveState() {
-      setCookie("tf_students_v5", students);
-      setCookie("tf_schedule_v5", schedule);
+      setCookie("tf_students_clean", students);
+      setCookie("tf_schedule_clean", schedule);
       renderAll();
     }
 
@@ -971,7 +928,6 @@
             card.classList.add("occupied", `level-${student.level}`);
             if (isOnce) card.classList.add("is-once");
 
-            // WYŚWIETLA TYLKO NAZWĘ UCZNIA (I EWENTUALNĄ PLAKIETKĘ 1x)
             card.innerHTML = `
               <div class="s-name">${escapeHtml(student.name)}</div>
               ${isOnce ? '<span class="badge-once">1x</span>' : ''}
@@ -1009,7 +965,12 @@
       container.innerHTML = "";
 
       if (students.length === 0) {
-        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8rem; padding: 10px;">Brak uczniów w bazie.</div>`;
+        container.innerHTML = `
+          <div style="color: var(--text-muted); font-size: 0.8rem; padding: 20px 10px; text-align: center; line-height: 1.5;">
+            Baza uczniów jest pusta.<br>
+            Kliknij <b>+ Nowy Uczeń</b>, aby dodać pierwszego ucznia.
+          </div>
+        `;
         return;
       }
 
@@ -1067,7 +1028,7 @@
 
       if (hour >= startHour && hour < endHour) {
         const minutesFromStart = (hour - startHour) * 60 + minutes;
-        const rowHeightPx = 54; // row height + spacing
+        const rowHeightPx = 54;
         const headerOffsetPx = 48;
 
         const topPosition = headerOffsetPx + (minutesFromStart / 60) * rowHeightPx;
