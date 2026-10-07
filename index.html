@@ -24,6 +24,7 @@
       --accent-hover: #4f46e5;
       --danger: #f43f5e;
       --success: #10b981;
+      --warning: #f59e0b;
 
       /* Kolory poziomów */
       --col-podstawowka-bg: rgba(16, 185, 129, 0.14);
@@ -91,6 +92,7 @@
       justify-content: space-between;
       flex-shrink: 0;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      gap: 16px;
     }
 
     .brand {
@@ -120,13 +122,49 @@
       -webkit-text-fill-color: transparent;
     }
 
+    /* GŁÓWNE ZAKŁADKI NAWIGACJI */
+    .main-nav-tabs {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px;
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      gap: 4px;
+    }
+
+    .nav-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+    }
+
     .kpi-bar {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    /* STAŁE ROZMIARY KAFELKÓW (NIE RUSZAJĄ SIĘ NA BOKI) */
     .kpi-chip {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--card-border);
@@ -163,7 +201,6 @@
       text-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
     }
 
-    /* KAFELEK CZASU (ZEGARA) */
     .live-clock-badge {
       display: flex;
       align-items: center;
@@ -197,12 +234,24 @@
       100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
     }
 
-    /* Układ pulpitu */
+    /* KONTENERY ZAKŁADEK */
+    .view-content {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .view-content.hidden {
+      display: none !important;
+    }
+
+    /* Układ pulpitu (Harmonogram) */
     .dashboard-body {
       display: grid;
       grid-template-columns: 1fr 340px;
       gap: 14px;
-      flex: 1;
+      width: 100%;
+      height: 100%;
       min-height: 0;
     }
 
@@ -386,7 +435,6 @@
       flex-shrink: 0;
     }
 
-    /* Subtelna linia bieżącego czasu */
     #current-time-line {
       position: absolute;
       left: 70px;
@@ -411,7 +459,7 @@
       box-shadow: 0 0 5px rgba(244, 63, 94, 0.5);
     }
 
-    /* Baza uczniów */
+    /* Baza uczniów w panelu bocznym */
     .students-scroll {
       flex: 1;
       overflow-y: auto;
@@ -511,6 +559,233 @@
     .btn-add-primary:hover {
       background: var(--accent-hover);
       transform: translateY(-1px);
+    }
+
+    /* WIDOK: PŁATNOŚCI */
+    .payments-view-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .payments-summary-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .pay-kpi {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pay-kpi-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .pay-kpi-val {
+      font-size: 1.35rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .pay-kpi-val.green { color: var(--success); }
+    .pay-kpi-val.red { color: var(--danger); }
+    .pay-kpi-val.amber { color: var(--warning); }
+    .pay-kpi-val.cyan { color: #38bdf8; }
+
+    .payments-table-panel {
+      flex: 1;
+      min-height: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .payments-search-row {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      background: #0d0f16;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      outline: none;
+      min-width: 260px;
+    }
+    .search-input:focus { border-color: var(--accent); }
+
+    .payments-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* KARTA ROZLICZENIOWA POJEDYNCZEGO UCZNIA */
+    .pay-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 240px 140px 180px 150px 1fr 40px;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .pay-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .pay-stud-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .pay-stud-name {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .pay-stud-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    .pay-rate-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .pay-col-sub {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .pay-col-num {
+      font-size: 0.96rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Wybór statusu płatności */
+    .status-select {
+      background: #0e111a;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 12px;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    .status-select.status-paid {
+      border-color: rgba(16, 185, 129, 0.5);
+      color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.12);
+    }
+    .status-select.status-unpaid {
+      border-color: rgba(244, 63, 94, 0.5);
+      color: #fda4af;
+      background: rgba(244, 63, 94, 0.12);
+    }
+    .status-select.status-overpaid {
+      border-color: rgba(6, 182, 212, 0.5);
+      color: #67e8f9;
+      background: rgba(6, 182, 212, 0.12);
+    }
+    .status-select.status-pending {
+      border-color: rgba(245, 158, 11, 0.5);
+      color: #fcd34d;
+      background: rgba(245, 158, 11, 0.12);
+    }
+
+    /* Kwota wpłacona / saldo */
+    .balance-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .balance-input {
+      background: #0d0f16;
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      width: 100px;
+      text-align: right;
+      outline: none;
+    }
+    .balance-input:focus { border-color: var(--accent); }
+
+    /* Notatka */
+    .note-input {
+      background: #0d0f16;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    .note-input:focus { border-color: var(--accent); }
+
+    .btn-quick-settle {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 10px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-quick-settle:hover {
+      background: var(--success);
+      color: #fff;
+      border-color: var(--success);
     }
 
     /* Mobilny pasek dni */
@@ -667,7 +942,17 @@
       color: #fff;
     }
 
-    /* RWD dla telefonów */
+    /* RWD dla telefonów i tabletów */
+    @media (max-width: 1100px) {
+      .pay-card {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .pay-card .note-col {
+        grid-column: span 2;
+      }
+    }
+
     @media (max-width: 960px) {
       body {
         padding: 8px;
@@ -681,9 +966,17 @@
       }
       header {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        align-items: stretch;
+        gap: 14px;
         border-radius: 18px;
+      }
+      .main-nav-tabs {
+        width: 100%;
+        justify-content: center;
+      }
+      .nav-tab-btn {
+        flex: 1;
+        justify-content: center;
       }
       .kpi-bar {
         width: 100%;
@@ -696,6 +989,9 @@
       .live-clock-badge {
         width: auto;
         padding: 8px 12px;
+      }
+      .payments-summary-bar {
+        grid-template-columns: 1fr 1fr;
       }
       .mobile-day-tabs {
         display: flex;
@@ -713,6 +1009,12 @@
       #current-time-line {
         left: 60px;
       }
+      .pay-card {
+        grid-template-columns: 1fr;
+      }
+      .pay-card .note-col {
+        grid-column: span 1;
+      }
     }
   </style>
 </head>
@@ -728,6 +1030,16 @@
           <div style="font-size: 0.72rem; color: var(--text-muted);">Grafik Stanisław Abucewicz</div>
         </div>
       </div>
+
+      <!-- NAWIGACJA ZAKŁADEK -->
+      <nav class="main-nav-tabs">
+        <button class="nav-tab-btn active" id="tab-btn-schedule" onclick="switchMainTab('schedule')">
+          📅 Harmonogram i Baza
+        </button>
+        <button class="nav-tab-btn" id="tab-btn-payments" onclick="switchMainTab('payments')">
+          💳 Płatności i Rozliczenia
+        </button>
+      </nav>
 
       <div class="kpi-bar">
         <div class="kpi-chip">
@@ -745,42 +1057,92 @@
       </div>
     </header>
 
-    <!-- Główny pulpit roboczy -->
-    <div class="dashboard-body">
-      <!-- Kalendarz -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>📅 Harmonogram tygodniowy</span>
+    <!-- ZAKŁADKA 1: HARMONOGRAM I BAZA UCZNIÓW -->
+    <main class="view-content" id="view-schedule">
+      <div class="dashboard-body">
+        <!-- Kalendarz -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>📅 Harmonogram tygodniowy</span>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">Czas: Polska</div>
           </div>
-          <div style="font-size: 0.72rem; color: var(--text-muted);">Czas: Polska</div>
+
+          <!-- Mobilny pasek dni -->
+          <div class="mobile-day-tabs" id="mobile-tabs-bar"></div>
+
+          <div class="calendar-container" id="cal-scroll-area">
+            <!-- Linia bieżącego czasu -->
+            <div id="current-time-line"></div>
+
+            <div class="calendar-grid" id="main-grid">
+              <!-- Renderowane dynamicznie -->
+            </div>
+          </div>
         </div>
 
-        <!-- Mobilny pasek dni -->
-        <div class="mobile-day-tabs" id="mobile-tabs-bar"></div>
-
-        <div class="calendar-container" id="cal-scroll-area">
-          <!-- Linia czasu MS Teams -->
-          <div id="current-time-line"></div>
-
-          <div class="calendar-grid" id="main-grid">
-            <!-- Renderowane dynamicznie -->
+        <!-- Baza uczniów -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span>👥 Baza Uczniów</span>
+            </div>
+            <button class="btn-add-primary" onclick="openStudentModal()">+ Nowy Uczeń</button>
           </div>
+
+          <div class="students-scroll" id="students-container"></div>
         </div>
       </div>
+    </main>
 
-      <!-- Baza uczniów -->
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>👥 Baza Uczniów</span>
+    <!-- ZAKŁADKA 2: PŁATNOŚCI I ROZLICZENIA -->
+    <main class="view-content hidden" id="view-payments">
+      <div class="payments-view-wrapper">
+        
+        <!-- Pasek podsumowania finansowego -->
+        <div class="payments-summary-bar">
+          <div class="pay-kpi">
+            <span class="pay-kpi-label">Uczniowie w bazie</span>
+            <span class="pay-kpi-val cyan" id="pay-kpi-students-total">0</span>
           </div>
-          <button class="btn-add-primary" onclick="openStudentModal()">+ Nowy Uczeń</button>
+          <div class="pay-kpi">
+            <span class="pay-kpi-label">Rozliczeni / Opłaceni</span>
+            <span class="pay-kpi-val green" id="pay-kpi-paid-count">0</span>
+          </div>
+          <div class="pay-kpi">
+            <span class="pay-kpi-label">Zaległości / Do wpłaty</span>
+            <span class="pay-kpi-val red" id="pay-kpi-unpaid-count">0</span>
+          </div>
+          <div class="pay-kpi">
+            <span class="pay-kpi-label">Wpłacone łącznie (zapisane)</span>
+            <span class="pay-kpi-val green" id="pay-kpi-total-collected">0 zł</span>
+          </div>
         </div>
 
-        <div class="students-scroll" id="students-container"></div>
+        <!-- Panel tabeli płatności -->
+        <div class="payments-table-panel">
+          <div class="payments-search-row">
+            <div class="panel-title">
+              <span>💰 Rozliczenia Uczniów</span>
+            </div>
+            <input 
+              type="text" 
+              id="payment-search" 
+              class="search-input" 
+              placeholder="🔍 Szukaj ucznia w rozliczeniach..." 
+              oninput="renderPaymentsView()"
+            />
+          </div>
+
+          <div class="payments-scroll-area" id="payments-list-container">
+            <!-- Renderowane dynamicznie karty uczniów -->
+          </div>
+        </div>
+
       </div>
-    </div>
+    </main>
+
   </div>
 
   <!-- MODAL: Przypisywanie terminu + Lekcja jednorazowa -->
@@ -878,16 +1240,42 @@
       "inf-rozsz": "Informatyka rozszerzenie"
     };
 
-    // PUSTY START W COOKIES
+    // DANE W COOKIES
     let students = getCookie("tf_students_clean") || [];
     let schedule = getCookie("tf_schedule_clean") || {};
+    let payments = getCookie("tf_payments_clean") || {}; 
+    // Struktura payments[studentId] = { status: 'paid'|'unpaid'|'overpaid'|'pending', amount: 0, note: '' }
+
     let selectedSlotKey = null;
     let activeMobileDayIndex = getCurrentPolandDayIndex();
+    let currentMainTab = "schedule";
 
     function saveState() {
       setCookie("tf_students_clean", students);
       setCookie("tf_schedule_clean", schedule);
+      setCookie("tf_payments_clean", payments);
       renderAll();
+    }
+
+    function switchMainTab(tabName) {
+      currentMainTab = tabName;
+      const schedTabBtn = document.getElementById("tab-btn-schedule");
+      const payTabBtn = document.getElementById("tab-btn-payments");
+      const schedView = document.getElementById("view-schedule");
+      const payView = document.getElementById("view-payments");
+
+      if (tabName === 'schedule') {
+        schedTabBtn.classList.add("active");
+        payTabBtn.classList.remove("active");
+        schedView.classList.remove("hidden");
+        payView.classList.add("hidden");
+      } else {
+        schedTabBtn.classList.remove("active");
+        payTabBtn.classList.add("active");
+        schedView.classList.add("hidden");
+        payView.classList.remove("hidden");
+        renderPaymentsView();
+      }
     }
 
     function getPolandDate() {
@@ -907,6 +1295,9 @@
       renderStudentsList();
       updateKPIs();
       updateLiveTimeAndIndicator();
+      if (currentMainTab === 'payments') {
+        renderPaymentsView();
+      }
     }
 
     function renderCalendarGrid() {
@@ -1016,6 +1407,148 @@
         `;
         container.appendChild(item);
       });
+    }
+
+    // --- ZAKŁADKA ROZLICZEŃ I PŁATNOŚCI ---
+    function renderPaymentsView() {
+      const container = document.getElementById("payments-list-container");
+      const searchVal = (document.getElementById("payment-search")?.value || "").toLowerCase().trim();
+      container.innerHTML = "";
+
+      // Obliczanie lekcji w tygodniu dla każdego ucznia
+      const studentLessonsCount = {};
+      Object.values(schedule).forEach(slot => {
+        if (!slot) return;
+        const sId = slot.studentId || slot;
+        studentLessonsCount[sId] = (studentLessonsCount[sId] || 0) + 1;
+      });
+
+      let paidCount = 0;
+      let unpaidCount = 0;
+      let totalCollected = 0;
+
+      const filteredStudents = students.filter(st => {
+        if (!searchVal) return true;
+        return st.name.toLowerCase().includes(searchVal);
+      });
+
+      // Zliczanie globalne do KPI
+      students.forEach(st => {
+        const pay = payments[st.id] || { status: 'pending', amount: 0, note: '' };
+        if (pay.status === 'paid' || pay.status === 'overpaid') paidCount++;
+        if (pay.status === 'unpaid') unpaidCount++;
+        totalCollected += Number(pay.amount || 0);
+      });
+
+      document.getElementById("pay-kpi-students-total").textContent = students.length;
+      document.getElementById("pay-kpi-paid-count").textContent = paidCount;
+      document.getElementById("pay-kpi-unpaid-count").textContent = unpaidCount;
+      document.getElementById("pay-kpi-total-collected").textContent = `${totalCollected.toLocaleString("pl-PL")} zł`;
+
+      if (filteredStudents.length === 0) {
+        container.innerHTML = `
+          <div style="color: var(--text-muted); font-size: 0.9rem; padding: 40px 10px; text-align: center;">
+            ${students.length === 0 ? 'Brak uczniów w bazie. Dodaj uczniów w zakładce Harmonogram.' : 'Brak wyników dla podanej frazy.'}
+          </div>
+        `;
+        return;
+      }
+
+      filteredStudents.forEach(st => {
+        const pay = payments[st.id] || { status: 'pending', amount: 0, note: '' };
+        const weeklyLessons = studentLessonsCount[st.id] || 0;
+        const weeklyTotal = weeklyLessons * (Number(st.rate) || 0);
+
+        const card = document.createElement("div");
+        card.className = "pay-card";
+
+        card.innerHTML = `
+          <div class="pay-stud-main">
+            <div class="pay-stud-name">${escapeHtml(st.name)}</div>
+            <div class="pay-stud-sub">
+              ${LEVEL_LABELS[st.level] || st.level} • Klasa ${escapeHtml(st.grade || '—')}
+            </div>
+          </div>
+
+          <div class="pay-rate-col">
+            <div class="pay-col-sub">Stawka / Grafik</div>
+            <div class="pay-col-num">${st.rate} zł/h</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">${weeklyLessons} lekcji (${weeklyTotal} zł/tydz.)</div>
+          </div>
+
+          <div>
+            <div class="pay-col-sub" style="margin-bottom:4px;">Status rozliczenia</div>
+            <select class="status-select status-${pay.status || 'pending'}" onchange="updatePaymentStatus('${st.id}', this.value)">
+              <option value="paid" ${pay.status === 'paid' ? 'selected' : ''}>✅ Uregulowane</option>
+              <option value="overpaid" ${pay.status === 'overpaid' ? 'selected' : ''}>💎 Nadpłata</option>
+              <option value="unpaid" ${pay.status === 'unpaid' ? 'selected' : ''}>❌ Zaległość</option>
+              <option value="pending" ${pay.status === 'pending' || !pay.status ? 'selected' : ''}>⏳ Czeka na wpłatę</option>
+            </select>
+          </div>
+
+          <div class="balance-input-wrap">
+            <div style="display:flex; flex-direction:column; gap:4px; width:100%;">
+              <div class="pay-col-sub">Wpłacone (zł)</div>
+              <input 
+                type="number" 
+                class="balance-input" 
+                value="${pay.amount !== undefined ? pay.amount : 0}" 
+                placeholder="0"
+                onchange="updatePaymentAmount('${st.id}', this.value)"
+              />
+            </div>
+          </div>
+
+          <div class="note-col">
+            <div class="pay-col-sub" style="margin-bottom:4px;">Notatka / Rozliczenie (np. opłacone do 15.11)</div>
+            <input 
+              type="text" 
+              class="note-input" 
+              value="${escapeHtml(pay.note || '')}" 
+              placeholder="Wpisz np. 'BLIK z góry za 4 lekcje'..."
+              onchange="updatePaymentNote('${st.id}', this.value)"
+            />
+          </div>
+
+          <div>
+            <button class="btn-quick-settle" title="Szybkie rozliczenie (Oznacz jako uregulowane)" onclick="quickSettleStudent('${st.id}')">✓</button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function updatePaymentStatus(studentId, newStatus) {
+      if (!payments[studentId]) payments[studentId] = { amount: 0, note: '' };
+      payments[studentId].status = newStatus;
+      setCookie("tf_payments_clean", payments);
+      renderPaymentsView();
+    }
+
+    function updatePaymentAmount(studentId, newAmount) {
+      if (!payments[studentId]) payments[studentId] = { status: 'pending', note: '' };
+      payments[studentId].amount = parseFloat(newAmount) || 0;
+      setCookie("tf_payments_clean", payments);
+      renderPaymentsView();
+    }
+
+    function updatePaymentNote(studentId, newNote) {
+      if (!payments[studentId]) payments[studentId] = { status: 'pending', amount: 0 };
+      payments[studentId].note = newNote;
+      setCookie("tf_payments_clean", payments);
+    }
+
+    function quickSettleStudent(studentId) {
+      const st = students.find(s => s.id === studentId);
+      if (!st) return;
+      if (!payments[studentId]) payments[studentId] = {};
+      payments[studentId].status = 'paid';
+      if (!payments[studentId].note) {
+        payments[studentId].note = `Uregulowano dnia ${new Date().toLocaleDateString('pl-PL')}`;
+      }
+      setCookie("tf_payments_clean", payments);
+      renderPaymentsView();
     }
 
     function updateKPIs() {
@@ -1144,8 +1677,9 @@
 
     function deleteStudent(id) {
       const st = students.find(s => s.id === id);
-      if (confirm(`Czy na pewno usunąć ucznia: ${st ? st.name : ""}? Spowoduje to wyczyszczenie jego lekcji z grafiku.`)) {
+      if (confirm(`Czy na pewno usunąć ucznia: ${st ? st.name : ""}? Spowoduje to wyczyszczenie jego lekcji z grafiku oraz historii płatności.`)) {
         students = students.filter(s => s.id !== id);
+        delete payments[id];
         Object.keys(schedule).forEach(k => {
           if (schedule[k] && (schedule[k].studentId === id || schedule[k] === id)) {
             delete schedule[k];
@@ -1164,6 +1698,7 @@
     }
 
     function escapeHtml(text) {
+      if (!text) return "";
       const div = document.createElement("div");
       div.textContent = text;
       return div.innerHTML;
