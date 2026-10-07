@@ -573,7 +573,7 @@
     /* Pasek podsumowania z inteligentnym globalnym kafelkiem */
     .payments-summary-bar {
       display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
       gap: 12px;
       flex-shrink: 0;
     }
@@ -591,7 +591,6 @@
       transition: all 0.25s ease;
     }
 
-    /* Globalny wskaźnik stanu rozliczeń */
     .pay-kpi.global-status-ok {
       background: rgba(16, 185, 129, 0.12);
       border-color: rgba(16, 185, 129, 0.4);
@@ -623,6 +622,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      white-space: nowrap;
     }
     .pay-kpi-val.green { color: var(--success); }
     .pay-kpi-val.red { color: var(--danger); }
@@ -673,16 +673,16 @@
       gap: 12px;
     }
 
-    /* KARTA ROZLICZENIOWA POJEDYNCZEGO UCZNIA */
+    /* KARTA ROZLICZENIOWA POJEDYNCZEGO UCZNIA - ROZSZERZONA I CZYSTA */
     .pay-card {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--card-border);
       border-radius: 18px;
-      padding: 16px 20px;
+      padding: 16px 24px;
       display: grid;
-      grid-template-columns: 260px 180px 220px 1fr;
+      grid-template-columns: 1fr 300px 220px;
       align-items: center;
-      gap: 16px;
+      gap: 24px;
       transition: all 0.2s ease;
     }
 
@@ -697,39 +697,42 @@
       gap: 4px;
     }
     .pay-stud-name {
-      font-size: 0.98rem;
+      font-size: 1.05rem;
       font-weight: 800;
       color: #fff;
     }
     .pay-stud-sub {
-      font-size: 0.74rem;
+      font-size: 0.78rem;
       color: var(--text-muted);
     }
 
     .pay-col-sub {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       text-transform: uppercase;
       font-weight: 700;
       color: var(--text-muted);
       margin-bottom: 6px;
     }
 
-    /* Opcje wyboru: 3 STANY */
+    /* Poszerzony wybór stanu rozliczenia bez przycinania */
     .status-select-wrap {
       display: flex;
       flex-direction: column;
+      width: 100%;
     }
     .status-select {
       background: #0e111a;
       border: 1px solid var(--card-border);
       color: #fff;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       font-weight: 700;
-      padding: 10px 12px;
-      border-radius: 12px;
+      padding: 11px 16px;
+      border-radius: 14px;
       outline: none;
       cursor: pointer;
       width: 100%;
+      min-width: 260px;
+      text-overflow: clip;
     }
     .status-select.opt-ok {
       border-color: rgba(16, 185, 129, 0.5);
@@ -751,43 +754,30 @@
     .amount-input-box {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     .amount-input {
       background: #0d0f16;
       border: 1px solid var(--card-border);
       color: #fff;
-      padding: 9px 12px;
+      padding: 10px 14px;
       border-radius: 12px;
-      font-size: 0.92rem;
+      font-size: 1rem;
       font-weight: 800;
-      width: 110px;
+      width: 130px;
       text-align: right;
       outline: none;
       font-variant-numeric: tabular-nums;
     }
     .amount-input:disabled {
-      opacity: 0.4;
+      opacity: 0.35;
       cursor: not-allowed;
       border-color: rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.2);
     }
     .amount-input:focus:not(:disabled) {
       border-color: var(--accent);
     }
-
-    /* Notatka */
-    .note-input {
-      background: #0d0f16;
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 9px 12px;
-      border-radius: 12px;
-      font-size: 0.82rem;
-      outline: none;
-      width: 100%;
-      transition: border-color 0.15s;
-    }
-    .note-input:focus { border-color: var(--accent); }
 
     /* Mobilny pasek dni */
     .mobile-day-tabs {
@@ -944,16 +934,6 @@
     }
 
     /* RWD dla tabletów i telefonów */
-    @media (max-width: 1100px) {
-      .pay-card {
-        grid-template-columns: 1fr 1fr;
-        gap: 14px;
-      }
-      .pay-card .note-col {
-        grid-column: span 2;
-      }
-    }
-
     @media (max-width: 960px) {
       body {
         padding: 8px;
@@ -1012,9 +992,11 @@
       }
       .pay-card {
         grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 14px 16px;
       }
-      .pay-card .note-col {
-        grid-column: span 1;
+      .status-select {
+        min-width: 100%;
       }
     }
   </style>
@@ -1251,7 +1233,7 @@
     let students = getCookie("tf_students_clean") || [];
     let schedule = getCookie("tf_schedule_clean") || {};
     let payments = getCookie("tf_payments_v2") || {}; 
-    // Struktura payments[studentId] = { status: 'ok'|'missing'|'overpaid', amount: 0, note: '' }
+    // Struktura payments[studentId] = { status: 'ok'|'missing'|'overpaid', amount: 0 }
 
     let selectedSlotKey = null;
     let activeMobileDayIndex = getCurrentPolandDayIndex();
@@ -1425,9 +1407,8 @@
       let totalMissing = 0;
       let totalOverpaid = 0;
 
-      // Zliczanie sum ze wszystkich uczniów
       students.forEach(st => {
-        const pay = payments[st.id] || { status: 'ok', amount: 0, note: '' };
+        const pay = payments[st.id] || { status: 'ok', amount: 0 };
         const amt = parseFloat(pay.amount) || 0;
         if (pay.status === 'missing') {
           totalMissing += amt;
@@ -1442,17 +1423,14 @@
 
       globalCard.className = "pay-kpi";
       if (totalMissing > 0) {
-        // Brakuje
         globalCard.classList.add("global-status-danger");
         globalVal.className = "pay-kpi-val red";
         globalVal.innerHTML = `<span>⚠️ Brakuje: -${totalMissing.toLocaleString("pl-PL")} zł</span>`;
       } else if (totalOverpaid > 0) {
-        // Nadpłata
         globalCard.classList.add("global-status-warning");
         globalVal.className = "pay-kpi-val amber";
         globalVal.innerHTML = `<span>💎 Nadpłacono: +${totalOverpaid.toLocaleString("pl-PL")} zł</span>`;
       } else {
-        // Wszystko się zgadza
         globalCard.classList.add("global-status-ok");
         globalVal.className = "pay-kpi-val green";
         globalVal.innerHTML = `<span>✓ Wszystko się zgadza</span>`;
@@ -1477,7 +1455,7 @@
       }
 
       filteredStudents.forEach(st => {
-        const pay = payments[st.id] || { status: 'ok', amount: 0, note: '' };
+        const pay = payments[st.id] || { status: 'ok', amount: 0 };
         const status = pay.status || 'ok';
         const isAmountActive = status !== 'ok';
 
@@ -1512,19 +1490,8 @@
                 ${!isAmountActive ? 'disabled' : ''}
                 oninput="changePaymentAmount('${st.id}', this.value)"
               />
-              <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted);">zł</span>
+              <span style="font-size:0.9rem; font-weight:700; color:var(--text-muted);">zł</span>
             </div>
-          </div>
-
-          <div class="note-col">
-            <div class="pay-col-sub">Własna notatka / komentarz</div>
-            <input 
-              type="text" 
-              class="note-input" 
-              value="${escapeHtml(pay.note || '')}" 
-              placeholder="np. zapłaci za 2 lekcje w piątek / przelew blik..."
-              oninput="changePaymentNote('${st.id}', this.value)"
-            />
           </div>
         `;
 
@@ -1533,7 +1500,7 @@
     }
 
     function changePaymentStatus(studentId, newStatus) {
-      if (!payments[studentId]) payments[studentId] = { amount: 0, note: '' };
+      if (!payments[studentId]) payments[studentId] = { amount: 0 };
       payments[studentId].status = newStatus;
       if (newStatus === 'ok') {
         payments[studentId].amount = 0;
@@ -1543,11 +1510,10 @@
     }
 
     function changePaymentAmount(studentId, newAmount) {
-      if (!payments[studentId]) payments[studentId] = { status: 'ok', note: '' };
+      if (!payments[studentId]) payments[studentId] = { status: 'ok' };
       payments[studentId].amount = parseFloat(newAmount) || 0;
       setCookie("tf_payments_v2", payments);
       
-      // Szybka aktualizacja podsumowania bez utraty fokusu w inputcie
       updatePaymentsSummaryValuesOnly();
     }
 
@@ -1556,7 +1522,7 @@
       let totalOverpaid = 0;
 
       students.forEach(st => {
-        const pay = payments[st.id] || { status: 'ok', amount: 0, note: '' };
+        const pay = payments[st.id] || { status: 'ok', amount: 0 };
         const amt = parseFloat(pay.amount) || 0;
         if (pay.status === 'missing') totalMissing += amt;
         else if (pay.status === 'overpaid') totalOverpaid += amt;
@@ -1582,12 +1548,6 @@
 
       document.getElementById("pay-kpi-total-missing").textContent = `${totalMissing.toLocaleString("pl-PL")} zł`;
       document.getElementById("pay-kpi-total-overpaid").textContent = `${totalOverpaid.toLocaleString("pl-PL")} zł`;
-    }
-
-    function changePaymentNote(studentId, newNote) {
-      if (!payments[studentId]) payments[studentId] = { status: 'ok', amount: 0 };
-      payments[studentId].note = newNote;
-      setCookie("tf_payments_v2", payments);
     }
 
     function updateKPIs() {
