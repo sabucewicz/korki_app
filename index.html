@@ -570,9 +570,10 @@
       gap: 14px;
     }
 
+    /* Pasek podsumowania z inteligentnym globalnym kafelkiem */
     .payments-summary-bar {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
       gap: 12px;
       flex-shrink: 0;
     }
@@ -582,14 +583,33 @@
       backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
       border-radius: 18px;
-      padding: 14px 18px;
+      padding: 12px 18px;
       display: flex;
       flex-direction: column;
+      justify-content: center;
       gap: 4px;
+      transition: all 0.25s ease;
+    }
+
+    /* Globalny wskaźnik stanu rozliczeń */
+    .pay-kpi.global-status-ok {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+    }
+    .pay-kpi.global-status-danger {
+      background: rgba(244, 63, 94, 0.14);
+      border-color: rgba(244, 63, 94, 0.45);
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.2);
+    }
+    .pay-kpi.global-status-warning {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.45);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
     }
 
     .pay-kpi-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -597,9 +617,12 @@
     }
 
     .pay-kpi-val {
-      font-size: 1.35rem;
+      font-size: 1.25rem;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .pay-kpi-val.green { color: var(--success); }
     .pay-kpi-val.red { color: var(--danger); }
@@ -657,7 +680,7 @@
       border-radius: 18px;
       padding: 16px 20px;
       display: grid;
-      grid-template-columns: 240px 140px 180px 150px 1fr 40px;
+      grid-template-columns: 260px 180px 220px 1fr;
       align-items: center;
       gap: 16px;
       transition: all 0.2s ease;
@@ -674,7 +697,7 @@
       gap: 4px;
     }
     .pay-stud-name {
-      font-size: 0.96rem;
+      font-size: 0.98rem;
       font-weight: 800;
       color: #fff;
     }
@@ -683,84 +706,81 @@
       color: var(--text-muted);
     }
 
-    .pay-rate-col {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
     .pay-col-sub {
       font-size: 0.68rem;
       text-transform: uppercase;
       font-weight: 700;
       color: var(--text-muted);
-    }
-    .pay-col-num {
-      font-size: 0.96rem;
-      font-weight: 800;
-      color: #f1f5f9;
-      font-variant-numeric: tabular-nums;
+      margin-bottom: 6px;
     }
 
-    /* Wybór statusu płatności */
+    /* Opcje wyboru: 3 STANY */
+    .status-select-wrap {
+      display: flex;
+      flex-direction: column;
+    }
     .status-select {
       background: #0e111a;
       border: 1px solid var(--card-border);
       color: #fff;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 700;
-      padding: 9px 12px;
+      padding: 10px 12px;
       border-radius: 12px;
       outline: none;
       cursor: pointer;
       width: 100%;
     }
-    .status-select.status-paid {
+    .status-select.opt-ok {
       border-color: rgba(16, 185, 129, 0.5);
       color: #6ee7b7;
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.14);
     }
-    .status-select.status-unpaid {
+    .status-select.opt-missing {
       border-color: rgba(244, 63, 94, 0.5);
       color: #fda4af;
-      background: rgba(244, 63, 94, 0.12);
+      background: rgba(244, 63, 94, 0.14);
     }
-    .status-select.status-overpaid {
-      border-color: rgba(6, 182, 212, 0.5);
-      color: #67e8f9;
-      background: rgba(6, 182, 212, 0.12);
-    }
-    .status-select.status-pending {
+    .status-select.opt-overpaid {
       border-color: rgba(245, 158, 11, 0.5);
       color: #fcd34d;
-      background: rgba(245, 158, 11, 0.12);
+      background: rgba(245, 158, 11, 0.14);
     }
 
-    /* Kwota wpłacona / saldo */
-    .balance-input-wrap {
+    /* Kwota w zł */
+    .amount-input-box {
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .balance-input {
+    .amount-input {
       background: #0d0f16;
       border: 1px solid var(--card-border);
       color: #fff;
-      padding: 8px 10px;
+      padding: 9px 12px;
       border-radius: 12px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      width: 100px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      width: 110px;
       text-align: right;
       outline: none;
+      font-variant-numeric: tabular-nums;
     }
-    .balance-input:focus { border-color: var(--accent); }
+    .amount-input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+    .amount-input:focus:not(:disabled) {
+      border-color: var(--accent);
+    }
 
     /* Notatka */
     .note-input {
       background: #0d0f16;
       border: 1px solid var(--card-border);
       color: var(--text);
-      padding: 8px 12px;
+      padding: 9px 12px;
       border-radius: 12px;
       font-size: 0.82rem;
       outline: none;
@@ -768,25 +788,6 @@
       transition: border-color 0.15s;
     }
     .note-input:focus { border-color: var(--accent); }
-
-    .btn-quick-settle {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      border-radius: 10px;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .btn-quick-settle:hover {
-      background: var(--success);
-      color: #fff;
-      border-color: var(--success);
-    }
 
     /* Mobilny pasek dni */
     .mobile-day-tabs {
@@ -942,11 +943,11 @@
       color: #fff;
     }
 
-    /* RWD dla telefonów i tabletów */
+    /* RWD dla tabletów i telefonów */
     @media (max-width: 1100px) {
       .pay-card {
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 14px;
       }
       .pay-card .note-col {
         grid-column: span 2;
@@ -1102,35 +1103,41 @@
         
         <!-- Pasek podsumowania finansowego -->
         <div class="payments-summary-bar">
+          <!-- INTELIGENTNY KAFELEK BILANSU -->
+          <div class="pay-kpi global-status-ok" id="global-status-card">
+            <span class="pay-kpi-label">Status ogólny rozliczeń</span>
+            <div class="pay-kpi-val green" id="global-status-value">
+              <span>✓ Wszystko się zgadza</span>
+            </div>
+          </div>
+
           <div class="pay-kpi">
-            <span class="pay-kpi-label">Uczniowie w bazie</span>
+            <span class="pay-kpi-label">Brakuje (łącznie)</span>
+            <span class="pay-kpi-val red" id="pay-kpi-total-missing">0 zł</span>
+          </div>
+
+          <div class="pay-kpi">
+            <span class="pay-kpi-label">Nadpłacono (łącznie)</span>
+            <span class="pay-kpi-val amber" id="pay-kpi-total-overpaid">0 zł</span>
+          </div>
+
+          <div class="pay-kpi">
+            <span class="pay-kpi-label">Liczba uczniów w bazie</span>
             <span class="pay-kpi-val cyan" id="pay-kpi-students-total">0</span>
-          </div>
-          <div class="pay-kpi">
-            <span class="pay-kpi-label">Rozliczeni / Opłaceni</span>
-            <span class="pay-kpi-val green" id="pay-kpi-paid-count">0</span>
-          </div>
-          <div class="pay-kpi">
-            <span class="pay-kpi-label">Zaległości / Do wpłaty</span>
-            <span class="pay-kpi-val red" id="pay-kpi-unpaid-count">0</span>
-          </div>
-          <div class="pay-kpi">
-            <span class="pay-kpi-label">Wpłacone łącznie (zapisane)</span>
-            <span class="pay-kpi-val green" id="pay-kpi-total-collected">0 zł</span>
           </div>
         </div>
 
-        <!-- Panel tabeli płatności -->
+        <!-- Panel listy uczniów -->
         <div class="payments-table-panel">
           <div class="payments-search-row">
             <div class="panel-title">
-              <span>💰 Rozliczenia Uczniów</span>
+              <span>💰 Ewidencja Wpłat</span>
             </div>
             <input 
               type="text" 
               id="payment-search" 
               class="search-input" 
-              placeholder="🔍 Szukaj ucznia w rozliczeniach..." 
+              placeholder="🔍 Szukaj ucznia..." 
               oninput="renderPaymentsView()"
             />
           </div>
@@ -1243,8 +1250,8 @@
     // DANE W COOKIES
     let students = getCookie("tf_students_clean") || [];
     let schedule = getCookie("tf_schedule_clean") || {};
-    let payments = getCookie("tf_payments_clean") || {}; 
-    // Struktura payments[studentId] = { status: 'paid'|'unpaid'|'overpaid'|'pending', amount: 0, note: '' }
+    let payments = getCookie("tf_payments_v2") || {}; 
+    // Struktura payments[studentId] = { status: 'ok'|'missing'|'overpaid', amount: 0, note: '' }
 
     let selectedSlotKey = null;
     let activeMobileDayIndex = getCurrentPolandDayIndex();
@@ -1253,7 +1260,7 @@
     function saveState() {
       setCookie("tf_students_clean", students);
       setCookie("tf_schedule_clean", schedule);
-      setCookie("tf_payments_clean", payments);
+      setCookie("tf_payments_v2", payments);
       renderAll();
     }
 
@@ -1415,49 +1422,64 @@
       const searchVal = (document.getElementById("payment-search")?.value || "").toLowerCase().trim();
       container.innerHTML = "";
 
-      // Obliczanie lekcji w tygodniu dla każdego ucznia
-      const studentLessonsCount = {};
-      Object.values(schedule).forEach(slot => {
-        if (!slot) return;
-        const sId = slot.studentId || slot;
-        studentLessonsCount[sId] = (studentLessonsCount[sId] || 0) + 1;
+      let totalMissing = 0;
+      let totalOverpaid = 0;
+
+      // Zliczanie sum ze wszystkich uczniów
+      students.forEach(st => {
+        const pay = payments[st.id] || { status: 'ok', amount: 0, note: '' };
+        const amt = parseFloat(pay.amount) || 0;
+        if (pay.status === 'missing') {
+          totalMissing += amt;
+        } else if (pay.status === 'overpaid') {
+          totalOverpaid += amt;
+        }
       });
 
-      let paidCount = 0;
-      let unpaidCount = 0;
-      let totalCollected = 0;
+      // AKTUALIZACJA GŁÓWNEGO WSKAŹNIKA ZBIORCZEGO
+      const globalCard = document.getElementById("global-status-card");
+      const globalVal = document.getElementById("global-status-value");
+
+      globalCard.className = "pay-kpi";
+      if (totalMissing > 0) {
+        // Brakuje
+        globalCard.classList.add("global-status-danger");
+        globalVal.className = "pay-kpi-val red";
+        globalVal.innerHTML = `<span>⚠️ Brakuje: -${totalMissing.toLocaleString("pl-PL")} zł</span>`;
+      } else if (totalOverpaid > 0) {
+        // Nadpłata
+        globalCard.classList.add("global-status-warning");
+        globalVal.className = "pay-kpi-val amber";
+        globalVal.innerHTML = `<span>💎 Nadpłacono: +${totalOverpaid.toLocaleString("pl-PL")} zł</span>`;
+      } else {
+        // Wszystko się zgadza
+        globalCard.classList.add("global-status-ok");
+        globalVal.className = "pay-kpi-val green";
+        globalVal.innerHTML = `<span>✓ Wszystko się zgadza</span>`;
+      }
+
+      document.getElementById("pay-kpi-total-missing").textContent = `${totalMissing.toLocaleString("pl-PL")} zł`;
+      document.getElementById("pay-kpi-total-overpaid").textContent = `${totalOverpaid.toLocaleString("pl-PL")} zł`;
+      document.getElementById("pay-kpi-students-total").textContent = students.length;
 
       const filteredStudents = students.filter(st => {
         if (!searchVal) return true;
         return st.name.toLowerCase().includes(searchVal);
       });
 
-      // Zliczanie globalne do KPI
-      students.forEach(st => {
-        const pay = payments[st.id] || { status: 'pending', amount: 0, note: '' };
-        if (pay.status === 'paid' || pay.status === 'overpaid') paidCount++;
-        if (pay.status === 'unpaid') unpaidCount++;
-        totalCollected += Number(pay.amount || 0);
-      });
-
-      document.getElementById("pay-kpi-students-total").textContent = students.length;
-      document.getElementById("pay-kpi-paid-count").textContent = paidCount;
-      document.getElementById("pay-kpi-unpaid-count").textContent = unpaidCount;
-      document.getElementById("pay-kpi-total-collected").textContent = `${totalCollected.toLocaleString("pl-PL")} zł`;
-
       if (filteredStudents.length === 0) {
         container.innerHTML = `
           <div style="color: var(--text-muted); font-size: 0.9rem; padding: 40px 10px; text-align: center;">
-            ${students.length === 0 ? 'Brak uczniów w bazie. Dodaj uczniów w zakładce Harmonogram.' : 'Brak wyników dla podanej frazy.'}
+            ${students.length === 0 ? 'Baza uczniów jest pusta. Dodaj uczniów w zakładce Harmonogram.' : 'Brak wyników dla podanej frazy.'}
           </div>
         `;
         return;
       }
 
       filteredStudents.forEach(st => {
-        const pay = payments[st.id] || { status: 'pending', amount: 0, note: '' };
-        const weeklyLessons = studentLessonsCount[st.id] || 0;
-        const weeklyTotal = weeklyLessons * (Number(st.rate) || 0);
+        const pay = payments[st.id] || { status: 'ok', amount: 0, note: '' };
+        const status = pay.status || 'ok';
+        const isAmountActive = status !== 'ok';
 
         const card = document.createElement("div");
         card.className = "pay-card";
@@ -1466,52 +1488,43 @@
           <div class="pay-stud-main">
             <div class="pay-stud-name">${escapeHtml(st.name)}</div>
             <div class="pay-stud-sub">
-              ${LEVEL_LABELS[st.level] || st.level} • Klasa ${escapeHtml(st.grade || '—')}
+              ${LEVEL_LABELS[st.level] || st.level} • ${st.rate} zł/h
             </div>
           </div>
 
-          <div class="pay-rate-col">
-            <div class="pay-col-sub">Stawka / Grafik</div>
-            <div class="pay-col-num">${st.rate} zł/h</div>
-            <div style="font-size:0.72rem; color:var(--text-muted);">${weeklyLessons} lekcji (${weeklyTotal} zł/tydz.)</div>
-          </div>
-
-          <div>
-            <div class="pay-col-sub" style="margin-bottom:4px;">Status rozliczenia</div>
-            <select class="status-select status-${pay.status || 'pending'}" onchange="updatePaymentStatus('${st.id}', this.value)">
-              <option value="paid" ${pay.status === 'paid' ? 'selected' : ''}>✅ Uregulowane</option>
-              <option value="overpaid" ${pay.status === 'overpaid' ? 'selected' : ''}>💎 Nadpłata</option>
-              <option value="unpaid" ${pay.status === 'unpaid' ? 'selected' : ''}>❌ Zaległość</option>
-              <option value="pending" ${pay.status === 'pending' || !pay.status ? 'selected' : ''}>⏳ Czeka na wpłatę</option>
+          <div class="status-select-wrap">
+            <div class="pay-col-sub">Stan rozliczenia</div>
+            <select class="status-select opt-${status}" onchange="changePaymentStatus('${st.id}', this.value)">
+              <option value="ok" ${status === 'ok' ? 'selected' : ''}>✅ Wszystko się zgadza</option>
+              <option value="missing" ${status === 'missing' ? 'selected' : ''}>❌ Brakuje</option>
+              <option value="overpaid" ${status === 'overpaid' ? 'selected' : ''}>💎 Nadpłacono</option>
             </select>
           </div>
 
-          <div class="balance-input-wrap">
-            <div style="display:flex; flex-direction:column; gap:4px; width:100%;">
-              <div class="pay-col-sub">Wpłacone (zł)</div>
+          <div>
+            <div class="pay-col-sub">Kwota (zł)</div>
+            <div class="amount-input-box">
               <input 
                 type="number" 
-                class="balance-input" 
-                value="${pay.amount !== undefined ? pay.amount : 0}" 
-                placeholder="0"
-                onchange="updatePaymentAmount('${st.id}', this.value)"
+                class="amount-input" 
+                value="${isAmountActive ? (pay.amount || '') : ''}" 
+                placeholder="${status === 'ok' ? '0' : 'wpisz zł'}"
+                ${!isAmountActive ? 'disabled' : ''}
+                oninput="changePaymentAmount('${st.id}', this.value)"
               />
+              <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted);">zł</span>
             </div>
           </div>
 
           <div class="note-col">
-            <div class="pay-col-sub" style="margin-bottom:4px;">Notatka / Rozliczenie (np. opłacone do 15.11)</div>
+            <div class="pay-col-sub">Własna notatka / komentarz</div>
             <input 
               type="text" 
               class="note-input" 
               value="${escapeHtml(pay.note || '')}" 
-              placeholder="Wpisz np. 'BLIK z góry za 4 lekcje'..."
-              onchange="updatePaymentNote('${st.id}', this.value)"
+              placeholder="np. zapłaci za 2 lekcje w piątek / przelew blik..."
+              oninput="changePaymentNote('${st.id}', this.value)"
             />
-          </div>
-
-          <div>
-            <button class="btn-quick-settle" title="Szybkie rozliczenie (Oznacz jako uregulowane)" onclick="quickSettleStudent('${st.id}')">✓</button>
           </div>
         `;
 
@@ -1519,36 +1532,62 @@
       });
     }
 
-    function updatePaymentStatus(studentId, newStatus) {
+    function changePaymentStatus(studentId, newStatus) {
       if (!payments[studentId]) payments[studentId] = { amount: 0, note: '' };
       payments[studentId].status = newStatus;
-      setCookie("tf_payments_clean", payments);
-      renderPaymentsView();
-    }
-
-    function updatePaymentAmount(studentId, newAmount) {
-      if (!payments[studentId]) payments[studentId] = { status: 'pending', note: '' };
-      payments[studentId].amount = parseFloat(newAmount) || 0;
-      setCookie("tf_payments_clean", payments);
-      renderPaymentsView();
-    }
-
-    function updatePaymentNote(studentId, newNote) {
-      if (!payments[studentId]) payments[studentId] = { status: 'pending', amount: 0 };
-      payments[studentId].note = newNote;
-      setCookie("tf_payments_clean", payments);
-    }
-
-    function quickSettleStudent(studentId) {
-      const st = students.find(s => s.id === studentId);
-      if (!st) return;
-      if (!payments[studentId]) payments[studentId] = {};
-      payments[studentId].status = 'paid';
-      if (!payments[studentId].note) {
-        payments[studentId].note = `Uregulowano dnia ${new Date().toLocaleDateString('pl-PL')}`;
+      if (newStatus === 'ok') {
+        payments[studentId].amount = 0;
       }
-      setCookie("tf_payments_clean", payments);
+      setCookie("tf_payments_v2", payments);
       renderPaymentsView();
+    }
+
+    function changePaymentAmount(studentId, newAmount) {
+      if (!payments[studentId]) payments[studentId] = { status: 'ok', note: '' };
+      payments[studentId].amount = parseFloat(newAmount) || 0;
+      setCookie("tf_payments_v2", payments);
+      
+      // Szybka aktualizacja podsumowania bez utraty fokusu w inputcie
+      updatePaymentsSummaryValuesOnly();
+    }
+
+    function updatePaymentsSummaryValuesOnly() {
+      let totalMissing = 0;
+      let totalOverpaid = 0;
+
+      students.forEach(st => {
+        const pay = payments[st.id] || { status: 'ok', amount: 0, note: '' };
+        const amt = parseFloat(pay.amount) || 0;
+        if (pay.status === 'missing') totalMissing += amt;
+        else if (pay.status === 'overpaid') totalOverpaid += amt;
+      });
+
+      const globalCard = document.getElementById("global-status-card");
+      const globalVal = document.getElementById("global-status-value");
+
+      globalCard.className = "pay-kpi";
+      if (totalMissing > 0) {
+        globalCard.classList.add("global-status-danger");
+        globalVal.className = "pay-kpi-val red";
+        globalVal.innerHTML = `<span>⚠️ Brakuje: -${totalMissing.toLocaleString("pl-PL")} zł</span>`;
+      } else if (totalOverpaid > 0) {
+        globalCard.classList.add("global-status-warning");
+        globalVal.className = "pay-kpi-val amber";
+        globalVal.innerHTML = `<span>💎 Nadpłacono: +${totalOverpaid.toLocaleString("pl-PL")} zł</span>`;
+      } else {
+        globalCard.classList.add("global-status-ok");
+        globalVal.className = "pay-kpi-val green";
+        globalVal.innerHTML = `<span>✓ Wszystko się zgadza</span>`;
+      }
+
+      document.getElementById("pay-kpi-total-missing").textContent = `${totalMissing.toLocaleString("pl-PL")} zł`;
+      document.getElementById("pay-kpi-total-overpaid").textContent = `${totalOverpaid.toLocaleString("pl-PL")} zł`;
+    }
+
+    function changePaymentNote(studentId, newNote) {
+      if (!payments[studentId]) payments[studentId] = { status: 'ok', amount: 0 };
+      payments[studentId].note = newNote;
+      setCookie("tf_payments_v2", payments);
     }
 
     function updateKPIs() {
