@@ -8,6 +8,11 @@
   <!-- Favicon w karcie przeglądarki -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+
   <!-- Google Font: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -933,7 +938,153 @@
       color: #fff;
     }
 
-    /* RWD dla tabletów i telefonów */
+
+
+    /* LOGOWANIE FIREBASE */
+    .auth-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 5000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.18), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.12), transparent 40%),
+        #090a0f;
+    }
+
+    .auth-card {
+      width: min(420px, 100%);
+      background: rgba(18, 21, 31, 0.92);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 25px 70px rgba(0,0,0,.55);
+      backdrop-filter: blur(18px);
+    }
+
+    .auth-logo {
+      margin: 0 auto 16px;
+    }
+
+    .auth-title {
+      text-align: center;
+      font-size: 1.45rem;
+      font-weight: 800;
+    }
+
+    .auth-subtitle {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .8rem;
+      line-height: 1.5;
+      margin: 8px 0 22px;
+    }
+
+    .auth-buttons {
+      margin-top: 12px;
+    }
+
+    .auth-error {
+      min-height: 18px;
+      color: #fda4af;
+      font-size: .76rem;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0;
+      color: #94a3b8;
+      font-size: 12px;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e2e8f0;
+    }
+    .btn-m-google {
+      width: 100%;
+      background: #fff;
+      color: #1f2937;
+      border: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-m-google:hover {
+      background: #f8fafc;
+    }
+    .google-mark {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .auth-loading {
+      display: none;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: .8rem;
+      padding-top: 10px;
+    }
+
+    .btn-logout {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+      border-radius: 12px;
+      border: 1px solid rgba(244,63,94,.25);
+      background: rgba(244,63,94,.08);
+      color: #fda4af;
+      cursor: pointer;
+      font-size: 1.05rem;
+    }
+
+    .btn-logout:hover {
+      background: rgba(244,63,94,.18);
+      border-color: rgba(244,63,94,.45);
+    }
+
+    .sync-status {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 1000;
+      padding: 7px 11px;
+      border-radius: 10px;
+      font-size: .68rem;
+      font-weight: 700;
+      background: rgba(18,21,31,.9);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      pointer-events: none;
+      opacity: .85;
+    }
+    .sync-status.ok { color: #6ee7b7; }
+    .sync-status.saving { color: #fcd34d; }
+    .sync-status.error { color: #fda4af; }
+
+    /* RWD — tablet / telefon */
+    @media (max-width: 1200px) {
+      .dashboard-body {
+        grid-template-columns: 1fr 300px;
+      }
+      .kpi-chip {
+        width: 150px;
+      }
+      .calendar-grid {
+        min-width: 760px;
+      }
+    }
+
     @media (max-width: 960px) {
       body {
         padding: 8px;
@@ -941,6 +1092,7 @@
       }
       .app-layout {
         height: auto;
+        min-height: calc(100vh - 16px);
       }
       .dashboard-body {
         grid-template-columns: 1fr;
@@ -948,8 +1100,11 @@
       header {
         flex-direction: column;
         align-items: stretch;
-        gap: 14px;
+        gap: 12px;
         border-radius: 18px;
+      }
+      .brand {
+        justify-content: center;
       }
       .main-nav-tabs {
         width: 100%;
@@ -958,18 +1113,25 @@
       .nav-tab-btn {
         flex: 1;
         justify-content: center;
+        padding: 9px 8px;
       }
       .kpi-bar {
         width: 100%;
-        justify-content: space-between;
+        justify-content: stretch;
+        flex-wrap: wrap;
       }
       .kpi-chip {
         width: auto;
-        flex: 1;
+        flex: 1 1 30%;
+        min-width: 0;
       }
       .live-clock-badge {
         width: auto;
-        padding: 8px 12px;
+        flex: 1 1 25%;
+        padding: 8px 10px;
+      }
+      .btn-logout {
+        flex: 0 0 42px;
       }
       .payments-summary-bar {
         grid-template-columns: 1fr 1fr;
@@ -998,12 +1160,155 @@
       .status-select {
         min-width: 100%;
       }
+      .students-scroll {
+        max-height: 420px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 5px;
+      }
+      .app-layout {
+        gap: 8px;
+      }
+      header {
+        padding: 10px;
+        gap: 9px;
+      }
+      .brand-logo {
+        width: 38px;
+        height: 38px;
+      }
+      .brand-title {
+        font-size: 1.05rem;
+      }
+      .brand > div:last-child > div:last-child {
+        font-size: .64rem !important;
+      }
+      .nav-tab-btn {
+        font-size: .72rem;
+        padding: 9px 5px;
+      }
+      .kpi-bar {
+        gap: 6px;
+      }
+      .kpi-chip {
+        padding: 7px 9px;
+        border-radius: 12px;
+      }
+      .kpi-chip .label {
+        font-size: .57rem;
+        letter-spacing: 0;
+      }
+      .kpi-chip .value {
+        font-size: .9rem;
+      }
+      .live-clock-badge {
+        font-size: .72rem;
+        height: 42px;
+      }
+      .panel {
+        border-radius: 17px;
+      }
+      .panel-header {
+        padding: 11px 13px;
+      }
+      .panel-title {
+        font-size: .84rem;
+      }
+      .mobile-day-tabs {
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .m-tab {
+        padding: 8px 11px;
+        font-size: .7rem;
+      }
+      .calendar-container {
+        padding: 4px;
+      }
+      .cal-header-cell {
+        font-size: .68rem;
+        padding: 9px 3px;
+      }
+      .time-slot-label {
+        font-size: .68rem;
+      }
+      .slot-card {
+        border-radius: 10px;
+        padding: 3px 4px;
+      }
+      .slot-card .s-name {
+        font-size: .72rem;
+      }
+      .badge-once {
+        font-size: .52rem;
+        padding: 2px 4px;
+      }
+      .payments-summary-bar {
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+      }
+      .pay-kpi {
+        padding: 10px 11px;
+        border-radius: 14px;
+      }
+      .pay-kpi-label {
+        font-size: .58rem;
+      }
+      .pay-kpi-val {
+        font-size: .9rem;
+      }
+      .search-input {
+        min-width: 100%;
+      }
+      .modal-backdrop {
+        padding: 12px;
+      }
+      .modal-dialog {
+        padding: 18px;
+        border-radius: 18px;
+      }
+      .auth-card {
+        padding: 22px 18px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="app-layout">
+  <!-- EKRAN LOGOWANIA -->
+  <div class="auth-screen" id="auth-screen">
+    <div class="auth-card">
+      <div class="brand-logo auth-logo">🎓</div>
+      <div class="auth-title">TutorFlow Pro</div>
+      <div class="auth-subtitle">Zaloguj się, aby korzystać z grafiku na każdym urządzeniu.</div>
+
+      <div id="auth-form">
+        <div class="fg">
+          <label>E-mail</label>
+          <input type="email" id="auth-email" class="ctrl-input" autocomplete="email" placeholder="twoj@email.com" />
+        </div>
+        <div class="fg">
+          <label>Hasło</label>
+          <input type="password" id="auth-password" class="ctrl-input" autocomplete="current-password" placeholder="Minimum 6 znaków" />
+        </div>
+        <div id="auth-error" class="auth-error"></div>
+        <div class="modal-btns auth-buttons">
+          <button class="btn-m btn-m-submit" onclick="login()">Zaloguj się</button>
+          <button class="btn-m btn-m-cancel" onclick="registerAccount()">Utwórz konto</button>
+        </div>
+        <div class="auth-divider"><span>lub</span></div>
+        <button type="button" class="btn-m btn-m-google" onclick="loginWithGoogle()">
+          <span class="google-mark">G</span> Zaloguj się przez Google
+        </button>
+      </div>
+      <div id="auth-loading" class="auth-loading">Łączenie z Firebase…</div>
+    </div>
+  </div>
+
+  <div class="app-layout" id="app-root" style="display:none;">
     <!-- Pasek górny -->
     <header>
       <div class="brand">
@@ -1037,6 +1342,7 @@
           <span class="live-pulse"></span>
           <span id="live-time-display">--:--:--</span>
         </div>
+        <button class="btn-logout" onclick="logout()" title="Wyloguj">↪</button>
       </div>
     </header>
 
@@ -1196,7 +1502,27 @@
   </div>
 
   <script>
-    // --- OBSŁUGA COOKIES (365 DNI) ---
+    // =========================================================
+    // FIREBASE — konfiguracja
+    // =========================================================
+    // 1. Wklej tutaj firebaseConfig z Firebase Console.
+    // 2. Włącz Authentication > Sign-in method > Email/Password.
+    // 3. Utwórz bazę Firestore.
+    // =========================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDDEAZ2A-PpzMZXAJL0D3G47X41ntMnWvo",
+      authDomain: "tutorflow-pro-f9634.firebaseapp.com",
+      projectId: "tutorflow-pro-f9634",
+      storageBucket: "tutorflow-pro-f9634.firebasestorage.app",
+      messagingSenderId: "755875619880",
+      appId: "1:755875619880:web:8f8c266d31b1492170c11d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Lokalna kopia jest używana jako cache / jednorazowa migracja.
     function setCookie(name, value, days = 365) {
       const d = new Date();
       d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -1229,22 +1555,215 @@
       "inf-rozsz": "Informatyka rozszerzenie"
     };
 
-    // DANE W COOKIES
+    // DANE APLIKACJI
     let students = getCookie("tf_students_clean") || [];
     let schedule = getCookie("tf_schedule_clean") || {};
-    let payments = getCookie("tf_payments_v2") || {}; 
-    // Struktura payments[studentId] = { status: 'ok'|'missing'|'overpaid', amount: 0 }
+    let payments = getCookie("tf_payments_v2") || {};
+    // payments[studentId] = { status: 'ok'|'missing'|'overpaid', amount: 0 }
 
     let selectedSlotKey = null;
     let activeMobileDayIndex = getCurrentPolandDayIndex();
     let currentMainTab = "schedule";
 
-    function saveState() {
+    let currentUser = null;
+    let stateRef = null;
+    let unsubscribeState = null;
+    let remoteInitialized = false;
+    let cloudSaveTimer = null;
+
+    const localState = {
+      students: JSON.parse(JSON.stringify(students)),
+      schedule: JSON.parse(JSON.stringify(schedule)),
+      payments: JSON.parse(JSON.stringify(payments))
+    };
+
+    function hasLocalData() {
+      return localState.students.length > 0 ||
+        Object.keys(localState.schedule).length > 0 ||
+        Object.keys(localState.payments).length > 0;
+    }
+
+    function setSyncStatus(text, type = "") {
+      const el = document.getElementById("sync-status");
+      if (!el) return;
+      el.textContent = text;
+      el.className = `sync-status ${type}`;
+    }
+
+    function showAuthError(message) {
+      document.getElementById("auth-error").textContent = message || "";
+    }
+
+    function firebaseErrorMessage(error) {
+      const map = {
+        "auth/invalid-email": "Nieprawidłowy adres e-mail.",
+        "auth/user-not-found": "Nie znaleziono konta z tym adresem.",
+        "auth/wrong-password": "Nieprawidłowe hasło.",
+        "auth/invalid-credential": "Nieprawidłowy e-mail lub hasło.",
+        "auth/email-already-in-use": "Konto z tym e-mailem już istnieje.",
+        "auth/weak-password": "Hasło musi mieć co najmniej 6 znaków.",
+        "auth/too-many-requests": "Za dużo prób. Spróbuj ponownie później.",
+        "auth/network-request-failed": "Problem z połączeniem internetowym.",
+        "auth/popup-closed-by-user": "Okno logowania Google zostało zamknięte.",
+        "auth/popup-blocked": "Przeglądarka zablokowała okno logowania Google.",
+        "auth/account-exists-with-different-credential": "Ten e-mail jest już powiązany z inną metodą logowania. Zaloguj się poprzednią metodą."
+      };
+      return map[error?.code] || error?.message || "Wystąpił nieznany błąd.";
+    }
+
+    async function login() {
+      showAuthError("");
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-password").value;
+      if (!email || !password) {
+        showAuthError("Wpisz e-mail i hasło.");
+        return;
+      }
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        showAuthError(firebaseErrorMessage(error));
+      }
+    }
+
+    async function loginWithGoogle() {
+      showAuthError("");
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+      } catch (error) {
+        console.error(error);
+        showAuthError(firebaseErrorMessage(error));
+      }
+    }
+
+    async function registerAccount() {
+      showAuthError("");
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-password").value;
+      if (!email || !password) {
+        showAuthError("Wpisz e-mail i hasło.");
+        return;
+      }
+      if (password.length < 6) {
+        showAuthError("Hasło musi mieć co najmniej 6 znaków.");
+        return;
+      }
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+      } catch (error) {
+        showAuthError(firebaseErrorMessage(error));
+      }
+    }
+
+    async function logout() {
+      if (unsubscribeState) unsubscribeState();
+      unsubscribeState = null;
+      stateRef = null;
+      remoteInitialized = false;
+      await auth.signOut();
+    }
+
+    async function saveState({ render = true } = {}) {
+      // Zawsze zostawiamy lokalną kopię — przydaje się np. przy migracji.
       setCookie("tf_students_clean", students);
       setCookie("tf_schedule_clean", schedule);
       setCookie("tf_payments_v2", payments);
-      renderAll();
+
+      if (!currentUser || !stateRef) {
+        if (render) renderAll();
+        return;
+      }
+
+      try {
+        setSyncStatus("Zapisywanie…", "saving");
+        await stateRef.set({
+          students,
+          schedule,
+          payments,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        setSyncStatus("✓ Zsynchronizowano", "ok");
+      } catch (error) {
+        console.error(error);
+        setSyncStatus("Błąd synchronizacji", "error");
+        alert("Nie udało się zapisać danych w Firebase. Sprawdź internet i reguły Firestore.");
+      }
+
+      if (render) renderAll();
     }
+
+    function scheduleCloudSave() {
+      setCookie("tf_students_clean", students);
+      setCookie("tf_schedule_clean", schedule);
+      setCookie("tf_payments_v2", payments);
+      updatePaymentsSummaryValuesOnly();
+
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(() => saveState({ render: false }), 500);
+    }
+
+    async function handleAuthenticatedUser(user) {
+      currentUser = user;
+      document.getElementById("auth-screen").style.display = "none";
+      document.getElementById("app-root").style.display = "flex";
+      document.getElementById("auth-loading").style.display = "none";
+
+      stateRef = db.collection("users").doc(user.uid).collection("app").doc("state");
+
+      if (unsubscribeState) unsubscribeState();
+      unsubscribeState = stateRef.onSnapshot(async (snap) => {
+        if (!snap.exists) {
+          // Pierwsze uruchomienie: jeśli na tym urządzeniu były dane z cookies,
+          // przenosimy je do Firestore.
+          students = localState.students;
+          schedule = localState.schedule;
+          payments = localState.payments;
+
+          if (hasLocalData()) {
+            setSyncStatus("Przenoszenie danych…", "saving");
+          }
+
+          await saveState({ render: false });
+          remoteInitialized = true;
+          renderAll();
+          return;
+        }
+
+        const data = snap.data() || {};
+        students = Array.isArray(data.students) ? data.students : [];
+        schedule = data.schedule && typeof data.schedule === "object" ? data.schedule : {};
+        payments = data.payments && typeof data.payments === "object" ? data.payments : {};
+
+        setCookie("tf_students_clean", students);
+        setCookie("tf_schedule_clean", schedule);
+        setCookie("tf_payments_v2", payments);
+
+        remoteInitialized = true;
+        setSyncStatus("✓ Zsynchronizowano", "ok");
+        renderAll();
+      }, (error) => {
+        console.error(error);
+        setSyncStatus("Błąd dostępu do bazy", "error");
+        alert("Firebase nie pozwala odczytać danych. Sprawdź reguły Firestore.");
+      });
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        await handleAuthenticatedUser(user);
+      } else {
+        currentUser = null;
+        if (unsubscribeState) unsubscribeState();
+        unsubscribeState = null;
+        stateRef = null;
+        remoteInitialized = false;
+        document.getElementById("app-root").style.display = "none";
+        document.getElementById("auth-screen").style.display = "flex";
+        document.getElementById("auth-loading").style.display = "none";
+      }
+    });
+
 
     function switchMainTab(tabName) {
       currentMainTab = tabName;
@@ -1289,11 +1808,31 @@
       }
     }
 
+    function getVisibleDayIndexes() {
+      // Telefon / mały tablet: jeden dzień.
+      // Większy tablet / mały laptop: trzy dni.
+      // Desktop: cały tydzień.
+      const width = window.innerWidth;
+      if (width <= 960) return [activeMobileDayIndex];
+      if (width <= 1200) {
+        const result = [activeMobileDayIndex];
+        for (let offset = 1; result.length < 3 && activeMobileDayIndex + offset < 7; offset++) {
+          result.push(activeMobileDayIndex + offset);
+        }
+        for (let offset = 1; result.length < 3 && activeMobileDayIndex - offset >= 0; offset++) {
+          result.unshift(activeMobileDayIndex - offset);
+        }
+        return result;
+      }
+      return DAYS.map((_, index) => index);
+    }
+
     function renderCalendarGrid() {
       const grid = document.getElementById("main-grid");
       grid.innerHTML = "";
 
       const todayIndex = getCurrentPolandDayIndex();
+      const visibleDays = getVisibleDayIndexes();
 
       const cornerHeader = document.createElement("div");
       cornerHeader.className = "cal-header-cell";
@@ -1303,7 +1842,8 @@
       DAYS.forEach((day, index) => {
         const th = document.createElement("div");
         const isToday = index === todayIndex;
-        th.className = `cal-header-cell ${isToday ? 'today-col' : ''} ${index === activeMobileDayIndex ? 'mobile-visible-header' : ''}`;
+        const visible = visibleDays.includes(index);
+        th.className = `cal-header-cell ${isToday ? 'today-col' : ''} ${visible ? 'mobile-visible-header' : ''}`;
         th.innerHTML = `${day} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
         grid.appendChild(th);
       });
@@ -1317,9 +1857,10 @@
         DAYS.forEach((day, dayIndex) => {
           const slotKey = `${hour}_${day}`;
           const isToday = dayIndex === todayIndex;
+          const visible = visibleDays.includes(dayIndex);
 
           const cell = document.createElement("div");
-          cell.className = `cal-cell ${isToday ? 'today-col' : ''} ${dayIndex === activeMobileDayIndex ? 'mobile-visible-col' : ''}`;
+          cell.className = `cal-cell ${isToday ? 'today-col' : ''} ${visible ? 'mobile-visible-col' : ''}`;
 
           const slotData = schedule[slotKey];
           const student = slotData ? students.find(s => s.id === (slotData.studentId || slotData)) : null;
@@ -1331,7 +1872,6 @@
           if (student) {
             card.classList.add("occupied", `level-${student.level}`);
             if (isOnce) card.classList.add("is-once");
-
             card.innerHTML = `
               <div class="s-name">${escapeHtml(student.name)}</div>
               ${isOnce ? '<span class="badge-once">1x</span>' : ''}
@@ -1505,16 +2045,13 @@
       if (newStatus === 'ok') {
         payments[studentId].amount = 0;
       }
-      setCookie("tf_payments_v2", payments);
-      renderPaymentsView();
+      saveState();
     }
 
     function changePaymentAmount(studentId, newAmount) {
       if (!payments[studentId]) payments[studentId] = { status: 'ok' };
       payments[studentId].amount = parseFloat(newAmount) || 0;
-      setCookie("tf_payments_v2", payments);
-      
-      updatePaymentsSummaryValuesOnly();
+      scheduleCloudSave();
     }
 
     function updatePaymentsSummaryValuesOnly() {
@@ -1709,7 +2246,14 @@
       }
     });
 
+    window.addEventListener("resize", () => renderCalendarGrid());
+
+    document.getElementById("auth-password").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
+
     renderAll();
   </script>
+  <div id="sync-status" class="sync-status">Gotowe</div>
 </body>
 </html>
