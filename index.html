@@ -2,11 +2,19 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <!-- Meta tagi dla aplikacji mobilnej PWA -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090a0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TutorFlow">
+  <link rel="manifest" href="manifest.json">
+  
   <title>TutorFlow Pro</title>
 
-  <!-- Favicon w karcie przeglądarki -->
+  <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
@@ -53,7 +61,7 @@
       --col-once-border: #ec4899;
       --col-once-text: #fbcfe8;
 
-      --row-height: 50px;
+      --row-height: 52px;
     }
 
     * {
@@ -61,7 +69,23 @@
       margin: 0;
       padding: 0;
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color: transparent; /* Usuwa brzydkie niebieskie tło przy klikaniu na tel */
+    }
+
+    /* Wygląd scrollbara w przeglądarkach Webkit (Chrome, Edge, Safari) */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
 
     body {
@@ -73,7 +97,10 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 14px;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-bottom: max(14px, env(safe-area-inset-bottom));
+      user-select: none; /* Zapobiega przypadkowemu zaznaczaniu tekstu na tel */
     }
 
     .app-layout {
@@ -82,21 +109,22 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      height: calc(100vh - 28px);
+      height: calc(100vh - max(28px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+      margin: 0 14px;
     }
 
-    /* Pasek górny (Header) */
+    /* Pasek górny */
     header {
       background: var(--card-bg);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
       border: 1px solid var(--card-border);
       border-radius: 22px;
-      padding: 12px 22px;
+      padding: 12px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       gap: 16px;
     }
 
@@ -107,15 +135,16 @@
     }
 
     .brand-logo {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 14px;
       background: linear-gradient(135deg, #6366f1, #06b6d4);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35);
+      flex-shrink: 0;
     }
 
     .brand-title {
@@ -127,37 +156,39 @@
       -webkit-text-fill-color: transparent;
     }
 
-    /* GŁÓWNE ZAKŁADKI NAWIGACJI */
     .main-nav-tabs {
       display: flex;
       align-items: center;
-      background: rgba(0, 0, 0, 0.35);
-      padding: 4px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 5px;
       border-radius: 16px;
       border: 1px solid var(--card-border);
-      gap: 4px;
+      gap: 6px;
     }
 
     .nav-tab-btn {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      padding: 8px 18px;
+      padding: 8px 20px;
       border-radius: 12px;
-      font-size: 0.86rem;
+      font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
     }
 
     .nav-tab-btn:hover {
       color: #fff;
       background: rgba(255, 255, 255, 0.05);
     }
-
+    .nav-tab-btn:active {
+      transform: scale(0.96); /* Efekt natywnego wciśnięcia */
+    }
     .nav-tab-btn.active {
       background: var(--accent);
       color: #fff;
@@ -180,12 +211,12 @@
       justify-content: center;
       align-items: flex-start;
       gap: 2px;
-      width: 175px;
+      width: 155px;
       flex-shrink: 0;
     }
 
     .kpi-chip .label {
-      font-size: 0.68rem;
+      font-size: 0.65rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -194,7 +225,7 @@
     }
 
     .kpi-chip .value {
-      font-size: 1.12rem;
+      font-size: 1.1rem;
       font-weight: 800;
       color: #fff;
       font-variant-numeric: tabular-nums;
@@ -219,9 +250,8 @@
       border-radius: 16px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
-      width: 125px;
       flex-shrink: 0;
-      height: 52px;
+      height: 50px;
     }
 
     .live-pulse {
@@ -239,22 +269,51 @@
       100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
     }
 
-    /* KONTENERY ZAKŁADEK */
+    .btn-logout {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      border: 1px solid rgba(244,63,94,.25);
+      background: rgba(244,63,94,.08);
+      color: #fda4af;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: rgba(244,63,94,.18);
+      border-color: rgba(244,63,94,.45);
+    }
+    .btn-logout:active {
+      transform: scale(0.92);
+    }
+
+    /* ZAKŁADKI */
     .view-content {
       display: flex;
       flex: 1;
       min-height: 0;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .view-content.hidden {
       display: none !important;
     }
 
-    /* Układ pulpitu (Harmonogram) */
     .dashboard-body {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 14px;
+      grid-template-columns: 1fr 350px; /* Szeroka baza uczniów na laptopie */
+      gap: 16px;
       width: 100%;
       height: 100%;
       min-height: 0;
@@ -264,24 +323,25 @@
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
-      border-radius: 22px;
+      border-radius: 24px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
     }
 
     .panel-header {
-      padding: 14px 20px;
+      padding: 16px 22px;
       border-bottom: 1px solid var(--card-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
+      background: rgba(255,255,255,0.01);
     }
 
     .panel-title {
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -295,25 +355,24 @@
       overflow: auto;
       display: flex;
       flex-direction: column;
-      padding: 6px;
+      padding: 10px;
     }
 
     .calendar-grid {
       display: grid;
-      grid-template-columns: 65px repeat(7, 1fr);
+      grid-template-columns: 70px repeat(7, minmax(110px, 1fr));
       min-width: 840px;
-      border-collapse: separate;
-      border-spacing: 4px;
+      gap: 8px;
       position: relative;
     }
 
     .cal-header-cell {
       background: rgba(14, 17, 24, 0.85);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 10px 4px;
+      border-radius: 14px;
+      padding: 12px 4px;
       text-align: center;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -321,14 +380,14 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(12px);
     }
 
     .cal-header-cell.today-col {
       color: #38bdf8;
       background: rgba(6, 182, 212, 0.12);
       border-color: #06b6d4;
-      box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+      box-shadow: 0 4px 16px rgba(6, 182, 212, 0.2);
     }
 
     .time-slot-label {
@@ -336,48 +395,56 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.78rem;
-      font-weight: 700;
+      font-size: 0.82rem;
+      font-weight: 800;
       color: var(--text-muted);
-      border-radius: 12px;
-      background: rgba(11, 14, 20, 0.5);
+      border-radius: 14px;
+      background: rgba(11, 14, 20, 0.6);
       border: 1px solid var(--card-border);
     }
 
     .cal-cell {
       height: var(--row-height);
       position: relative;
-      padding: 2px;
+      padding: 0;
     }
 
     .cal-cell.today-col {
       background: rgba(99, 102, 241, 0.04);
-      border-radius: 14px;
+      border-radius: 16px;
     }
 
     /* Karta lekcji */
     .slot-card {
       width: 100%;
       height: 100%;
-      border-radius: 12px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 8px;
       cursor: pointer;
       border: 1px dashed rgba(255, 255, 255, 0.08);
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       background: rgba(255, 255, 255, 0.02);
-      color: rgba(255, 255, 255, 0.2);
-      font-size: 0.85rem;
-      padding: 4px 8px;
-      text-align: center;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 0.88rem;
+      padding: 6px 12px;
+      text-align: left;
     }
 
     .slot-card:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.25);
-      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .slot-card:active {
+      transform: scale(0.96);
+    }
+
+    .slot-card.empty-slot {
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.2);
     }
 
     .slot-card.occupied {
@@ -386,26 +453,10 @@
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
     }
 
-    .slot-card.level-podstawowka {
-      background: var(--col-podstawowka-bg);
-      border-color: var(--col-podstawowka-border);
-      color: var(--col-podstawowka-text);
-    }
-    .slot-card.level-liceum-podst {
-      background: var(--col-liceum-podst-bg);
-      border-color: var(--col-liceum-podst-border);
-      color: var(--col-liceum-podst-text);
-    }
-    .slot-card.level-liceum-rozsz {
-      background: var(--col-liceum-rozsz-bg);
-      border-color: var(--col-liceum-rozsz-border);
-      color: var(--col-liceum-rozsz-text);
-    }
-    .slot-card.level-inf-rozsz {
-      background: var(--col-inf-rozsz-bg);
-      border-color: var(--col-inf-rozsz-border);
-      color: var(--col-inf-rozsz-text);
-    }
+    .slot-card.level-podstawowka { background: var(--col-podstawowka-bg); border-color: var(--col-podstawowka-border); color: var(--col-podstawowka-text); }
+    .slot-card.level-liceum-podst { background: var(--col-liceum-podst-bg); border-color: var(--col-liceum-podst-border); color: var(--col-liceum-podst-text); }
+    .slot-card.level-liceum-rozsz { background: var(--col-liceum-rozsz-bg); border-color: var(--col-liceum-rozsz-border); color: var(--col-liceum-rozsz-text); }
+    .slot-card.level-inf-rozsz { background: var(--col-inf-rozsz-bg); border-color: var(--col-inf-rozsz-border); color: var(--col-inf-rozsz-text); }
 
     .slot-card.is-once {
       background: repeating-linear-gradient(
@@ -420,21 +471,21 @@
     }
 
     .slot-card .s-name {
-      font-size: 0.84rem;
+      font-size: 0.9rem;
       font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 95%;
       letter-spacing: -0.2px;
+      flex: 1;
     }
 
     .badge-once {
       background: var(--col-once-border);
       color: #fff;
-      font-size: 0.6rem;
-      padding: 2px 6px;
-      border-radius: 6px;
+      font-size: 0.65rem;
+      padding: 4px 8px;
+      border-radius: 8px;
       font-weight: 800;
       text-transform: uppercase;
       flex-shrink: 0;
@@ -442,10 +493,10 @@
 
     #current-time-line {
       position: absolute;
-      left: 70px;
-      right: 6px;
-      height: 1.5px;
-      background: rgba(244, 63, 94, 0.45);
+      left: 78px;
+      right: 10px;
+      height: 2px;
+      background: rgba(244, 63, 94, 0.65);
       z-index: 25;
       pointer-events: none;
       display: none;
@@ -455,61 +506,63 @@
     #current-time-line::before {
       content: "";
       position: absolute;
-      left: -4px;
-      top: -3px;
-      width: 7px;
-      height: 7px;
+      left: -5px;
+      top: -4px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: rgba(244, 63, 94, 0.7);
-      box-shadow: 0 0 5px rgba(244, 63, 94, 0.5);
+      background: #f43f5e;
+      box-shadow: 0 0 8px #f43f5e;
     }
 
     /* Baza uczniów w panelu bocznym */
     .students-scroll {
       flex: 1;
       overflow-y: auto;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .student-item {
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 10px 14px;
+      border-radius: 16px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      transition: all 0.15s ease;
+      transition: all 0.2s ease;
+      cursor: default;
     }
 
     .student-item:hover {
       border-color: rgba(255, 255, 255, 0.18);
       background: rgba(255, 255, 255, 0.04);
+      transform: translateX(4px);
     }
 
     .st-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       min-width: 0;
     }
 
     .st-pill {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .st-pill.podstawowka { background: #10b981; box-shadow: 0 0 8px #10b981; }
-    .st-pill.liceum-podst { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
-    .st-pill.liceum-rozsz { background: #8b5cf6; box-shadow: 0 0 8px #8b5cf6; }
-    .st-pill.inf-rozsz { background: #06b6d4; box-shadow: 0 0 8px #06b6d4; }
+    .st-pill.podstawowka { background: #10b981; box-shadow: 0 0 10px #10b981; }
+    .st-pill.liceum-podst { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+    .st-pill.liceum-rozsz { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
+    .st-pill.inf-rozsz { background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
 
     .st-name {
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
@@ -517,16 +570,16 @@
     }
 
     .st-desc {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
       margin-top: 2px;
     }
 
     .st-rate {
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       font-weight: 800;
       color: var(--success);
-      margin-right: 8px;
+      margin-right: 12px;
       font-variant-numeric: tabular-nums;
     }
 
@@ -535,51 +588,56 @@
       border: 1px solid rgba(239, 68, 68, 0.25);
       color: var(--danger);
       cursor: pointer;
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
-      transition: all 0.15s;
+      font-size: 0.9rem;
+      transition: all 0.2s;
     }
     .btn-icon-del:hover {
       background: var(--danger);
       color: #fff;
+    }
+    .btn-icon-del:active {
+      transform: scale(0.9);
     }
 
     .btn-add-primary {
       background: var(--accent);
       color: #fff;
       border: none;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 0.82rem;
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.15s;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
     }
     .btn-add-primary:hover {
       background: var(--accent-hover);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+    }
+    .btn-add-primary:active {
+      transform: scale(0.95);
     }
 
-    /* WIDOK: PŁATNOŚCI */
+    /* PŁATNOŚCI */
     .payments-view-wrapper {
       width: 100%;
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
-    /* Pasek podsumowania z inteligentnym globalnym kafelkiem */
     .payments-summary-bar {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      gap: 12px;
+      gap: 14px;
       flex-shrink: 0;
     }
 
@@ -587,33 +645,21 @@
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 12px 18px;
+      border-radius: 20px;
+      padding: 16px 22px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 4px;
+      gap: 6px;
       transition: all 0.25s ease;
     }
 
-    .pay-kpi.global-status-ok {
-      background: rgba(16, 185, 129, 0.12);
-      border-color: rgba(16, 185, 129, 0.4);
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
-    }
-    .pay-kpi.global-status-danger {
-      background: rgba(244, 63, 94, 0.14);
-      border-color: rgba(244, 63, 94, 0.45);
-      box-shadow: 0 0 20px rgba(244, 63, 94, 0.2);
-    }
-    .pay-kpi.global-status-warning {
-      background: rgba(245, 158, 11, 0.14);
-      border-color: rgba(245, 158, 11, 0.45);
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
-    }
+    .pay-kpi.global-status-ok { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 24px rgba(16, 185, 129, 0.15); }
+    .pay-kpi.global-status-danger { background: rgba(244, 63, 94, 0.14); border-color: rgba(244, 63, 94, 0.45); box-shadow: 0 0 24px rgba(244, 63, 94, 0.2); }
+    .pay-kpi.global-status-warning { background: rgba(245, 158, 11, 0.14); border-color: rgba(245, 158, 11, 0.45); box-shadow: 0 0 24px rgba(245, 158, 11, 0.2); }
 
     .pay-kpi-label {
-      font-size: 0.68rem;
+      font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -621,7 +667,7 @@
     }
 
     .pay-kpi-val {
-      font-size: 1.25rem;
+      font-size: 1.4rem;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
       display: flex;
@@ -640,20 +686,20 @@
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
-      border-radius: 22px;
+      border-radius: 24px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
     }
 
     .payments-search-row {
-      padding: 14px 20px;
+      padding: 16px 22px;
       border-bottom: 1px solid var(--card-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      gap: 16px;
       flex-wrap: wrap;
     }
 
@@ -661,65 +707,65 @@
       background: #0d0f16;
       border: 1px solid var(--card-border);
       color: var(--text);
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 0.85rem;
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-size: 0.9rem;
       outline: none;
-      min-width: 260px;
+      min-width: 300px;
+      transition: all 0.2s;
     }
-    .search-input:focus { border-color: var(--accent); }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
 
     .payments-scroll-area {
       flex: 1;
       overflow-y: auto;
-      padding: 16px 20px;
+      padding: 18px 22px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
-    /* KARTA ROZLICZENIOWA POJEDYNCZEGO UCZNIA - ROZSZERZONA I CZYSTA */
     .pay-card {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 16px 24px;
+      border-radius: 20px;
+      padding: 18px 28px;
       display: grid;
-      grid-template-columns: 1fr 300px 220px;
+      grid-template-columns: 1fr 280px 200px;
       align-items: center;
       gap: 24px;
-      transition: all 0.2s ease;
+      transition: all 0.25s ease;
     }
 
     .pay-card:hover {
       background: rgba(255, 255, 255, 0.04);
       border-color: rgba(255, 255, 255, 0.16);
+      transform: translateX(4px);
     }
 
     .pay-stud-main {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
     .pay-stud-name {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 800;
       color: #fff;
     }
     .pay-stud-sub {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
     }
 
     .pay-col-sub {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
       font-weight: 700;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
-    /* Poszerzony wybór stanu rozliczenia bez przycinania */
     .status-select-wrap {
       display: flex;
       flex-direction: column;
@@ -729,62 +775,42 @@
       background: #0e111a;
       border: 1px solid var(--card-border);
       color: #fff;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       font-weight: 700;
-      padding: 11px 16px;
+      padding: 12px 18px;
       border-radius: 14px;
       outline: none;
       cursor: pointer;
       width: 100%;
-      min-width: 260px;
-      text-overflow: clip;
+      -webkit-appearance: none; /* Natywny look na iOS */
     }
-    .status-select.opt-ok {
-      border-color: rgba(16, 185, 129, 0.5);
-      color: #6ee7b7;
-      background: rgba(16, 185, 129, 0.14);
-    }
-    .status-select.opt-missing {
-      border-color: rgba(244, 63, 94, 0.5);
-      color: #fda4af;
-      background: rgba(244, 63, 94, 0.14);
-    }
-    .status-select.opt-overpaid {
-      border-color: rgba(245, 158, 11, 0.5);
-      color: #fcd34d;
-      background: rgba(245, 158, 11, 0.14);
-    }
+    .status-select.opt-ok { border-color: rgba(16, 185, 129, 0.5); color: #6ee7b7; background: rgba(16, 185, 129, 0.14); }
+    .status-select.opt-missing { border-color: rgba(244, 63, 94, 0.5); color: #fda4af; background: rgba(244, 63, 94, 0.14); }
+    .status-select.opt-overpaid { border-color: rgba(245, 158, 11, 0.5); color: #fcd34d; background: rgba(245, 158, 11, 0.14); }
 
-    /* Kwota w zł */
     .amount-input-box {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
     .amount-input {
       background: #0d0f16;
       border: 1px solid var(--card-border);
       color: #fff;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 1rem;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 1.05rem;
       font-weight: 800;
-      width: 130px;
+      width: 140px;
       text-align: right;
       outline: none;
       font-variant-numeric: tabular-nums;
+      transition: all 0.2s;
     }
-    .amount-input:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-      border-color: rgba(255, 255, 255, 0.05);
-      background: rgba(0, 0, 0, 0.2);
-    }
-    .amount-input:focus:not(:disabled) {
-      border-color: var(--accent);
-    }
+    .amount-input:disabled { opacity: 0.35; cursor: not-allowed; border-color: rgba(255, 255, 255, 0.05); background: rgba(0, 0, 0, 0.2); }
+    .amount-input:focus:not(:disabled) { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
 
-    /* Mobilny pasek dni */
+    /* Pasek dni w wersji mobilnej */
     .mobile-day-tabs {
       display: none;
       padding: 10px 14px;
@@ -792,6 +818,7 @@
       overflow-x: auto;
       border-bottom: 1px solid var(--card-border);
       scrollbar-width: none;
+      background: rgba(0,0,0,0.2);
     }
     .mobile-day-tabs::-webkit-scrollbar { display: none; }
 
@@ -799,146 +826,103 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 0.78rem;
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 0.85rem;
       font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
+      transition: all 0.2s;
     }
+    .m-tab:active { transform: scale(0.95); }
     .m-tab.active {
       background: var(--accent);
       border-color: var(--accent);
       color: #fff;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
     }
-    .m-tab.is-today {
-      border-color: #06b6d4;
-      color: #38bdf8;
-    }
+    .m-tab.is-today { border-color: #06b6d4; color: #38bdf8; }
 
     /* Modale */
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
       justify-content: center;
-      align-items: flex-start;
-      padding: 30px 16px;
-      z-index: 999;
-      overflow-y: auto;
+      align-items: center;
+      padding: 20px;
+      z-index: 9999; /* Zawsze na wierzchu */
     }
-    .modal-backdrop.open {
-      display: flex;
-    }
+    .modal-backdrop.open { display: flex; }
 
     .modal-dialog {
       background: #151822;
       border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 22px;
+      border-radius: 28px;
       width: 100%;
-      max-width: 420px;
-      padding: 22px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
-      animation: modalFade 0.15s ease-out;
+      max-width: 440px;
+      padding: 28px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+      animation: modalFade 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     @keyframes modalFade {
-      from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .modal-dialog h3 {
-      font-size: 1.15rem;
-      margin-bottom: 16px;
-      font-weight: 800;
-    }
+    .modal-dialog h3 { font-size: 1.25rem; margin-bottom: 20px; font-weight: 800; }
 
-    .fg {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
-
-    .fg label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.5px;
-    }
+    .fg { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .fg label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
 
     .ctrl-input, .ctrl-select {
       background: #0d0f16;
       border: 1px solid var(--card-border);
       color: var(--text);
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 0.92rem;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-size: 0.95rem;
       outline: none;
       width: 100%;
+      transition: all 0.2s;
+      -webkit-appearance: none;
     }
-    .ctrl-input:focus, .ctrl-select:focus {
-      border-color: var(--accent);
-    }
+    .ctrl-input:focus, .ctrl-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
 
     .checkbox-container {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
+      gap: 12px;
+      padding: 14px 16px;
       background: rgba(236, 72, 153, 0.08);
       border: 1px solid rgba(236, 72, 153, 0.3);
-      border-radius: 14px;
+      border-radius: 16px;
       cursor: pointer;
-      margin: 14px 0;
+      margin: 18px 0;
+      transition: all 0.2s;
     }
+    .checkbox-container:active { transform: scale(0.97); }
+    .checkbox-container input { accent-color: #ec4899; width: 22px; height: 22px; cursor: pointer; }
+    .checkbox-container span { font-size: 0.9rem; font-weight: 700; color: #fbcfe8; user-select: none; }
 
-    .checkbox-container input {
-      accent-color: #ec4899;
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-
-    .checkbox-container span {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #fbcfe8;
-    }
-
-    .modal-btns {
-      display: flex;
-      gap: 8px;
-      margin-top: 18px;
-    }
-
+    .modal-btns { display: flex; gap: 10px; margin-top: 24px; }
     .btn-m {
       flex: 1;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 0.88rem;
+      padding: 14px;
+      border-radius: 16px;
+      font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
       border: none;
+      transition: all 0.2s;
     }
-    .btn-m-cancel {
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-muted);
-    }
-    .btn-m-clear {
-      background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      color: var(--danger);
-    }
-    .btn-m-submit {
-      background: var(--accent);
-      color: #fff;
-    }
-
-
+    .btn-m:active { transform: scale(0.94); }
+    .btn-m-cancel { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+    .btn-m-clear { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: var(--danger); }
+    .btn-m-submit { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
 
     /* LOGOWANIE FIREBASE */
     .auth-screen {
@@ -959,320 +943,134 @@
       width: min(420px, 100%);
       background: rgba(18, 21, 31, 0.92);
       border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 25px 70px rgba(0,0,0,.55);
-      backdrop-filter: blur(18px);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.6);
+      backdrop-filter: blur(24px);
     }
 
-    .auth-logo {
-      margin: 0 auto 16px;
-    }
+    .auth-logo { margin: 0 auto 20px; }
+    .auth-title { text-align: center; font-size: 1.6rem; font-weight: 800; }
+    .auth-subtitle { text-align: center; color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin: 10px 0 26px; }
+    .auth-buttons { margin-top: 16px; }
+    .auth-error { min-height: 20px; color: #fda4af; font-size: 0.8rem; line-height: 1.4; margin-top: 6px; }
 
-    .auth-title {
-      text-align: center;
-      font-size: 1.45rem;
-      font-weight: 800;
-    }
-
-    .auth-subtitle {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: .8rem;
-      line-height: 1.5;
-      margin: 8px 0 22px;
-    }
-
-    .auth-buttons {
-      margin-top: 12px;
-    }
-
-    .auth-error {
-      min-height: 18px;
-      color: #fda4af;
-      font-size: .76rem;
-      line-height: 1.4;
-      margin-top: 4px;
-    }
-
-    .auth-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 14px 0;
-      color: #94a3b8;
-      font-size: 12px;
-    }
-    .auth-divider::before,
-    .auth-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: #e2e8f0;
-    }
+    .auth-divider { display: flex; align-items: center; gap: 10px; margin: 20px 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; font-weight: 700;}
+    .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+    
     .btn-m-google {
-      width: 100%;
-      background: #fff;
-      color: #1f2937;
-      border: 1px solid #d1d5db;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      width: 100%; background: #fff; color: #1f2937; border: 1px solid #d1d5db; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 0.95rem;
     }
-    .btn-m-google:hover {
-      background: #f8fafc;
-    }
-    .google-mark {
-      font-weight: 800;
-      font-size: 18px;
-    }
-
-    .auth-loading {
-      display: none;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: .8rem;
-      padding-top: 10px;
-    }
-
-    .btn-logout {
-      width: 42px;
-      height: 42px;
-      flex-shrink: 0;
-      border-radius: 12px;
-      border: 1px solid rgba(244,63,94,.25);
-      background: rgba(244,63,94,.08);
-      color: #fda4af;
-      cursor: pointer;
-      font-size: 1.05rem;
-    }
-
-    .btn-logout:hover {
-      background: rgba(244,63,94,.18);
-      border-color: rgba(244,63,94,.45);
-    }
+    .btn-m-google:hover { background: #f8fafc; }
+    .google-mark { font-weight: 800; font-size: 20px; color: #ea4335;}
 
     .sync-status {
       position: fixed;
-      right: 18px;
-      bottom: 18px;
+      right: max(16px, env(safe-area-inset-right));
+      bottom: max(16px, env(safe-area-inset-bottom));
       z-index: 1000;
-      padding: 7px 11px;
-      border-radius: 10px;
-      font-size: .68rem;
-      font-weight: 700;
-      background: rgba(18,21,31,.9);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: rgba(18,21,31,.95);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
       pointer-events: none;
-      opacity: .85;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
     }
-    .sync-status.ok { color: #6ee7b7; }
+    .sync-status.ok { color: #6ee7b7; border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 16px rgba(16,185,129,0.15); }
     .sync-status.saving { color: #fcd34d; }
     .sync-status.error { color: #fda4af; }
 
-    /* RWD — tablet / telefon */
-    @media (max-width: 1200px) {
-      .dashboard-body {
-        grid-template-columns: 1fr 300px;
-      }
-      .kpi-chip {
-        width: 150px;
-      }
-      .calendar-grid {
-        min-width: 760px;
-      }
+    /* ========================================================= */
+    /* GOAT RESPONSIVE DESIGN - TELEFON & TABLET                 */
+    /* ========================================================= */
+
+    @media (max-width: 1100px) {
+      .dashboard-body { grid-template-columns: 1fr 300px; }
     }
 
     @media (max-width: 960px) {
       body {
-        padding: 8px;
-        height: auto;
+        /* Wypełnia cały ekran na tel, likwiduje domyślne obwódki */
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        min-height: 100vh;
       }
       .app-layout {
-        height: auto;
-        min-height: calc(100vh - 16px);
+        margin: 0;
+        border-radius: 0;
+        height: 100vh; 
+        gap: 8px;
       }
-      .dashboard-body {
-        grid-template-columns: 1fr;
-      }
+      
       header {
         flex-direction: column;
         align-items: stretch;
         gap: 12px;
-        border-radius: 18px;
+        padding: max(14px, env(safe-area-inset-top)) 16px 14px 16px;
+        border-radius: 0 0 24px 24px; /* Zaokrąglone tylko na dole */
+        border-top: none;
+        border-left: none;
+        border-right: none;
       }
-      .brand {
-        justify-content: center;
-      }
-      .main-nav-tabs {
-        width: 100%;
-        justify-content: center;
-      }
-      .nav-tab-btn {
-        flex: 1;
-        justify-content: center;
-        padding: 9px 8px;
-      }
+      .brand { justify-content: space-between; width: 100%; }
+      .brand-info { display: flex; align-items: center; gap: 10px; }
+      
+      .main-nav-tabs { width: 100%; padding: 6px; border-radius: 20px;}
+      .nav-tab-btn { flex: 1; justify-content: center; padding: 10px 8px; font-size: 0.82rem; }
+
       .kpi-bar {
         width: 100%;
-        justify-content: stretch;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Na telefonie 2 kolumny statystyk */
+        gap: 10px;
+        align-items: stretch;
       }
-      .kpi-chip {
-        width: auto;
-        flex: 1 1 30%;
-        min-width: 0;
-      }
+      /* Zegarek na pełną szerokość pod spodem w kpi-bar */
       .live-clock-badge {
-        width: auto;
-        flex: 1 1 25%;
-        padding: 8px 10px;
+        grid-column: span 2;
+        height: 44px;
       }
-      .btn-logout {
-        flex: 0 0 42px;
-      }
-      .payments-summary-bar {
-        grid-template-columns: 1fr 1fr;
-      }
-      .mobile-day-tabs {
-        display: flex;
-      }
-      .calendar-grid {
-        min-width: 100%;
-        grid-template-columns: 55px 1fr !important;
-      }
-      .cal-header-cell:not(.mobile-visible-header) {
-        display: none !important;
-      }
-      .cal-cell:not(.mobile-visible-col) {
-        display: none !important;
-      }
-      #current-time-line {
-        left: 60px;
-      }
-      .pay-card {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        padding: 14px 16px;
-      }
-      .status-select {
-        min-width: 100%;
-      }
-      .students-scroll {
-        max-height: 420px;
-      }
-    }
+      .kpi-chip { width: 100%; padding: 10px 14px; }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 5px;
-      }
-      .app-layout {
+      .dashboard-body { grid-template-columns: 1fr; height: auto; padding: 0 10px; }
+      
+      .panel { border-radius: 24px; margin-bottom: 10px; }
+
+      .mobile-day-tabs { display: flex; }
+
+      /* IDEALNY KALENDARZ MOBILNY */
+      .calendar-container { padding: 8px; }
+      .calendar-grid {
+        min-width: 100% !important;
+        grid-template-columns: 66px 1fr !important;
         gap: 8px;
       }
-      header {
-        padding: 10px;
-        gap: 9px;
-      }
-      .brand-logo {
-        width: 38px;
-        height: 38px;
-      }
-      .brand-title {
-        font-size: 1.05rem;
-      }
-      .brand > div:last-child > div:last-child {
-        font-size: .64rem !important;
-      }
-      .nav-tab-btn {
-        font-size: .72rem;
-        padding: 9px 5px;
-      }
-      .kpi-bar {
-        gap: 6px;
-      }
-      .kpi-chip {
-        padding: 7px 9px;
-        border-radius: 12px;
-      }
-      .kpi-chip .label {
-        font-size: .57rem;
-        letter-spacing: 0;
-      }
-      .kpi-chip .value {
-        font-size: .9rem;
-      }
-      .live-clock-badge {
-        font-size: .72rem;
-        height: 42px;
-      }
-      .panel {
-        border-radius: 17px;
-      }
-      .panel-header {
-        padding: 11px 13px;
-      }
-      .panel-title {
-        font-size: .84rem;
-      }
-      .mobile-day-tabs {
-        padding: 8px 10px;
-        gap: 6px;
-      }
-      .m-tab {
-        padding: 8px 11px;
-        font-size: .7rem;
-      }
-      .calendar-container {
-        padding: 4px;
-      }
-      .cal-header-cell {
-        font-size: .68rem;
-        padding: 9px 3px;
-      }
-      .time-slot-label {
-        font-size: .68rem;
-      }
-      .slot-card {
-        border-radius: 10px;
-        padding: 3px 4px;
-      }
-      .slot-card .s-name {
-        font-size: .72rem;
-      }
-      .badge-once {
-        font-size: .52rem;
-        padding: 2px 4px;
-      }
-      .payments-summary-bar {
-        grid-template-columns: 1fr 1fr;
-        gap: 7px;
-      }
-      .pay-kpi {
-        padding: 10px 11px;
-        border-radius: 14px;
-      }
-      .pay-kpi-label {
-        font-size: .58rem;
-      }
-      .pay-kpi-val {
-        font-size: .9rem;
-      }
-      .search-input {
-        min-width: 100%;
-      }
-      .modal-backdrop {
-        padding: 12px;
-      }
-      .modal-dialog {
-        padding: 18px;
-        border-radius: 18px;
-      }
-      .auth-card {
-        padding: 22px 18px;
-      }
+      .cal-header-cell { font-size: 0.72rem; padding: 10px 2px; }
+      .time-slot-label { font-size: 0.75rem; }
+
+      #current-time-line { left: 74px; right: 4px; }
+
+      /* Płatności mobilnie */
+      .payments-view-wrapper { padding: 0 10px; }
+      .payments-summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .pay-kpi { padding: 14px 16px; border-radius: 18px; }
+      .pay-card { grid-template-columns: 1fr; gap: 16px; padding: 18px; }
+      .status-select { min-width: 100%; }
+      .amount-input-box { width: 100%; }
+      .amount-input { flex: 1; }
+      
+      /* Zapobiega cięciu ekranu na małych tel */
+      .students-scroll { max-height: 400px; } 
+    }
+
+    @media (max-width: 380px) {
+      .brand-title { font-size: 1.15rem; }
+      .kpi-chip .value { font-size: 0.95rem; }
+      .slot-card .s-name { font-size: 0.85rem; }
+      .auth-card { padding: 24px 20px; }
     }
   </style>
 </head>
@@ -1304,7 +1102,7 @@
           <span class="google-mark">G</span> Zaloguj się przez Google
         </button>
       </div>
-      <div id="auth-loading" class="auth-loading">Łączenie z Firebase…</div>
+      <div id="auth-loading" class="auth-loading" style="display:none; text-align:center; margin-top:20px;">Łączenie z Firebase…</div>
     </div>
   </div>
 
@@ -1312,11 +1110,14 @@
     <!-- Pasek górny -->
     <header>
       <div class="brand">
-        <div class="brand-logo">🎓</div>
-        <div>
-          <div class="brand-title">TutorFlow Pro</div>
-          <div style="font-size: 0.72rem; color: var(--text-muted);">Grafik Stanisław Abucewicz</div>
+        <div class="brand-info">
+          <div class="brand-logo">🎓</div>
+          <div>
+            <div class="brand-title">TutorFlow Pro</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Grafik Stanisław Abucewicz</div>
+          </div>
         </div>
+        <button class="btn-logout" onclick="logout()" title="Wyloguj">↪</button>
       </div>
 
       <!-- NAWIGACJA ZAKŁADEK -->
@@ -1331,18 +1132,17 @@
 
       <div class="kpi-bar">
         <div class="kpi-chip">
-          <span class="label">Lekcje tygodniowo</span>
+          <span class="label">Lekcje tyg.</span>
           <span class="value" id="kpi-count">0</span>
         </div>
         <div class="kpi-chip highlight">
-          <span class="label">Zarobek tygodniowo</span>
+          <span class="label">Zarobek tyg.</span>
           <span class="value" id="kpi-earnings">0 zł</span>
         </div>
         <div class="live-clock-badge">
           <span class="live-pulse"></span>
           <span id="live-time-display">--:--:--</span>
         </div>
-        <button class="btn-logout" onclick="logout()" title="Wyloguj">↪</button>
       </div>
     </header>
 
@@ -1353,9 +1153,9 @@
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">
-              <span>📅 Harmonogram tygodniowy</span>
+              <span>📅 Harmonogram</span>
             </div>
-            <div style="font-size: 0.72rem; color: var(--text-muted);">Czas: Polska</div>
+            <div style="font-size: 0.75rem; font-weight:700; color: var(--text-muted);">Czas: Polska</div>
           </div>
 
           <!-- Mobilny pasek dni -->
@@ -1364,10 +1164,7 @@
           <div class="calendar-container" id="cal-scroll-area">
             <!-- Linia bieżącego czasu -->
             <div id="current-time-line"></div>
-
-            <div class="calendar-grid" id="main-grid">
-              <!-- Renderowane dynamicznie -->
-            </div>
+            <div class="calendar-grid" id="main-grid"></div>
           </div>
         </div>
 
@@ -1391,24 +1188,20 @@
         
         <!-- Pasek podsumowania finansowego -->
         <div class="payments-summary-bar">
-          <!-- INTELIGENTNY KAFELEK BILANSU -->
           <div class="pay-kpi global-status-ok" id="global-status-card">
             <span class="pay-kpi-label">Status ogólny rozliczeń</span>
             <div class="pay-kpi-val green" id="global-status-value">
               <span>✓ Wszystko się zgadza</span>
             </div>
           </div>
-
           <div class="pay-kpi">
             <span class="pay-kpi-label">Brakuje (łącznie)</span>
             <span class="pay-kpi-val red" id="pay-kpi-total-missing">0 zł</span>
           </div>
-
           <div class="pay-kpi">
             <span class="pay-kpi-label">Nadpłacono (łącznie)</span>
             <span class="pay-kpi-val amber" id="pay-kpi-total-overpaid">0 zł</span>
           </div>
-
           <div class="pay-kpi">
             <span class="pay-kpi-label">Liczba uczniów w bazie</span>
             <span class="pay-kpi-val cyan" id="pay-kpi-students-total">0</span>
@@ -1421,40 +1214,26 @@
             <div class="panel-title">
               <span>💰 Ewidencja Wpłat</span>
             </div>
-            <input 
-              type="text" 
-              id="payment-search" 
-              class="search-input" 
-              placeholder="🔍 Szukaj ucznia..." 
-              oninput="renderPaymentsView()"
-            />
+            <input type="text" id="payment-search" class="search-input" placeholder="🔍 Szukaj ucznia..." oninput="renderPaymentsView()" />
           </div>
-
-          <div class="payments-scroll-area" id="payments-list-container">
-            <!-- Renderowane dynamicznie karty uczniów -->
-          </div>
+          <div class="payments-scroll-area" id="payments-list-container"></div>
         </div>
-
       </div>
     </main>
-
   </div>
 
   <!-- MODAL: Przypisywanie terminu + Lekcja jednorazowa -->
   <div class="modal-backdrop" id="modal-assign">
     <div class="modal-dialog">
       <h3 id="assign-title">Termin lekcji</h3>
-
       <div class="fg">
         <label>Uczeń</label>
         <select id="assign-student" class="ctrl-select"></select>
       </div>
-
       <label class="checkbox-container">
         <input type="checkbox" id="assign-is-once" />
         <span>Lekcja jednorazowa</span>
       </label>
-
       <div class="modal-btns">
         <button class="btn-m btn-m-cancel" onclick="closeModal('modal-assign')">Anuluj</button>
         <button class="btn-m btn-m-clear" onclick="clearSlot()">Wyczyść slot</button>
@@ -1467,12 +1246,10 @@
   <div class="modal-backdrop" id="modal-new-student">
     <div class="modal-dialog">
       <h3>Dodaj ucznia do bazy</h3>
-
       <div class="fg">
         <label>Imię i nazwisko</label>
-        <input type="text" id="stud-name" class="ctrl-input" placeholder="np. Kamil B" />
+        <input type="text" id="stud-name" class="ctrl-input" placeholder="np. Kamil B" autocomplete="off" />
       </div>
-
       <div class="fg">
         <label>Poziom kształcenia</label>
         <select id="stud-level" class="ctrl-select">
@@ -1482,18 +1259,16 @@
           <option value="inf-rozsz">Informatyka rozszerzenie</option>
         </select>
       </div>
-
-      <div style="display: flex; gap: 8px;">
+      <div style="display: flex; gap: 12px;">
         <div class="fg" style="flex: 1;">
           <label>Klasa</label>
-          <input type="text" id="stud-grade" class="ctrl-input" placeholder="np. 5" />
+          <input type="text" id="stud-grade" class="ctrl-input" placeholder="np. 5" autocomplete="off" />
         </div>
         <div class="fg" style="flex: 1;">
           <label>Stawka zł/h</label>
           <input type="number" id="stud-rate" class="ctrl-input" placeholder="np. 60" />
         </div>
       </div>
-
       <div class="modal-btns">
         <button class="btn-m btn-m-cancel" onclick="closeModal('modal-new-student')">Anuluj</button>
         <button class="btn-m btn-m-submit" onclick="saveStudent()">Dodaj</button>
@@ -1501,13 +1276,22 @@
     </div>
   </div>
 
+  <div id="sync-status" class="sync-status">Gotowe</div>
+
   <script>
+    // REJESTRACJA SERVICE WORKERA DO INSTALACJI (PWA)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then((registration) => {
+          console.log('ServiceWorker registered with scope:', registration.scope);
+        }).catch((err) => {
+          console.log('ServiceWorker registration failed:', err);
+        });
+      });
+    }
+
     // =========================================================
     // FIREBASE — konfiguracja
-    // =========================================================
-    // 1. Wklej tutaj firebaseConfig z Firebase Console.
-    // 2. Włącz Authentication > Sign-in method > Email/Password.
-    // 3. Utwórz bazę Firestore.
     // =========================================================
     const firebaseConfig = {
       apiKey: "AIzaSyDDEAZ2A-PpzMZXAJL0D3G47X41ntMnWvo",
@@ -1522,7 +1306,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Lokalna kopia jest używana jako cache / jednorazowa migracja.
     function setCookie(name, value, days = 365) {
       const d = new Date();
       d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -1542,11 +1325,7 @@
     }
 
     const DAYS = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
-    
-    const HOURS = [
-      "14:00", "15:00", "16:00", "17:00", "18:00", 
-      "19:00", "20:00", "21:00", "22:00"
-    ];
+    const HOURS = ["14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
 
     const LEVEL_LABELS = {
       "podstawowka": "Podstawówka",
@@ -1555,11 +1334,9 @@
       "inf-rozsz": "Informatyka rozszerzenie"
     };
 
-    // DANE APLIKACJI
     let students = getCookie("tf_students_clean") || [];
     let schedule = getCookie("tf_schedule_clean") || {};
     let payments = getCookie("tf_payments_v2") || {};
-    // payments[studentId] = { status: 'ok'|'missing'|'overpaid', amount: 0 }
 
     let selectedSlotKey = null;
     let activeMobileDayIndex = getCurrentPolandDayIndex();
@@ -1568,7 +1345,6 @@
     let currentUser = null;
     let stateRef = null;
     let unsubscribeState = null;
-    let remoteInitialized = false;
     let cloudSaveTimer = null;
 
     const localState = {
@@ -1578,9 +1354,7 @@
     };
 
     function hasLocalData() {
-      return localState.students.length > 0 ||
-        Object.keys(localState.schedule).length > 0 ||
-        Object.keys(localState.payments).length > 0;
+      return localState.students.length > 0 || Object.keys(localState.schedule).length > 0 || Object.keys(localState.payments).length > 0;
     }
 
     function setSyncStatus(text, type = "") {
@@ -1594,35 +1368,17 @@
       document.getElementById("auth-error").textContent = message || "";
     }
 
-    function firebaseErrorMessage(error) {
-      const map = {
-        "auth/invalid-email": "Nieprawidłowy adres e-mail.",
-        "auth/user-not-found": "Nie znaleziono konta z tym adresem.",
-        "auth/wrong-password": "Nieprawidłowe hasło.",
-        "auth/invalid-credential": "Nieprawidłowy e-mail lub hasło.",
-        "auth/email-already-in-use": "Konto z tym e-mailem już istnieje.",
-        "auth/weak-password": "Hasło musi mieć co najmniej 6 znaków.",
-        "auth/too-many-requests": "Za dużo prób. Spróbuj ponownie później.",
-        "auth/network-request-failed": "Problem z połączeniem internetowym.",
-        "auth/popup-closed-by-user": "Okno logowania Google zostało zamknięte.",
-        "auth/popup-blocked": "Przeglądarka zablokowała okno logowania Google.",
-        "auth/account-exists-with-different-credential": "Ten e-mail jest już powiązany z inną metodą logowania. Zaloguj się poprzednią metodą."
-      };
-      return map[error?.code] || error?.message || "Wystąpił nieznany błąd.";
-    }
-
     async function login() {
       showAuthError("");
       const email = document.getElementById("auth-email").value.trim();
       const password = document.getElementById("auth-password").value;
-      if (!email || !password) {
-        showAuthError("Wpisz e-mail i hasło.");
-        return;
-      }
+      if (!email || !password) return showAuthError("Wpisz e-mail i hasło.");
+      document.getElementById("auth-loading").style.display = "block";
       try {
         await auth.signInWithEmailAndPassword(email, password);
       } catch (error) {
-        showAuthError(firebaseErrorMessage(error));
+        document.getElementById("auth-loading").style.display = "none";
+        showAuthError("Błąd logowania. Sprawdź dane.");
       }
     }
 
@@ -1632,8 +1388,7 @@
         const provider = new firebase.auth.GoogleAuthProvider();
         await auth.signInWithPopup(provider);
       } catch (error) {
-        console.error(error);
-        showAuthError(firebaseErrorMessage(error));
+        showAuthError("Błąd logowania Google.");
       }
     }
 
@@ -1641,18 +1396,14 @@
       showAuthError("");
       const email = document.getElementById("auth-email").value.trim();
       const password = document.getElementById("auth-password").value;
-      if (!email || !password) {
-        showAuthError("Wpisz e-mail i hasło.");
-        return;
-      }
-      if (password.length < 6) {
-        showAuthError("Hasło musi mieć co najmniej 6 znaków.");
-        return;
-      }
+      if (!email || !password) return showAuthError("Wpisz e-mail i hasło.");
+      if (password.length < 6) return showAuthError("Hasło musi mieć co najmniej 6 znaków.");
+      document.getElementById("auth-loading").style.display = "block";
       try {
         await auth.createUserWithEmailAndPassword(email, password);
       } catch (error) {
-        showAuthError(firebaseErrorMessage(error));
+        document.getElementById("auth-loading").style.display = "none";
+        showAuthError("Konto istnieje lub wpisano złe dane.");
       }
     }
 
@@ -1660,12 +1411,10 @@
       if (unsubscribeState) unsubscribeState();
       unsubscribeState = null;
       stateRef = null;
-      remoteInitialized = false;
       await auth.signOut();
     }
 
     async function saveState({ render = true } = {}) {
-      // Zawsze zostawiamy lokalną kopię — przydaje się np. przy migracji.
       setCookie("tf_students_clean", students);
       setCookie("tf_schedule_clean", schedule);
       setCookie("tf_payments_v2", payments);
@@ -1678,16 +1427,12 @@
       try {
         setSyncStatus("Zapisywanie…", "saving");
         await stateRef.set({
-          students,
-          schedule,
-          payments,
+          students, schedule, payments,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         setSyncStatus("✓ Zsynchronizowano", "ok");
       } catch (error) {
-        console.error(error);
         setSyncStatus("Błąd synchronizacji", "error");
-        alert("Nie udało się zapisać danych w Firebase. Sprawdź internet i reguły Firestore.");
       }
 
       if (render) renderAll();
@@ -1707,25 +1452,17 @@
       currentUser = user;
       document.getElementById("auth-screen").style.display = "none";
       document.getElementById("app-root").style.display = "flex";
-      document.getElementById("auth-loading").style.display = "none";
 
       stateRef = db.collection("users").doc(user.uid).collection("app").doc("state");
 
       if (unsubscribeState) unsubscribeState();
       unsubscribeState = stateRef.onSnapshot(async (snap) => {
         if (!snap.exists) {
-          // Pierwsze uruchomienie: jeśli na tym urządzeniu były dane z cookies,
-          // przenosimy je do Firestore.
           students = localState.students;
           schedule = localState.schedule;
           payments = localState.payments;
-
-          if (hasLocalData()) {
-            setSyncStatus("Przenoszenie danych…", "saving");
-          }
-
+          if (hasLocalData()) setSyncStatus("Przenoszenie danych…", "saving");
           await saveState({ render: false });
-          remoteInitialized = true;
           renderAll();
           return;
         }
@@ -1739,13 +1476,10 @@
         setCookie("tf_schedule_clean", schedule);
         setCookie("tf_payments_v2", payments);
 
-        remoteInitialized = true;
         setSyncStatus("✓ Zsynchronizowano", "ok");
         renderAll();
       }, (error) => {
-        console.error(error);
-        setSyncStatus("Błąd dostępu do bazy", "error");
-        alert("Firebase nie pozwala odczytać danych. Sprawdź reguły Firestore.");
+        setSyncStatus("Błąd dostępu", "error");
       });
     }
 
@@ -1757,13 +1491,11 @@
         if (unsubscribeState) unsubscribeState();
         unsubscribeState = null;
         stateRef = null;
-        remoteInitialized = false;
         document.getElementById("app-root").style.display = "none";
         document.getElementById("auth-screen").style.display = "flex";
         document.getElementById("auth-loading").style.display = "none";
       }
     });
-
 
     function switchMainTab(tabName) {
       currentMainTab = tabName;
@@ -1788,8 +1520,7 @@
 
     function getPolandDate() {
       const now = new Date();
-      const polandString = now.toLocaleString("en-US", { timeZone: "Europe/Warsaw" });
-      return new Date(polandString);
+      return new Date(now.toLocaleString("en-US", { timeZone: "Europe/Warsaw" }));
     }
 
     function getCurrentPolandDayIndex() {
@@ -1803,50 +1534,39 @@
       renderStudentsList();
       updateKPIs();
       updateLiveTimeAndIndicator();
-      if (currentMainTab === 'payments') {
-        renderPaymentsView();
-      }
+      if (currentMainTab === 'payments') renderPaymentsView();
     }
 
-    function getVisibleDayIndexes() {
-      // Telefon / mały tablet: jeden dzień.
-      // Większy tablet / mały laptop: trzy dni.
-      // Desktop: cały tydzień.
-      const width = window.innerWidth;
-      if (width <= 960) return [activeMobileDayIndex];
-      if (width <= 1200) {
-        const result = [activeMobileDayIndex];
-        for (let offset = 1; result.length < 3 && activeMobileDayIndex + offset < 7; offset++) {
-          result.push(activeMobileDayIndex + offset);
-        }
-        for (let offset = 1; result.length < 3 && activeMobileDayIndex - offset >= 0; offset++) {
-          result.unshift(activeMobileDayIndex - offset);
-        }
-        return result;
-      }
-      return DAYS.map((_, index) => index);
+    function isMobileView() {
+      return window.innerWidth <= 960;
     }
 
     function renderCalendarGrid() {
       const grid = document.getElementById("main-grid");
       grid.innerHTML = "";
-
       const todayIndex = getCurrentPolandDayIndex();
-      const visibleDays = getVisibleDayIndexes();
+      const mobile = isMobileView();
 
       const cornerHeader = document.createElement("div");
       cornerHeader.className = "cal-header-cell";
       cornerHeader.textContent = "GODZ.";
       grid.appendChild(cornerHeader);
 
-      DAYS.forEach((day, index) => {
+      if (mobile) {
         const th = document.createElement("div");
-        const isToday = index === todayIndex;
-        const visible = visibleDays.includes(index);
-        th.className = `cal-header-cell ${isToday ? 'today-col' : ''} ${visible ? 'mobile-visible-header' : ''}`;
-        th.innerHTML = `${day} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
+        const isToday = activeMobileDayIndex === todayIndex;
+        th.className = `cal-header-cell ${isToday ? 'today-col' : ''}`;
+        th.innerHTML = `${DAYS[activeMobileDayIndex]} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
         grid.appendChild(th);
-      });
+      } else {
+        DAYS.forEach((day, index) => {
+          const th = document.createElement("div");
+          const isToday = index === todayIndex;
+          th.className = `cal-header-cell ${isToday ? 'today-col' : ''}`;
+          th.innerHTML = `${day} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
+          grid.appendChild(th);
+        });
+      }
 
       HOURS.forEach(hour => {
         const timeCell = document.createElement("div");
@@ -1854,37 +1574,45 @@
         timeCell.textContent = hour;
         grid.appendChild(timeCell);
 
-        DAYS.forEach((day, dayIndex) => {
-          const slotKey = `${hour}_${day}`;
-          const isToday = dayIndex === todayIndex;
-          const visible = visibleDays.includes(dayIndex);
-
-          const cell = document.createElement("div");
-          cell.className = `cal-cell ${isToday ? 'today-col' : ''} ${visible ? 'mobile-visible-col' : ''}`;
-
-          const slotData = schedule[slotKey];
-          const student = slotData ? students.find(s => s.id === (slotData.studentId || slotData)) : null;
-          const isOnce = slotData && slotData.isOnce;
-
-          const card = document.createElement("div");
-          card.className = "slot-card";
-
-          if (student) {
-            card.classList.add("occupied", `level-${student.level}`);
-            if (isOnce) card.classList.add("is-once");
-            card.innerHTML = `
-              <div class="s-name">${escapeHtml(student.name)}</div>
-              ${isOnce ? '<span class="badge-once">1x</span>' : ''}
-            `;
-          } else {
-            card.innerHTML = `<span>+</span>`;
-          }
-
-          card.onclick = () => openAssignModal(slotKey, hour, day);
-          cell.appendChild(card);
-          grid.appendChild(cell);
-        });
+        if (mobile) {
+          const dayName = DAYS[activeMobileDayIndex];
+          const slotKey = `${hour}_${dayName}`;
+          renderSlotCell(grid, slotKey, hour, dayName, activeMobileDayIndex === todayIndex);
+        } else {
+          DAYS.forEach((day, dayIndex) => {
+            const slotKey = `${hour}_${day}`;
+            renderSlotCell(grid, slotKey, hour, day, dayIndex === todayIndex);
+          });
+        }
       });
+    }
+
+    function renderSlotCell(container, slotKey, hour, dayName, isToday) {
+      const cell = document.createElement("div");
+      cell.className = `cal-cell ${isToday ? 'today-col' : ''}`;
+
+      const slotData = schedule[slotKey];
+      const student = slotData ? students.find(s => s.id === (slotData.studentId || slotData)) : null;
+      const isOnce = slotData && slotData.isOnce;
+
+      const card = document.createElement("div");
+      card.className = "slot-card";
+
+      if (student) {
+        card.classList.add("occupied", `level-${student.level}`);
+        if (isOnce) card.classList.add("is-once");
+        card.innerHTML = `
+          <div class="s-name">${escapeHtml(student.name)}</div>
+          ${isOnce ? '<span class="badge-once">1x</span>' : ''}
+        `;
+      } else {
+        card.classList.add("empty-slot");
+        card.innerHTML = `<span>+</span>`;
+      }
+
+      card.onclick = () => openAssignModal(slotKey, hour, dayName);
+      cell.appendChild(card);
+      container.appendChild(cell);
     }
 
     function renderMobileTabs() {
@@ -1909,12 +1637,7 @@
       container.innerHTML = "";
 
       if (students.length === 0) {
-        container.innerHTML = `
-          <div style="color: var(--text-muted); font-size: 0.8rem; padding: 20px 10px; text-align: center; line-height: 1.5;">
-            Baza uczniów jest pusta.<br>
-            Kliknij <b>+ Nowy Uczeń</b>, aby dodać pierwszego ucznia.
-          </div>
-        `;
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.85rem; padding: 30px 10px; text-align: center; line-height: 1.5;">Baza uczniów jest pusta.<br>Kliknij <b>+ Nowy Uczeń</b>, aby dodać.</div>`;
         return;
       }
 
@@ -1931,54 +1654,19 @@
           </div>
           <div style="display: flex; align-items: center;">
             <span class="st-rate">${st.rate} zł</span>
-            <button class="btn-icon-del" onclick="deleteStudent('${st.id}')" title="Usuń ucznia">✕</button>
+            <button class="btn-icon-del" onclick="deleteStudent('${st.id}')">✕</button>
           </div>
         `;
         container.appendChild(item);
       });
     }
 
-    // --- ZAKŁADKA ROZLICZEŃ I PŁATNOŚCI ---
     function renderPaymentsView() {
       const container = document.getElementById("payments-list-container");
       const searchVal = (document.getElementById("payment-search")?.value || "").toLowerCase().trim();
       container.innerHTML = "";
 
-      let totalMissing = 0;
-      let totalOverpaid = 0;
-
-      students.forEach(st => {
-        const pay = payments[st.id] || { status: 'ok', amount: 0 };
-        const amt = parseFloat(pay.amount) || 0;
-        if (pay.status === 'missing') {
-          totalMissing += amt;
-        } else if (pay.status === 'overpaid') {
-          totalOverpaid += amt;
-        }
-      });
-
-      // AKTUALIZACJA GŁÓWNEGO WSKAŹNIKA ZBIORCZEGO
-      const globalCard = document.getElementById("global-status-card");
-      const globalVal = document.getElementById("global-status-value");
-
-      globalCard.className = "pay-kpi";
-      if (totalMissing > 0) {
-        globalCard.classList.add("global-status-danger");
-        globalVal.className = "pay-kpi-val red";
-        globalVal.innerHTML = `<span>⚠️ Brakuje: -${totalMissing.toLocaleString("pl-PL")} zł</span>`;
-      } else if (totalOverpaid > 0) {
-        globalCard.classList.add("global-status-warning");
-        globalVal.className = "pay-kpi-val amber";
-        globalVal.innerHTML = `<span>💎 Nadpłacono: +${totalOverpaid.toLocaleString("pl-PL")} zł</span>`;
-      } else {
-        globalCard.classList.add("global-status-ok");
-        globalVal.className = "pay-kpi-val green";
-        globalVal.innerHTML = `<span>✓ Wszystko się zgadza</span>`;
-      }
-
-      document.getElementById("pay-kpi-total-missing").textContent = `${totalMissing.toLocaleString("pl-PL")} zł`;
-      document.getElementById("pay-kpi-total-overpaid").textContent = `${totalOverpaid.toLocaleString("pl-PL")} zł`;
-      document.getElementById("pay-kpi-students-total").textContent = students.length;
+      updatePaymentsSummaryValuesOnly();
 
       const filteredStudents = students.filter(st => {
         if (!searchVal) return true;
@@ -1986,11 +1674,7 @@
       });
 
       if (filteredStudents.length === 0) {
-        container.innerHTML = `
-          <div style="color: var(--text-muted); font-size: 0.9rem; padding: 40px 10px; text-align: center;">
-            ${students.length === 0 ? 'Baza uczniów jest pusta. Dodaj uczniów w zakładce Harmonogram.' : 'Brak wyników dla podanej frazy.'}
-          </div>
-        `;
+        container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem; padding: 40px 10px; text-align: center;">Brak wyników.</div>`;
         return;
       }
 
@@ -2001,15 +1685,11 @@
 
         const card = document.createElement("div");
         card.className = "pay-card";
-
         card.innerHTML = `
           <div class="pay-stud-main">
             <div class="pay-stud-name">${escapeHtml(st.name)}</div>
-            <div class="pay-stud-sub">
-              ${LEVEL_LABELS[st.level] || st.level} • ${st.rate} zł/h
-            </div>
+            <div class="pay-stud-sub">${LEVEL_LABELS[st.level] || st.level} • ${st.rate} zł/h</div>
           </div>
-
           <div class="status-select-wrap">
             <div class="pay-col-sub">Stan rozliczenia</div>
             <select class="status-select opt-${status}" onchange="changePaymentStatus('${st.id}', this.value)">
@@ -2018,23 +1698,14 @@
               <option value="overpaid" ${status === 'overpaid' ? 'selected' : ''}>💎 Nadpłacono</option>
             </select>
           </div>
-
           <div>
             <div class="pay-col-sub">Kwota (zł)</div>
             <div class="amount-input-box">
-              <input 
-                type="number" 
-                class="amount-input" 
-                value="${isAmountActive ? (pay.amount || '') : ''}" 
-                placeholder="${status === 'ok' ? '0' : 'wpisz zł'}"
-                ${!isAmountActive ? 'disabled' : ''}
-                oninput="changePaymentAmount('${st.id}', this.value)"
-              />
-              <span style="font-size:0.9rem; font-weight:700; color:var(--text-muted);">zł</span>
+              <input type="number" class="amount-input" value="${isAmountActive ? (pay.amount || '') : ''}" placeholder="${status === 'ok' ? '0' : 'zł'}" ${!isAmountActive ? 'disabled' : ''} oninput="changePaymentAmount('${st.id}', this.value)" />
+              <span style="font-size:1rem; font-weight:800; color:var(--text-muted);">zł</span>
             </div>
           </div>
         `;
-
         container.appendChild(card);
       });
     }
@@ -2042,9 +1713,7 @@
     function changePaymentStatus(studentId, newStatus) {
       if (!payments[studentId]) payments[studentId] = { amount: 0 };
       payments[studentId].status = newStatus;
-      if (newStatus === 'ok') {
-        payments[studentId].amount = 0;
-      }
+      if (newStatus === 'ok') payments[studentId].amount = 0;
       saveState();
     }
 
@@ -2090,7 +1759,6 @@
     function updateKPIs() {
       let count = 0;
       let totalWeekly = 0;
-
       Object.values(schedule).forEach(slotData => {
         if (!slotData) return;
         const sId = slotData.studentId || slotData;
@@ -2100,16 +1768,13 @@
           totalWeekly += Number(student.rate) || 0;
         }
       });
-
       document.getElementById("kpi-count").textContent = count;
       document.getElementById("kpi-earnings").textContent = `${totalWeekly.toLocaleString("pl-PL")} zł`;
     }
 
     function updateLiveTimeAndIndicator() {
       const nowPoland = getPolandDate();
-      
-      const timeStr = nowPoland.toLocaleTimeString("pl-PL", { hour12: false });
-      document.getElementById("live-time-display").textContent = timeStr;
+      document.getElementById("live-time-display").textContent = nowPoland.toLocaleTimeString("pl-PL", { hour12: false });
 
       const hour = nowPoland.getHours();
       const minutes = nowPoland.getMinutes();
@@ -2120,18 +1785,15 @@
 
       if (hour >= startHour && hour < endHour) {
         const minutesFromStart = (hour - startHour) * 60 + minutes;
-        const rowHeightPx = 54;
-        const headerOffsetPx = 48;
-
+        const rowHeightPx = 60; // uwzględnia border i gap
+        const headerOffsetPx = 48; // wysokość headera tabeli
         const topPosition = headerOffsetPx + (minutesFromStart / 60) * rowHeightPx;
-
         line.style.display = "block";
         line.style.top = `${topPosition}px`;
       } else {
         line.style.display = "none";
       }
     }
-
     setInterval(updateLiveTimeAndIndicator, 1000);
 
     function openAssignModal(slotKey, hour, day) {
@@ -2160,16 +1822,11 @@
     function saveSlot() {
       const studentId = document.getElementById("assign-student").value;
       const isOnce = document.getElementById("assign-is-once").checked;
-
       if (studentId) {
-        schedule[selectedSlotKey] = {
-          studentId: studentId,
-          isOnce: isOnce
-        };
+        schedule[selectedSlotKey] = { studentId: studentId, isOnce: isOnce };
       } else {
         delete schedule[selectedSlotKey];
       }
-
       closeModal("modal-assign");
       saveState();
     }
@@ -2194,26 +1851,16 @@
       const level = document.getElementById("stud-level").value;
       const grade = document.getElementById("stud-grade").value.trim();
       const rate = parseFloat(document.getElementById("stud-rate").value);
-
-      if (!name) return alert("Podaj imię lub oznaczenie ucznia.");
-      if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę godzinową w zł.");
-
-      const newStudent = {
-        id: "s_" + Date.now(),
-        name,
-        level,
-        grade,
-        rate
-      };
-
-      students.push(newStudent);
+      if (!name) return alert("Podaj imię ucznia.");
+      if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę.");
+      students.push({ id: "s_" + Date.now(), name, level, grade, rate });
       closeModal("modal-new-student");
       saveState();
     }
 
     function deleteStudent(id) {
       const st = students.find(s => s.id === id);
-      if (confirm(`Czy na pewno usunąć ucznia: ${st ? st.name : ""}? Spowoduje to wyczyszczenie jego lekcji z grafiku oraz historii płatności.`)) {
+      if (confirm(`Usunąć ucznia: ${st ? st.name : ""}?`)) {
         students = students.filter(s => s.id !== id);
         delete payments[id];
         Object.keys(schedule).forEach(k => {
@@ -2225,35 +1872,21 @@
       }
     }
 
-    function openModal(id) {
-      document.getElementById(id).classList.add("open");
-    }
+    function openModal(id) { document.getElementById(id).classList.add("open"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+    function escapeHtml(text) { if (!text) return ""; const div = document.createElement("div"); div.textContent = text; return div.innerHTML; }
 
-    function closeModal(id) {
-      document.getElementById(id).classList.remove("open");
-    }
+    window.addEventListener("click", e => { if (e.target.classList.contains("modal-backdrop")) { e.target.classList.remove("open"); } });
 
-    function escapeHtml(text) {
-      if (!text) return "";
-      const div = document.createElement("div");
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    window.addEventListener("click", e => {
-      if (e.target.classList.contains("modal-backdrop")) {
-        e.target.classList.remove("open");
-      }
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { renderCalendarGrid(); updateLiveTimeAndIndicator(); }, 100);
     });
 
-    window.addEventListener("resize", () => renderCalendarGrid());
-
-    document.getElementById("auth-password").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") login();
-    });
+    document.getElementById("auth-password").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
 
     renderAll();
   </script>
-  <div id="sync-status" class="sync-status">Gotowe</div>
 </body>
 </html>
