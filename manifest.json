@@ -1,23 +1,18 @@
 {
+  "id": "/korki_app/",
   "name": "TutorFlow Pro - Grafik",
   "short_name": "TutorFlow",
+  "description": "Grafik korepetycji, baza uczniów i rozliczenia",
+  "lang": "pl",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#090a0f",
   "theme_color": "#090a0f",
-  "orientation": "portrait",
   "icons": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2312151f%22/><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2312151f%22/><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
