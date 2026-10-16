@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <!-- Meta tagi dla aplikacji mobilnej PWA -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#090a0f">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="TutorFlow">
@@ -14,7 +15,8 @@
 
   <!-- Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
@@ -62,6 +64,7 @@
       --col-once-text: #fbcfe8;
 
       --row-height: 52px;
+      --time-col: 66px;
     }
 
     * {
@@ -102,6 +105,7 @@
       flex-direction: column;
       gap: 14px;
       height: calc(100vh - max(28px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+      height: calc(100dvh - max(28px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
       margin: 0 14px;
     }
 
@@ -319,8 +323,7 @@
 
     .calendar-grid {
       display: grid;
-      grid-template-columns: 66px repeat(7, minmax(110px, 1fr));
-      min-width: 840px;
+      grid-template-columns: var(--time-col) repeat(7, minmax(0, 1fr));
       gap: 8px;
       position: relative;
     }
@@ -386,7 +389,7 @@
     .badge-once { background: var(--col-once-border); color: #fff; font-size: 0.65rem; padding: 4px 8px; border-radius: 8px; font-weight: 800; text-transform: uppercase; flex-shrink: 0; }
 
     #current-time-line {
-      position: absolute; left: 74px; right: 10px; height: 2px; background: rgba(244, 63, 94, 0.65); z-index: 25; pointer-events: none; display: none; border-radius: 99px;
+      position: absolute; left: 74px; /* nadpisywane w JS */ right: 10px; height: 2px; background: rgba(244, 63, 94, 0.65); z-index: 25; pointer-events: none; display: none; border-radius: 99px;
     }
     #current-time-line::before {
       content: ""; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #f43f5e; box-shadow: 0 0 8px #f43f5e;
@@ -492,104 +495,226 @@
     .sync-status.error { color: #fda4af; }
 
     /* ========================================================= */
-    /* FUNDAMENTALNA ZMIANA DLA MOBILE - POZBYCIE SIĘ ZGNIECEŃ   */
+    /* DODATKI: nawigacja po dniach, instalacja, ulepszenia      */
     /* ========================================================= */
 
-    @media (max-width: 1100px) {
-      .dashboard-body { grid-template-columns: 1fr 300px; }
-    }
+    input, select, textarea { user-select: text; -webkit-user-select: text; }
 
-    @media (max-width: 960px) {
-      body {
-        /* Uwalnia body od flexa, pozwala na normalny scroll pionowy całą stroną! */
-        display: block !important; 
-        overflow-y: auto !important; 
-        height: auto !important;
-        min-height: 100vh;
-        padding-bottom: max(30px, env(safe-area-inset-bottom));
-      }
-      
-      .app-layout {
-        display: block !important;
-        margin: 0;
-        border-radius: 0;
-        height: auto !important;  
-      }
-      
-      header {
-        flex-direction: column; align-items: stretch; gap: 14px;
-        padding: max(14px, env(safe-area-inset-top)) 16px 14px 16px;
-        border-radius: 0 0 24px 24px; border-top: none; border-left: none; border-right: none;
-      }
-      
-      .brand { justify-content: space-between; width: 100%; }
-      .brand-info { display: flex; align-items: center; gap: 10px; }
-      .btn-logout { width: 44px; height: 44px; border-radius: 12px; }
-      
-      /* Skrócone nazwy zakładek (ukrywa część tekstu) */
+    .brand-info { display: flex; align-items: center; gap: 12px; }
+    .brand-actions { display: flex; align-items: center; gap: 8px; }
+
+    .sync-status { transition: opacity 0.5s ease; }
+    .sync-status.fade { opacity: 0; }
+
+    .btn-install {
+      display: none;
+      align-items: center; justify-content: center; gap: 6px;
+      height: 44px; padding: 0 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      background: rgba(99, 102, 241, 0.18);
+      color: #c7d2fe;
+      font-size: 0.82rem; font-weight: 800;
+      cursor: pointer; white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .btn-install:hover { background: rgba(99, 102, 241, 0.3); }
+    .btn-install:active { transform: scale(0.94); }
+
+    .cal-nav { display: none; align-items: center; gap: 6px; }
+    .nav-arrow, .nav-today {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      border-radius: 12px;
+      height: 38px; min-width: 40px;
+      padding: 0 12px;
+      font-size: 1.1rem; font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .nav-arrow:active, .nav-today:active { transform: scale(0.92); }
+    .nav-arrow:disabled { opacity: 0.25; cursor: default; }
+    .nav-today { font-size: 0.78rem; color: #38bdf8; border-color: rgba(6, 182, 212, 0.45); }
+    .cal-range { font-size: 0.78rem; color: var(--text-muted); font-weight: 700; min-width: 74px; text-align: center; }
+
+    .mobile-day-tabs {
+      display: none;
+      padding: 10px 14px;
+      gap: 8px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--card-border);
+      scrollbar-width: none;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .mobile-day-tabs.show { display: flex; }
+    .mobile-day-tabs::-webkit-scrollbar { display: none; }
+    .m-tab {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-size: 0.84rem; font-weight: 700;
+      white-space: nowrap; cursor: pointer;
+      flex-shrink: 0;
+    }
+    .m-tab:active { transform: scale(0.94); }
+    .m-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); }
+    .m-tab.is-today:not(.active) { border-color: #06b6d4; color: #38bdf8; }
+
+    .slot-card .s-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .slot-card .s-main .s-name { flex: none; }
+    .slot-card .s-sub { font-size: 0.74rem; font-weight: 600; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ========================================================= */
+    /* RESPONSYWNOŚĆ                                             */
+    /* ========================================================= */
+
+    /* węższy laptop / małe okno przeglądarki */
+    @media (max-width: 1320px) {
+      header { gap: 10px; padding: 12px 16px; }
+      .brand-sub { display: none; }
+      .kpi-chip { width: 132px; padding: 8px 12px; }
+      .nav-tab-btn { padding: 8px 14px; font-size: 0.84rem; }
+      .dashboard-body { grid-template-columns: 1fr 320px; }
+    }
+    @media (max-width: 1250px) {
       .hide-mobile { display: none; }
-      .main-nav-tabs { width: 100%; padding: 6px; border-radius: 18px;}
-      .nav-tab-btn { flex: 1; justify-content: center; padding: 10px 8px; font-size: 0.88rem; }
-
-      .kpi-bar { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch; }
-      .live-clock-badge { grid-column: span 2; height: 46px; font-size: 0.95rem; }
-      .kpi-chip { width: 100%; padding: 10px 14px; }
-      .kpi-chip .value { font-size: 1.05rem; }
-
-      .view-content {
-        display: block !important; /* Wyłącza kurczenie we flexie */
-        height: auto !important;
-      }
-      
-      .dashboard-body { 
-        display: block !important; 
-        height: auto !important; 
-        padding: 12px 12px 30px 12px; 
-      }
-      
-      .panel { 
-        display: block !important;
-        border-radius: 24px; 
-        height: auto !important; 
-        overflow: visible !important; /* Kluczowe! Nie ucina zawartości */
-        margin-bottom: 16px;
-      }
-
-      /* Pasek dni w wersji mobilnej */
-      .mobile-day-tabs { display: flex; padding: 12px 14px; }
-
-      /* Uwolniony, pełnowymiarowy kalendarz */
-      .calendar-container { 
-        display: block !important;
-        padding: 8px; 
-        overflow: visible !important; /* Kalendarz sam poszerza panel */
-        height: auto !important; 
-      }
-      .calendar-grid { min-width: 100% !important; grid-template-columns: 58px 1fr !important; gap: 6px; }
-      .cal-header-cell { font-size: 0.72rem; padding: 10px 2px; }
-      .time-slot-label { font-size: 0.76rem; }
-      #current-time-line { left: 66px; right: 4px; }
-
-      /* Baza uczniów uwolniona z ograniczeń wysokości */
-      .students-scroll { max-height: none !important; overflow: visible !important; padding-bottom: 20px; } 
-
-      /* Płatności mobilnie */
-      .payments-view-wrapper { padding: 0 12px 30px 12px; height: auto; display: block !important; }
-      .payments-summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;}
-      .payments-table-panel { height: auto !important; overflow: visible !important; display: block !important; }
-      .payments-scroll-area { max-height: none !important; overflow: visible !important; }
-      .pay-kpi { padding: 14px 16px; border-radius: 18px; }
-      .pay-card { grid-template-columns: 1fr; gap: 16px; padding: 18px; }
-      .status-select { min-width: 100%; }
-      .amount-input-box { width: 100%; }
-      .amount-input { flex: 1; }
     }
 
+    /* TRYB "JEDNA KOLUMNA": tablet, telefon, bardzo małe okno */
+    @media (max-width: 1100px) {
+      body {
+        display: block;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 0 0 max(24px, env(safe-area-inset-bottom)) 0;
+      }
+      .app-layout { display: block !important; height: auto; margin: 0; max-width: none; }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px 16px;
+        padding: max(12px, env(safe-area-inset-top)) 16px 14px;
+        border-radius: 0 0 26px 26px;
+        border-width: 0 0 1px 0;
+      }
+      .brand { width: auto; gap: 16px; }
+      .main-nav-tabs { flex: 1 1 320px; max-width: 520px; width: auto; }
+      .nav-tab-btn { flex: 1; padding: 11px 8px; font-size: 0.92rem; }
+
+      .kpi-bar { flex: 1 1 100%; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; width: 100%; align-items: stretch; }
+      .kpi-chip { width: 100%; }
+      .live-clock-badge { height: auto; min-height: 54px; padding: 8px 14px; }
+
+      .view-content { display: block !important; height: auto !important; animation: none; }
+      .dashboard-body { display: block; height: auto; padding: 14px 12px 0; }
+      .panel { display: block; height: auto; overflow: visible; margin-bottom: 14px; }
+
+      .calendar-container { display: block; overflow: visible; height: auto; padding: 8px; }
+      .cal-header-cell { position: static; }
+      .students-scroll { max-height: none; overflow: visible; padding-bottom: 18px; }
+
+      .payments-view-wrapper { display: block; height: auto; padding: 14px 12px 0; }
+      .payments-summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+      .payments-table-panel { display: block; height: auto; overflow: visible; }
+      .payments-scroll-area { max-height: none; overflow: visible; }
+    }
+
+    /* telefony */
+    @media (max-width: 700px) {
+      :root { --time-col: 52px; --row-height: 60px; }
+
+      /* dolny pasek zakładek jak w prawdziwej aplikacji */
+      body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+      header { display: grid; grid-template-columns: 1fr; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 10px; }
+      .brand { width: 100%; justify-content: space-between; }
+      .hide-mobile { display: none; }
+      .main-nav-tabs {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+        width: auto;
+        border-radius: 22px 22px 0 0;
+        border-width: 1px 0 0 0;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+        background: rgba(14, 17, 24, 0.94);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
+        gap: 8px;
+      }
+      .nav-tab-btn { padding: 13px 8px; border-radius: 16px; font-size: 0.92rem; }
+
+      .kpi-bar { grid-template-columns: 1fr 1.2fr auto; gap: 8px; }
+      .kpi-chip { padding: 8px 10px; border-radius: 14px; }
+      .kpi-chip .label { font-size: 0.6rem; white-space: normal; }
+      .kpi-chip .value { font-size: 1rem; }
+      .live-clock-badge { padding: 8px 10px; font-size: 0.8rem; min-height: 0; height: auto; gap: 6px; }
+
+      .tz-label, .cal-range { display: none; }
+      .panel-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
+      .panel-title { font-size: 0.95rem; }
+
+      .calendar-container { padding: 6px; }
+      .calendar-grid { gap: 6px; }
+      .cal-header-cell { padding: 10px 2px; font-size: 0.78rem; letter-spacing: 0; }
+      .time-slot-label { font-size: 0.82rem; border-radius: 12px; }
+      .slot-card { padding: 6px 12px; border-radius: 14px; }
+      .slot-card .s-name { font-size: 1rem; }
+      #current-time-line { right: 6px; }
+
+      .sync-status { left: 12px; right: auto; bottom: calc(84px + env(safe-area-inset-bottom)); }
+
+      /* okna dialogowe jako "szuflada" od dołu */
+      .modal-backdrop { align-items: flex-end; padding: 0; }
+      .modal-dialog {
+        max-width: none;
+        border-radius: 28px 28px 0 0;
+        padding: 22px 18px calc(22px + env(safe-area-inset-bottom));
+        max-height: 92vh; max-height: 92dvh;
+        overflow-y: auto;
+        animation: sheetUp 0.25s ease-out;
+      }
+      @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+      /* 16px = iPhone/Android nie powiększa ekranu po kliknięciu w pole */
+      .ctrl-input, .ctrl-select, .search-input, .amount-input, .status-select { font-size: 16px; }
+
+      .student-item { padding: 12px 14px; }
+      .btn-icon-del { width: 38px; height: 38px; }
+
+      .payments-view-wrapper { padding: 14px 12px 0; }
+      .payments-summary-bar > :first-child, .payments-summary-bar > :last-child { grid-column: 1 / -1; }
+      .pay-kpi { padding: 14px 16px; border-radius: 18px; }
+      .pay-kpi-val { font-size: 1.2rem; }
+      .payments-search-row { padding: 14px; }
+      .search-input { min-width: 0; width: 100%; }
+      .payments-scroll-area { padding: 14px; gap: 12px; }
+      .pay-card { grid-template-columns: 1fr; gap: 14px; padding: 16px; }
+      .amount-input-box { width: 100%; }
+      .amount-input { flex: 1; width: auto; }
+
+      .auth-card { padding: 26px 20px; }
+    }
+
+    @media (max-width: 420px) {
+      .install-label { display: none; }
+      .btn-install { padding: 0 12px; }
+    }
     @media (max-width: 380px) {
       .brand-title { font-size: 1.15rem; }
       .kpi-chip .value { font-size: 0.95rem; }
-      .slot-card .s-name { font-size: 0.85rem; }
-      .auth-card { padding: 24px 20px; }
+    }
+
+    /* ekrany dotykowe: bez "podskakiwania" po najechaniu */
+    @media (hover: none) {
+      .slot-card:hover, .student-item:hover, .pay-card:hover, .btn-add-primary:hover { transform: none; }
     }
   </style>
 </head>
@@ -633,10 +758,13 @@
           <div class="brand-logo">🎓</div>
           <div>
             <div class="brand-title">TutorFlow Pro</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Grafik Stanisław Abucewicz</div>
+            <div class="brand-sub" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Grafik Stanisław Abucewicz</div>
           </div>
         </div>
-        <button class="btn-logout" onclick="logout()" title="Wyloguj">↪</button>
+        <div class="brand-actions">
+          <button class="btn-install install-btn" onclick="installApp()" title="Zainstaluj aplikację na tym urządzeniu">⬇<span class="install-label"> Zainstaluj</span></button>
+          <button class="btn-logout" onclick="logout()" title="Wyloguj">↪</button>
+        </div>
       </div>
 
       <!-- NAWIGACJA ZAKŁADEK -->
@@ -674,7 +802,13 @@
             <div class="panel-title">
               <span>📅 Harmonogram</span>
             </div>
-            <div style="font-size: 0.75rem; font-weight:700; color: var(--text-muted);">Czas: Polska</div>
+            <div class="cal-nav" id="cal-nav">
+              <button class="nav-arrow" id="nav-prev" onclick="shiftDays(-1)" aria-label="Poprzednie dni">‹</button>
+              <span class="cal-range" id="cal-range"></span>
+              <button class="nav-arrow" id="nav-next" onclick="shiftDays(1)" aria-label="Następne dni">›</button>
+              <button class="nav-today" onclick="goToToday()">Dziś</button>
+            </div>
+            <div class="tz-label" style="font-size: 0.75rem; font-weight:700; color: var(--text-muted);">Czas: Polska</div>
           </div>
 
           <!-- Mobilny pasek dni -->
@@ -853,7 +987,10 @@
     let payments = getCookie("tf_payments_v2") || {};
 
     let selectedSlotKey = null;
-    let activeMobileDayIndex = getCurrentPolandDayIndex();
+    // widok kalendarza: ile dni się mieści i od którego zaczynamy
+    let viewStart = 0;
+    let visibleDays = 7;
+    let viewInitialized = false;
     let currentMainTab = "schedule";
 
     let currentUser = null;
@@ -867,15 +1004,26 @@
       payments: JSON.parse(JSON.stringify(payments))
     };
 
+    function stableStringify(v) {
+      if (Array.isArray(v)) return "[" + v.map(stableStringify).join(",") + "]";
+      if (v && typeof v === "object") {
+        return "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + stableStringify(v[k])).join(",") + "}";
+      }
+      return JSON.stringify(v);
+    }
+
     function hasLocalData() {
       return localState.students.length > 0 || Object.keys(localState.schedule).length > 0 || Object.keys(localState.payments).length > 0;
     }
 
+    let syncFadeTimer = null;
     function setSyncStatus(text, type = "") {
       const el = document.getElementById("sync-status");
       if (!el) return;
       el.textContent = text;
       el.className = `sync-status ${type}`;
+      clearTimeout(syncFadeTimer);
+      if (type === "ok") syncFadeTimer = setTimeout(() => el.classList.add("fade"), 2500);
     }
 
     function showAuthError(message) {
@@ -959,7 +1107,7 @@
       updatePaymentsSummaryValuesOnly();
 
       clearTimeout(cloudSaveTimer);
-      cloudSaveTimer = setTimeout(() => saveState({ render: false }), 500);
+      cloudSaveTimer = setTimeout(() => { cloudSaveTimer = null; saveState({ render: false }); }, 500);
     }
 
     async function handleAuthenticatedUser(user) {
@@ -971,6 +1119,9 @@
 
       if (unsubscribeState) unsubscribeState();
       unsubscribeState = stateRef.onSnapshot(async (snap) => {
+        // własne, jeszcze niezapisane zmiany – nie nadpisuj ich (i nie zamykaj klawiatury w trakcie pisania)
+        if (snap.metadata.hasPendingWrites || cloudSaveTimer) return;
+
         if (!snap.exists) {
           students = localState.students;
           schedule = localState.schedule;
@@ -982,9 +1133,20 @@
         }
 
         const data = snap.data() || {};
-        students = Array.isArray(data.students) ? data.students : [];
-        schedule = data.schedule && typeof data.schedule === "object" ? data.schedule : {};
-        payments = data.payments && typeof data.payments === "object" ? data.payments : {};
+        const inStudents = Array.isArray(data.students) ? data.students : [];
+        const inSchedule = data.schedule && typeof data.schedule === "object" ? data.schedule : {};
+        const inPayments = data.payments && typeof data.payments === "object" ? data.payments : {};
+
+        // te same dane co już mamy – nic nie rób (nie odświeżaj ekranu)
+        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments }) ===
+            stableStringify({ students, schedule, payments })) {
+          setSyncStatus("✓ Zsynchronizowano", "ok");
+          return;
+        }
+
+        students = inStudents;
+        schedule = inSchedule;
+        payments = inPayments;
 
         setCookie("tf_students_clean", students);
         setCookie("tf_schedule_clean", schedule);
@@ -1051,52 +1213,75 @@
       if (currentMainTab === 'payments') renderPaymentsView();
     }
 
-    function isMobileView() {
-      return window.innerWidth <= 960;
+    const SHORT_DAYS = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"];
+    const MIN_DAY_COL = 112; // minimalna szerokość kolumny dnia (px)
+    const GRID_GAP = 8;
+
+    function getTimeColWidth() {
+      return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--time-col")) || 66;
+    }
+
+    function getGridGap() {
+      return window.innerWidth <= 700 ? 6 : GRID_GAP;
+    }
+
+    // ile dni zmieści się w kalendarzu przy aktualnej szerokości
+    function computeVisibleDays() {
+      const area = document.getElementById("cal-scroll-area");
+      const w = area ? area.clientWidth : 0;
+      if (!w) return visibleDays;            // zakładka ukryta – nic nie zmieniaj
+      if (w < 520) return 1;                 // telefon: jeden dzień
+      const gap = getGridGap();
+      const usable = w - 20 - getTimeColWidth();
+      return Math.max(1, Math.min(7, Math.floor(usable / (MIN_DAY_COL + gap))));
     }
 
     function renderCalendarGrid() {
       const grid = document.getElementById("main-grid");
+      const area = document.getElementById("cal-scroll-area");
       grid.innerHTML = "";
+
+      visibleDays = computeVisibleDays();
       const todayIndex = getCurrentPolandDayIndex();
-      const mobile = isMobileView();
+
+      if (!viewInitialized && area.clientWidth) {
+        viewStart = Math.min(todayIndex, 7 - visibleDays);
+        viewInitialized = true;
+      }
+      viewStart = Math.max(0, Math.min(viewStart, 7 - visibleDays));
+
+      grid.style.gridTemplateColumns = `var(--time-col) repeat(${visibleDays}, minmax(0, 1fr))`;
+
+      const colW = area.clientWidth
+        ? (area.clientWidth - 20 - getTimeColWidth()) / visibleDays - getGridGap()
+        : 999;
+      const useShortNames = visibleDays > 1 && colW < 135;
 
       const cornerHeader = document.createElement("div");
       cornerHeader.className = "cal-header-cell";
       cornerHeader.textContent = "GODZ.";
       grid.appendChild(cornerHeader);
 
-      if (mobile) {
+      const lastDay = viewStart + visibleDays;
+
+      for (let index = viewStart; index < lastDay; index++) {
         const th = document.createElement("div");
-        const isToday = activeMobileDayIndex === todayIndex;
+        const isToday = index === todayIndex;
         th.className = `cal-header-cell ${isToday ? 'today-col' : ''}`;
-        th.innerHTML = `${DAYS[activeMobileDayIndex]} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
+        th.innerHTML = `${useShortNames ? SHORT_DAYS[index] : DAYS[index]} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
         grid.appendChild(th);
-      } else {
-        DAYS.forEach((day, index) => {
-          const th = document.createElement("div");
-          const isToday = index === todayIndex;
-          th.className = `cal-header-cell ${isToday ? 'today-col' : ''}`;
-          th.innerHTML = `${day} ${isToday ? '<span style="font-size:0.65rem; display:block; color:#38bdf8;">(DZIŚ)</span>' : ''}`;
-          grid.appendChild(th);
-        });
       }
 
       HOURS.forEach(hour => {
         const timeCell = document.createElement("div");
         timeCell.className = "time-slot-label";
+        timeCell.dataset.hour = hour;
         timeCell.textContent = hour;
         grid.appendChild(timeCell);
 
-        if (mobile) {
-          const dayName = DAYS[activeMobileDayIndex];
-          const slotKey = `${hour}_${dayName}`;
-          renderSlotCell(grid, slotKey, hour, dayName, activeMobileDayIndex === todayIndex);
-        } else {
-          DAYS.forEach((day, dayIndex) => {
-            const slotKey = `${hour}_${day}`;
-            renderSlotCell(grid, slotKey, hour, day, dayIndex === todayIndex);
-          });
+        for (let dayIndex = viewStart; dayIndex < lastDay; dayIndex++) {
+          const dayName = DAYS[dayIndex];
+          renderSlotCell(grid, `${hour}_${dayName}`, hour, dayName, dayIndex === todayIndex);
         }
       });
     }
@@ -1115,8 +1300,15 @@
       if (student) {
         card.classList.add("occupied", `level-${student.level}`);
         if (isOnce) card.classList.add("is-once");
+        // przy widoku jednego dnia (telefon) jest miejsce na dodatkowy opis
+        const sub = visibleDays === 1
+          ? `<div class="s-sub">${escapeHtml(LEVEL_LABELS[student.level] || student.level)} • ${escapeHtml(String(student.rate))} zł</div>`
+          : '';
         card.innerHTML = `
-          <div class="s-name">${escapeHtml(student.name)}</div>
+          <div class="s-main">
+            <div class="s-name">${escapeHtml(student.name)}</div>
+            ${sub}
+          </div>
           ${isOnce ? '<span class="badge-once">1x</span>' : ''}
         `;
       } else {
@@ -1129,21 +1321,46 @@
       container.appendChild(cell);
     }
 
+    // pasek z dniami (telefon) + strzałki
     function renderMobileTabs() {
       const container = document.getElementById("mobile-tabs-bar");
       container.innerHTML = "";
       const todayIndex = getCurrentPolandDayIndex();
 
+      container.classList.toggle("show", visibleDays <= 3);
+
       DAYS.forEach((day, idx) => {
+        const inView = idx >= viewStart && idx < viewStart + visibleDays;
         const btn = document.createElement("button");
-        btn.className = `m-tab ${idx === activeMobileDayIndex ? 'active' : ''} ${idx === todayIndex ? 'is-today' : ''}`;
+        btn.className = `m-tab ${inView ? 'active' : ''} ${idx === todayIndex ? 'is-today' : ''}`;
         btn.textContent = day + (idx === todayIndex ? ' •' : '');
         btn.onclick = () => {
-          activeMobileDayIndex = idx;
+          viewStart = Math.max(0, Math.min(idx, 7 - visibleDays));
           renderAll();
         };
         container.appendChild(btn);
       });
+
+      const activeBtn = container.querySelector(".m-tab.active");
+      if (activeBtn && container.clientWidth) {
+        container.scrollLeft = activeBtn.offsetLeft - (container.clientWidth - activeBtn.offsetWidth) / 2;
+      }
+
+      document.getElementById("cal-nav").style.display = visibleDays >= 7 ? "none" : "flex";
+      document.getElementById("nav-prev").disabled = viewStart <= 0;
+      document.getElementById("nav-next").disabled = viewStart >= 7 - visibleDays;
+      document.getElementById("cal-range").textContent =
+        visibleDays === 1 ? "" : `${SHORT_DAYS[viewStart]} – ${SHORT_DAYS[viewStart + visibleDays - 1]}`;
+    }
+
+    function shiftDays(dir) {
+      viewStart = Math.max(0, Math.min(viewStart + dir * visibleDays, 7 - visibleDays));
+      renderAll();
+    }
+
+    function goToToday() {
+      viewStart = Math.max(0, Math.min(getCurrentPolandDayIndex(), 7 - visibleDays));
+      renderAll();
     }
 
     function renderStudentsList() {
@@ -1238,6 +1455,9 @@
     }
 
     function updatePaymentsSummaryValuesOnly() {
+      const studentsTotalEl = document.getElementById("pay-kpi-students-total");
+      if (studentsTotalEl) studentsTotalEl.textContent = students.length;
+
       let totalMissing = 0;
       let totalOverpaid = 0;
 
@@ -1290,31 +1510,23 @@
       const nowPoland = getPolandDate();
       document.getElementById("live-time-display").textContent = nowPoland.toLocaleTimeString("pl-PL", { hour12: false });
 
-      const hour = nowPoland.getHours();
-      const minutes = nowPoland.getMinutes();
       const line = document.getElementById("current-time-line");
+      const grid = document.getElementById("main-grid");
+      const hourKey = String(nowPoland.getHours()).padStart(2, "0") + ":00";
+      const minutes = nowPoland.getMinutes();
+      const todayIndex = getCurrentPolandDayIndex();
+      const todayVisible = todayIndex >= viewStart && todayIndex < viewStart + visibleDays;
+      const label = grid.querySelector(`.time-slot-label[data-hour="${hourKey}"]`);
 
-      const startHour = 14;
-      const endHour = 23;
-
-      if (hour >= startHour && hour < endHour) {
-        const minutesFromStart = (hour - startHour) * 60 + minutes;
-        const headerEl = document.querySelector('.cal-header-cell');
-        const headerOffsetPx = headerEl ? headerEl.offsetHeight : 44;
-        
-        const grid = document.getElementById("main-grid");
-        const gap = parseInt(window.getComputedStyle(grid).gap) || 8;
-        
-        const rowEl = document.querySelector('.time-slot-label');
-        const rowHeightPx = (rowEl ? rowEl.offsetHeight : 52) + gap;
-
-        const topPosition = headerOffsetPx + gap + (minutesFromStart / 60) * rowHeightPx;
-        
-        line.style.display = "block";
-        line.style.top = `${topPosition}px`;
-      } else {
+      // linia tylko gdy: jest godzina z grafiku, "dziś" jest widoczne, a zakładka jest otwarta
+      if (!label || !todayVisible || !grid.offsetParent) {
         line.style.display = "none";
+        return;
       }
+
+      line.style.display = "block";
+      line.style.top = `${grid.offsetTop + label.offsetTop + label.offsetHeight * (minutes / 60)}px`;
+      line.style.left = `${grid.offsetLeft + label.offsetLeft + label.offsetWidth + 4}px`;
     }
     setInterval(updateLiveTimeAndIndicator, 1000);
 
@@ -1400,15 +1612,68 @@
 
     window.addEventListener("click", e => { if (e.target.classList.contains("modal-backdrop")) { e.target.classList.remove("open"); } });
 
-    let resizeTimer;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { renderCalendarGrid(); updateLiveTimeAndIndicator(); }, 100);
+    // reakcja na zmianę rozmiaru okna + przesuwanie dni palcem
+    function initResponsive() {
+      const area = document.getElementById("cal-scroll-area");
+
+      const onResize = () => {
+        if (!area.clientWidth) return;
+        if (!viewInitialized || computeVisibleDays() !== visibleDays) renderAll();
+        else updateLiveTimeAndIndicator();
+      };
+      if ("ResizeObserver" in window) new ResizeObserver(onResize).observe(area);
+      window.addEventListener("resize", onResize);
+      window.addEventListener("orientationchange", () => setTimeout(onResize, 200));
+
+      let sx = 0, sy = 0, st = 0;
+      area.addEventListener("touchstart", e => {
+        const t = e.touches[0];
+        sx = t.clientX; sy = t.clientY; st = Date.now();
+      }, { passive: true });
+      area.addEventListener("touchend", e => {
+        if (visibleDays >= 7) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - sx, dy = t.clientY - sy;
+        if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 2 && Date.now() - st < 600) {
+          shiftDays(dx < 0 ? 1 : -1);
+        }
+      }, { passive: true });
+    }
+
+    // przycisk "Zainstaluj" (Chrome pokazuje go tylko gdy aplikację da się zainstalować)
+    let deferredInstallPrompt = null;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+    function setInstallButtons(show) {
+      document.querySelectorAll(".install-btn").forEach(b => { b.style.display = show ? "flex" : "none"; });
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if (!isStandalone) setInstallButtons(true);
     });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      setInstallButtons(false);
+    });
+
+    async function installApp() {
+      if (!deferredInstallPrompt) {
+        alert("Aby zainstalować: w Chrome kliknij menu ⋮ i wybierz „Zainstaluj aplikację” albo „Dodaj do ekranu głównego”.");
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      try { await deferredInstallPrompt.userChoice; } catch (e) {}
+      deferredInstallPrompt = null;
+      setInstallButtons(false);
+    }
 
     document.getElementById("auth-password").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
 
     renderAll();
+    initResponsive();
   </script>
 </body>
 </html>
