@@ -956,20 +956,43 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    function setCookie(name, value, days = 365) {
-      const d = new Date();
-      d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-      document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+    // =========================================================
+    // KOPIA ZAPASOWA W PRZEGLĄDARCE (osobna dla każdego konta)
+    // Używamy localStorage zamiast cookies: cookie ma limit ok. 4 KB,
+    // a grafik z uczniami szybko go przekracza (zapis po cichu by się nie udał).
+    // =========================================================
+    function backupKey(uid) { return "tf_backup_" + uid; }
+
+    function saveBackup() {
+      if (!currentUser) return;
+      try {
+        localStorage.setItem(backupKey(currentUser.uid), JSON.stringify({
+          students, schedule, payments, savedAt: Date.now()
+        }));
+      } catch (e) { /* brak miejsca / tryb prywatny – trudno */ }
     }
 
-    function getCookie(name) {
-      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      if (match) {
-        try {
-          return JSON.parse(decodeURIComponent(match[2]));
-        } catch (e) { return null; }
-      }
-      return null;
+    function loadBackup(uid) {
+      try {
+        const raw = localStorage.getItem(backupKey(uid));
+        if (!raw) return null;
+        const d = JSON.parse(raw);
+        return {
+          students: Array.isArray(d.students) ? d.students : [],
+          schedule: d.schedule && typeof d.schedule === "object" ? d.schedule : {},
+          payments: d.payments && typeof d.payments === "object" ? d.payments : {}
+        };
+      } catch (e) { return null; }
+    }
+
+    function backupHasData(b) {
+      return !!b && (b.students.length > 0 || Object.keys(b.schedule).length > 0 || Object.keys(b.payments).length > 0);
+    }
+
+    function resetState() {
+      students = [];
+      schedule = {};
+      payments = {};
     }
 
     const DAYS = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
@@ -982,9 +1005,10 @@
       "inf-rozsz": "Informatyka rozszerzenie"
     };
 
-    let students = getCookie("tf_students_clean") || [];
-    let schedule = getCookie("tf_schedule_clean") || {};
-    let payments = getCookie("tf_payments_v2") || {};
+    // dane ładują się dopiero po zalogowaniu (każde konto ma swoje)
+    let students = [];
+    let schedule = {};
+    let payments = {};
 
     let selectedSlotKey = null;
     // widok kalendarza: ile dni się mieści i od którego zaczynamy
@@ -998,22 +1022,12 @@
     let unsubscribeState = null;
     let cloudSaveTimer = null;
 
-    const localState = {
-      students: JSON.parse(JSON.stringify(students)),
-      schedule: JSON.parse(JSON.stringify(schedule)),
-      payments: JSON.parse(JSON.stringify(payments))
-    };
-
     function stableStringify(v) {
       if (Array.isArray(v)) return "[" + v.map(stableStringify).join(",") + "]";
       if (v && typeof v === "object") {
         return "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + stableStringify(v[k])).join(",") + "}";
       }
       return JSON.stringify(v);
-    }
-
-    function hasLocalData() {
-      return localState.students.length > 0 || Object.keys(localState.schedule).length > 0 || Object.keys(localState.payments).length > 0;
     }
 
     let syncFadeTimer = null;
@@ -1077,9 +1091,7 @@
     }
 
     async function saveState({ render = true } = {}) {
-      setCookie("tf_students_clean", students);
-      setCookie("tf_schedule_clean", schedule);
-      setCookie("tf_payments_v2", payments);
+      saveBackup(); // najpierw lokalna kopia – działa nawet gdy baza padnie
 
       if (!currentUser || !stateRef) {
         if (render) renderAll();
@@ -1094,16 +1106,14 @@
         });
         setSyncStatus("✓ Zsynchronizowano", "ok");
       } catch (error) {
-        setSyncStatus("Błąd synchronizacji", "error");
+        setSyncStatus("Błąd bazy – dane zapisane lokalnie", "error");
       }
 
       if (render) renderAll();
     }
 
     function scheduleCloudSave() {
-      setCookie("tf_students_clean", students);
-      setCookie("tf_schedule_clean", schedule);
-      setCookie("tf_payments_v2", payments);
+      saveBackup();
       updatePaymentsSummaryValuesOnly();
 
       clearTimeout(cloudSaveTimer);
@@ -1114,8 +1124,20 @@
       currentUser = user;
       document.getElementById("auth-screen").style.display = "none";
       document.getElementById("app-root").style.display = "flex";
+      const outBtn = document.querySelector(".btn-logout");
+      if (outBtn) outBtn.title = "Wyloguj (" + (user.email || "konto") + ")";
 
       stateRef = db.collection("users").doc(user.uid).collection("app").doc("state");
+
+      // od razu pokaż lokalną kopię TEGO konta (szybki start / brak internetu)
+      resetState();
+      const backup = loadBackup(user.uid);
+      if (backup) {
+        students = backup.students;
+        schedule = backup.schedule;
+        payments = backup.payments;
+      }
+      renderAll();
 
       if (unsubscribeState) unsubscribeState();
       unsubscribeState = stateRef.onSnapshot(async (snap) => {
@@ -1123,11 +1145,13 @@
         if (snap.metadata.hasPendingWrites || cloudSaveTimer) return;
 
         if (!snap.exists) {
-          students = localState.students;
-          schedule = localState.schedule;
-          payments = localState.payments;
-          if (hasLocalData()) setSyncStatus("Przenoszenie danych…", "saving");
-          await saveState({ render: false });
+          // baza pusta: nowe konto (zostaje puste) albo baza została wyczyszczona (odtwarzamy z kopii tego konta)
+          if (backupHasData(backup) || students.length || Object.keys(schedule).length || Object.keys(payments).length) {
+            setSyncStatus("Odtwarzanie danych z kopii…", "saving");
+            await saveState({ render: false });
+          } else {
+            setSyncStatus("✓ Nowe, puste konto", "ok");
+          }
           renderAll();
           return;
         }
@@ -1140,6 +1164,7 @@
         // te same dane co już mamy – nic nie rób (nie odświeżaj ekranu)
         if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments }) ===
             stableStringify({ students, schedule, payments })) {
+          saveBackup();
           setSyncStatus("✓ Zsynchronizowano", "ok");
           return;
         }
@@ -1148,14 +1173,12 @@
         schedule = inSchedule;
         payments = inPayments;
 
-        setCookie("tf_students_clean", students);
-        setCookie("tf_schedule_clean", schedule);
-        setCookie("tf_payments_v2", payments);
-
+        saveBackup();
         setSyncStatus("✓ Zsynchronizowano", "ok");
         renderAll();
       }, (error) => {
-        setSyncStatus("Błąd dostępu", "error");
+        // baza niedostępna – pracujemy na lokalnej kopii, zmiany nadal zapisują się lokalnie
+        setSyncStatus("Baza niedostępna – tryb lokalny", "error");
       });
     }
 
@@ -1167,6 +1190,9 @@
         if (unsubscribeState) unsubscribeState();
         unsubscribeState = null;
         stateRef = null;
+        clearTimeout(cloudSaveTimer);
+        cloudSaveTimer = null;
+        resetState(); // dane poprzedniego konta nie mogą zostać w pamięci
         document.getElementById("app-root").style.display = "none";
         document.getElementById("auth-screen").style.display = "flex";
         document.getElementById("auth-loading").style.display = "none";
