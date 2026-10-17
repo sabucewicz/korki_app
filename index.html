@@ -265,6 +265,13 @@
     }
     .btn-logout:hover { background: rgba(244,63,94,.18); border-color: rgba(244,63,94,.45); }
     .btn-logout:active { transform: scale(0.92); }
+    .btn-account { width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color: var(--text); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .btn-account:hover { background: rgba(255,255,255,.12); }
+    .btn-account:active { transform: scale(0.92); }
+    .auth-ok { min-height: 20px; color: #6ee7b7; font-size: 0.8rem; line-height: 1.4; margin-top: 6px; }
+    .acc-section { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 18px; padding-top: 18px; }
+    .acc-hint { color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin-bottom: 12px; }
+    .acc-providers { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
 
     /* ZAKŁADKI */
     .view-content {
@@ -739,7 +746,7 @@
         <div id="auth-error" class="auth-error"></div>
         <div class="modal-btns auth-buttons">
           <button class="btn-m btn-m-submit" onclick="login()">Zaloguj się</button>
-          <button class="btn-m btn-m-cancel" onclick="registerAccount()">Utwórz konto</button>
+          <button class="btn-m btn-m-cancel" onclick="openRegister()">Utwórz konto</button>
         </div>
         <div class="auth-divider"><span>lub</span></div>
         <button type="button" class="btn-m btn-m-google" onclick="loginWithGoogle()">
@@ -747,6 +754,67 @@
         </button>
       </div>
       <div id="auth-loading" class="auth-loading" style="display:none; text-align:center; margin-top:20px;">Łączenie z Firebase…</div>
+    </div>
+  </div>
+
+  <!-- OKNO: UTWÓRZ KONTO -->
+  <div class="modal-backdrop" id="modal-register">
+    <div class="modal-dialog">
+      <h3>Utwórz konto</h3>
+      <div class="fg">
+        <label>Imię i nazwisko</label>
+        <input type="text" id="reg-name" class="ctrl-input" autocomplete="name" placeholder="np. Kamil Kowalski" />
+      </div>
+      <div class="fg">
+        <label>E-mail</label>
+        <input type="email" id="reg-email" class="ctrl-input" autocomplete="email" placeholder="twoj@email.com" />
+      </div>
+      <div class="fg">
+        <label>Hasło</label>
+        <input type="password" id="reg-password" class="ctrl-input" autocomplete="new-password" placeholder="Minimum 6 znaków" />
+      </div>
+      <div id="reg-error" class="auth-error"></div>
+      <div class="modal-btns">
+        <button class="btn-m btn-m-cancel" onclick="closeModal('modal-register')">Anuluj</button>
+        <button class="btn-m btn-m-submit" id="reg-submit" onclick="submitRegister()">Utwórz konto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OKNO: USTAWIENIA KONTA -->
+  <div class="modal-backdrop" id="modal-account">
+    <div class="modal-dialog">
+      <h3>Moje konto</h3>
+      <div class="fg">
+        <label>Imię i nazwisko</label>
+        <input type="text" id="acc-name" class="ctrl-input" autocomplete="name" placeholder="np. Kamil Kowalski" />
+      </div>
+      <div class="acc-providers" id="acc-info"></div>
+
+      <div class="acc-section" id="acc-pass-section">
+        <div class="acc-hint">Ustaw hasło, żeby logować się też e-mailem i hasłem. To nadal będzie to samo konto i ten sam grafik co przez Google.</div>
+        <div class="fg" style="margin-bottom:0;">
+          <label>Nowe hasło</label>
+          <input type="password" id="acc-password" class="ctrl-input" autocomplete="new-password" placeholder="Minimum 6 znaków" />
+        </div>
+        <div class="modal-btns" style="margin-top:12px;">
+          <button class="btn-m btn-m-cancel" onclick="linkPasswordToAccount()">Ustaw hasło</button>
+        </div>
+      </div>
+
+      <div class="acc-section" id="acc-google-section">
+        <div class="acc-hint">Połącz konto z Google, żeby móc logować się też przyciskiem Google.</div>
+        <div class="modal-btns" style="margin-top:0;">
+          <button class="btn-m btn-m-cancel" onclick="linkGoogleToAccount()">Połącz z Google</button>
+        </div>
+      </div>
+
+      <div id="acc-error" class="auth-error"></div>
+      <div id="acc-ok" class="auth-ok"></div>
+      <div class="modal-btns">
+        <button class="btn-m btn-m-cancel" onclick="closeModal('modal-account')">Zamknij</button>
+        <button class="btn-m btn-m-submit" onclick="saveDisplayName()">Zapisz imię</button>
+      </div>
     </div>
   </div>
 
@@ -763,6 +831,7 @@
         </div>
         <div class="brand-actions">
           <button class="btn-install install-btn" onclick="installApp()" title="Zainstaluj aplikację na tym urządzeniu">⬇<span class="install-label"> Zainstaluj</span></button>
+          <button class="btn-account" onclick="openAccountSettings()" title="Moje konto">👤</button>
           <button class="btn-logout" onclick="logout()" title="Wyloguj">↪</button>
         </div>
       </div>
@@ -1044,6 +1113,24 @@
       document.getElementById("auth-error").textContent = message || "";
     }
 
+    function authErrorText(error, fallback) {
+      switch (error && error.code) {
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+          return "Nieprawidłowy e-mail lub hasło. Jeśli konto założyłeś przez Google, zaloguj się przyciskiem Google, a hasło ustawisz w ustawieniach konta (👤).";
+        case "auth/invalid-email": return "Nieprawidłowy adres e-mail.";
+        case "auth/email-already-in-use": return "Ten e-mail ma już konto. Zamknij to okno i zaloguj się. Jeśli konto było założone przez Google, użyj przycisku Google, a hasło ustawisz w ustawieniach konta (👤).";
+        case "auth/weak-password": return "Hasło jest za słabe (minimum 6 znaków).";
+        case "auth/too-many-requests": return "Za dużo prób. Spróbuj ponownie za chwilę.";
+        case "auth/network-request-failed": return "Brak połączenia z internetem.";
+        case "auth/requires-recent-login": return "Ze względów bezpieczeństwa wyloguj się, zaloguj ponownie i spróbuj jeszcze raz.";
+        case "auth/credential-already-in-use": return "To konto Google jest już używane przez inny profil w aplikacji.";
+        case "auth/provider-already-linked": return "Ta metoda logowania jest już połączona z Twoim kontem.";
+        default: return fallback;
+      }
+    }
+
     async function login() {
       showAuthError("");
       const email = document.getElementById("auth-email").value.trim();
@@ -1054,7 +1141,7 @@
         await auth.signInWithEmailAndPassword(email, password);
       } catch (error) {
         document.getElementById("auth-loading").style.display = "none";
-        showAuthError("Błąd logowania. Sprawdź dane.");
+        showAuthError(authErrorText(error, "Błąd logowania. Sprawdź dane."));
       }
     }
 
@@ -1064,22 +1151,122 @@
         const provider = new firebase.auth.GoogleAuthProvider();
         await auth.signInWithPopup(provider);
       } catch (error) {
-        showAuthError("Błąd logowania Google.");
+        if (error && (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request")) return;
+        if (error && error.code === "auth/account-exists-with-different-credential") {
+          return showAuthError("Ten e-mail ma już konto z hasłem. Zaloguj się e-mailem i hasłem, a Google połączysz w ustawieniach konta (👤).");
+        }
+        showAuthError(authErrorText(error, "Błąd logowania Google."));
       }
     }
 
-    async function registerAccount() {
+    // ---------- Tworzenie konta (osobne okienko) ----------
+    function openRegister() {
       showAuthError("");
-      const email = document.getElementById("auth-email").value.trim();
-      const password = document.getElementById("auth-password").value;
-      if (!email || !password) return showAuthError("Wpisz e-mail i hasło.");
-      if (password.length < 6) return showAuthError("Hasło musi mieć co najmniej 6 znaków.");
-      document.getElementById("auth-loading").style.display = "block";
+      document.getElementById("reg-error").textContent = "";
+      document.getElementById("reg-name").value = "";
+      document.getElementById("reg-email").value = document.getElementById("auth-email").value.trim();
+      document.getElementById("reg-password").value = "";
+      openModal("modal-register");
+      setTimeout(() => document.getElementById("reg-name").focus(), 50);
+    }
+
+    async function submitRegister() {
+      const errEl = document.getElementById("reg-error");
+      const btn = document.getElementById("reg-submit");
+      errEl.textContent = "";
+      const name = document.getElementById("reg-name").value.trim().replace(/\s+/g, " ");
+      const email = document.getElementById("reg-email").value.trim();
+      const password = document.getElementById("reg-password").value;
+      if (name.length < 2) return errEl.textContent = "Wpisz imię i nazwisko.";
+      if (!email) return errEl.textContent = "Wpisz adres e-mail.";
+      if (password.length < 6) return errEl.textContent = "Hasło musi mieć co najmniej 6 znaków.";
+      btn.disabled = true;
       try {
-        await auth.createUserWithEmailAndPassword(email, password);
+        const cred = await auth.createUserWithEmailAndPassword(email, password);
+        try { await cred.user.updateProfile({ displayName: name }); } catch (e) {}
+        updateUserLabel();
+        closeModal("modal-register");
       } catch (error) {
-        document.getElementById("auth-loading").style.display = "none";
-        showAuthError("Konto istnieje lub wpisano złe dane.");
+        errEl.textContent = authErrorText(error, "Nie udało się utworzyć konta. Sprawdź dane.");
+      }
+      btn.disabled = false;
+    }
+
+    function updateUserLabel() {
+      const user = auth.currentUser;
+      const el = document.getElementById("user-label");
+      if (!user || !el) return;
+      el.textContent = "Grafik: " + (user.displayName || user.email || "moje konto");
+    }
+
+    // ---------- Ustawienia konta (imię, hasło, Google) ----------
+    function refreshAccountModal() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const ids = user.providerData.map(p => p.providerId);
+      const hasPass = ids.includes("password");
+      const hasGoogle = ids.includes("google.com");
+      document.getElementById("acc-name").value = user.displayName || "";
+      document.getElementById("acc-info").innerHTML =
+        "E-mail: <b>" + (user.email || "—") + "</b><br>Logowanie: " +
+        (hasGoogle ? "✅ Google" : "▫️ Google (niepołączone)") + " · " +
+        (hasPass ? "✅ e-mail i hasło" : "▫️ e-mail i hasło (niepołączone)");
+      document.getElementById("acc-pass-section").style.display = hasPass || !user.email ? "none" : "block";
+      document.getElementById("acc-google-section").style.display = hasGoogle ? "none" : "block";
+    }
+
+    function accMessage(err, ok) {
+      document.getElementById("acc-error").textContent = err || "";
+      document.getElementById("acc-ok").textContent = ok || "";
+    }
+
+    function openAccountSettings() {
+      accMessage("", "");
+      document.getElementById("acc-password").value = "";
+      refreshAccountModal();
+      openModal("modal-account");
+    }
+
+    async function saveDisplayName() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const name = document.getElementById("acc-name").value.trim().replace(/\s+/g, " ");
+      if (name.length < 2) return accMessage("Wpisz imię i nazwisko.", "");
+      try {
+        await user.updateProfile({ displayName: name });
+        updateUserLabel();
+        accMessage("", "Zapisano.");
+      } catch (error) {
+        accMessage(authErrorText(error, "Nie udało się zapisać imienia."), "");
+      }
+    }
+
+    async function linkPasswordToAccount() {
+      const user = auth.currentUser;
+      if (!user || !user.email) return;
+      const password = document.getElementById("acc-password").value;
+      if (password.length < 6) return accMessage("Hasło musi mieć co najmniej 6 znaków.", "");
+      try {
+        const cred = firebase.auth.EmailAuthProvider.credential(user.email, password);
+        await user.linkWithCredential(cred);
+        document.getElementById("acc-password").value = "";
+        refreshAccountModal();
+        accMessage("", "Gotowe. Możesz się teraz logować e-mailem i hasłem albo przez Google.");
+      } catch (error) {
+        accMessage(authErrorText(error, "Nie udało się ustawić hasła."), "");
+      }
+    }
+
+    async function linkGoogleToAccount() {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        await user.linkWithPopup(new firebase.auth.GoogleAuthProvider());
+        refreshAccountModal();
+        accMessage("", "Gotowe. Możesz się teraz logować też przez Google.");
+      } catch (error) {
+        if (error && error.code === "auth/popup-closed-by-user") return;
+        accMessage(authErrorText(error, "Nie udało się połączyć z Google."), "");
       }
     }
 
@@ -1124,8 +1311,7 @@
       currentUser = user;
       document.getElementById("auth-screen").style.display = "none";
       document.getElementById("app-root").style.display = "flex";
-      const userLabel = document.getElementById("user-label");
-      if (userLabel) userLabel.textContent = "Grafik: " + (user.displayName || user.email || "moje konto");
+      updateUserLabel();
       const outBtn = document.querySelector(".btn-logout");
       if (outBtn) outBtn.title = "Wyloguj (" + (user.email || "konto") + ")";
 
@@ -1698,6 +1884,7 @@
       setInstallButtons(false);
     }
 
+    document.getElementById("reg-password").addEventListener("keydown", (e) => { if (e.key === "Enter") submitRegister(); });
     document.getElementById("auth-password").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
 
     renderAll();
