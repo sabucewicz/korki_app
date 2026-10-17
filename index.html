@@ -758,7 +758,7 @@
           <div class="brand-logo">🎓</div>
           <div>
             <div class="brand-title">TutorFlow Pro</div>
-            <div class="brand-sub" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Grafik Stanisław Abucewicz</div>
+            <div class="brand-sub" id="user-label" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">Twój grafik</div>
           </div>
         </div>
         <div class="brand-actions">
@@ -1124,6 +1124,8 @@
       currentUser = user;
       document.getElementById("auth-screen").style.display = "none";
       document.getElementById("app-root").style.display = "flex";
+      const userLabel = document.getElementById("user-label");
+      if (userLabel) userLabel.textContent = "Grafik: " + (user.displayName || user.email || "moje konto");
       const outBtn = document.querySelector(".btn-logout");
       if (outBtn) outBtn.title = "Wyloguj (" + (user.email || "konto") + ")";
 
