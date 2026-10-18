@@ -1,5 +1,5 @@
 // TutorFlow Pro – service worker (instalacja jako aplikacja + działanie po chwilowym braku internetu)
-const CACHE_NAME = 'tutorflow-cache-v4';
+const CACHE_NAME = 'tutorflow-cache-v5';
 const APP_SHELL = [
   './',
   './index.html',

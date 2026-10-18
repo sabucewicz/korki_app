@@ -1682,18 +1682,23 @@
         else if (pay.status === 'overpaid') totalOverpaid += amt;
       });
 
+      const roundMoney = (n) => Math.round((Number(n) || 0) * 100) / 100;
+      totalMissing = roundMoney(totalMissing);
+      totalOverpaid = roundMoney(totalOverpaid);
+      const netBalance = roundMoney(totalOverpaid - totalMissing);
+
       const globalCard = document.getElementById("global-status-card");
       const globalVal = document.getElementById("global-status-value");
 
       globalCard.className = "pay-kpi";
-      if (totalMissing > 0) {
+      if (netBalance < 0) {
         globalCard.classList.add("global-status-danger");
         globalVal.className = "pay-kpi-val red";
-        globalVal.innerHTML = `<span>⚠️ Brakuje: -${totalMissing.toLocaleString("pl-PL")} zł</span>`;
-      } else if (totalOverpaid > 0) {
+        globalVal.innerHTML = `<span>⚠️ Brakuje: -${roundMoney(Math.abs(netBalance)).toLocaleString("pl-PL")} zł</span>`;
+      } else if (netBalance > 0) {
         globalCard.classList.add("global-status-warning");
         globalVal.className = "pay-kpi-val amber";
-        globalVal.innerHTML = `<span>💎 Nadpłacono: +${totalOverpaid.toLocaleString("pl-PL")} zł</span>`;
+        globalVal.innerHTML = `<span>💎 Nadpłacono: +${netBalance.toLocaleString("pl-PL")} zł</span>`;
       } else {
         globalCard.classList.add("global-status-ok");
         globalVal.className = "pay-kpi-val green";
