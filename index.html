@@ -418,7 +418,11 @@
     .st-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
     .st-rate { font-size: 0.95rem; font-weight: 800; color: var(--success); margin-right: 12px; font-variant-numeric: tabular-nums; }
     
-    .btn-icon-del { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); color: var(--danger); cursor: pointer; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.2s; }
+    .btn-icon-edit, .btn-icon-del { border: 1px solid; cursor: pointer; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.2s; flex-shrink: 0; }
+    .btn-icon-edit { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc; margin-right: 6px; }
+    .btn-icon-edit:hover { background: var(--accent); color: #fff; }
+    .btn-icon-edit:active { transform: scale(0.9); }
+    .btn-icon-del { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.25); color: var(--danger); }
     .btn-icon-del:hover { background: var(--danger); color: #fff; }
     .btn-icon-del:active { transform: scale(0.9); }
 
@@ -575,7 +579,11 @@
 
     .slot-card .s-main { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
     .slot-card .s-main .s-name { flex: none; }
-    .slot-card .s-sub { font-size: 0.74rem; font-weight: 600; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .slot-card .s-sub {
+      font-size: 0.72rem; font-weight: 600; opacity: 0.88; line-height: 1.25;
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+      overflow: hidden; word-break: break-word;
+    }
 
     /* ========================================================= */
     /* RESPONSYWNOŚĆ                                             */
@@ -700,7 +708,7 @@
       .ctrl-input, .ctrl-select, .search-input, .amount-input, .status-select { font-size: 16px; }
 
       .student-item { padding: 12px 14px; }
-      .btn-icon-del { width: 38px; height: 38px; }
+      .btn-icon-edit, .btn-icon-del { width: 38px; height: 38px; }
 
       .payments-view-wrapper { padding: 14px 12px 0; }
       .payments-summary-bar > :first-child, .payments-summary-bar > :last-child { grid-column: 1 / -1; }
@@ -812,6 +820,13 @@
         <div class="acc-hint">Połącz konto z Google, żeby móc logować się też przyciskiem Google.</div>
         <div class="modal-btns" style="margin-top:0;">
           <button class="btn-m btn-m-cancel" onclick="linkGoogleToAccount()">Połącz z Google</button>
+        </div>
+      </div>
+
+      <div class="acc-section">
+        <div class="acc-hint">Pobierz kopię zapasową danych tego konta (uczniowie, grafik, płatności). Tylko eksport — nic nie zmienia w bazie.</div>
+        <div class="modal-btns" style="margin-top:0;">
+          <button class="btn-m btn-m-cancel" type="button" onclick="downloadDataBackup()">Pobierz kopię danych (JSON)</button>
         </div>
       </div>
 
@@ -965,27 +980,35 @@
     </div>
   </div>
 
-  <!-- MODAL: Nowy uczeń (4 poziomy) -->
+  <!-- MODAL: Nowy / edycja ucznia -->
   <div class="modal-backdrop" id="modal-new-student">
     <div class="modal-dialog">
-      <h3>Dodaj ucznia do bazy</h3>
+      <h3 id="stud-modal-title">Dodaj ucznia do bazy</h3>
       <div class="fg">
         <label>Imię i nazwisko</label>
         <input type="text" id="stud-name" class="ctrl-input" placeholder="np. Kamil B" autocomplete="off" />
       </div>
       <div class="fg">
+        <label>Przedmiot</label>
+        <select id="stud-subject" class="ctrl-select" onchange="onSubjectSelectChange()"></select>
+      </div>
+      <div class="fg" id="stud-subject-custom-wrap" style="display: none;">
+        <label>Nazwa przedmiotu</label>
+        <input type="text" id="stud-subject-custom" class="ctrl-input" placeholder="np. Fizyka" autocomplete="off" />
+      </div>
+      <div class="fg">
         <label>Poziom kształcenia</label>
         <select id="stud-level" class="ctrl-select">
           <option value="podstawowka">Podstawówka</option>
-          <option value="liceum-podst">Liceum podstawa</option>
-          <option value="liceum-rozsz">Liceum rozszerzenie</option>
-          <option value="inf-rozsz">Informatyka rozszerzenie</option>
+          <option value="liceum-podst">Liceum/technikum – podstawa</option>
+          <option value="liceum-rozsz">Liceum/technikum – rozszerzenie</option>
+          <option value="student">Student</option>
         </select>
       </div>
       <div style="display: flex; gap: 12px;">
         <div class="fg" style="flex: 1;">
-          <label>Klasa</label>
-          <input type="text" id="stud-grade" class="ctrl-input" placeholder="np. 5" autocomplete="off" />
+          <label>Klasa / rok</label>
+          <input type="text" id="stud-grade" class="ctrl-input" placeholder="np. 5 lub 2" autocomplete="off" />
         </div>
         <div class="fg" style="flex: 1;">
           <label>Stawka zł/h</label>
@@ -994,7 +1017,7 @@
       </div>
       <div class="modal-btns">
         <button class="btn-m btn-m-cancel" onclick="closeModal('modal-new-student')">Anuluj</button>
-        <button class="btn-m btn-m-submit" onclick="saveStudent()">Dodaj</button>
+        <button class="btn-m btn-m-submit" id="stud-modal-submit" onclick="saveStudent()">Dodaj</button>
       </div>
     </div>
   </div>
@@ -1038,7 +1061,7 @@
       if (!currentUser) return;
       try {
         localStorage.setItem(backupKey(currentUser.uid), JSON.stringify({
-          students, schedule, payments, savedAt: Date.now()
+          students, schedule, payments, subjectColors, savedAt: Date.now()
         }));
       } catch (e) { /* brak miejsca / tryb prywatny – trudno */ }
     }
@@ -1049,9 +1072,10 @@
         if (!raw) return null;
         const d = JSON.parse(raw);
         return {
-          students: Array.isArray(d.students) ? d.students : [],
+          students: migrateStudents(Array.isArray(d.students) ? d.students : []),
           schedule: d.schedule && typeof d.schedule === "object" ? d.schedule : {},
-          payments: d.payments && typeof d.payments === "object" ? d.payments : {}
+          payments: d.payments && typeof d.payments === "object" ? d.payments : {},
+          subjectColors: d.subjectColors && typeof d.subjectColors === "object" ? d.subjectColors : {}
         };
       } catch (e) { return null; }
     }
@@ -1064,6 +1088,7 @@
       students = [];
       schedule = {};
       payments = {};
+      subjectColors = {};
     }
 
     const DAYS = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
@@ -1071,17 +1096,35 @@
 
     const LEVEL_LABELS = {
       "podstawowka": "Podstawówka",
-      "liceum-podst": "Liceum podstawa",
-      "liceum-rozsz": "Liceum rozszerzenie",
+      "liceum-podst": "Liceum/technikum – podstawa",
+      "liceum-rozsz": "Liceum/technikum – rozszerzenie",
+      "student": "Student",
       "inf-rozsz": "Informatyka rozszerzenie"
+    };
+
+    const DEFAULT_SUBJECTS = ["Matematyka", "Język polski", "Język angielski"];
+    const DEFAULT_SUBJECT_HUES = {
+      "matematyka": 215,
+      "jezyk polski": 355,
+      "jezyk angielski": 145
+    };
+    const CUSTOM_HUE_QUEUE = [35, 275, 185, 60, 320, 100, 245];
+    const LEVEL_COLOR_PARAMS = {
+      "podstawowka": { s: 48, l: 58, textL: 78 },
+      "liceum-podst": { s: 58, l: 46, textL: 74 },
+      "liceum-rozsz": { s: 68, l: 36, textL: 72 },
+      "student": { s: 78, l: 28, textL: 70 },
+      "inf-rozsz": { s: 68, l: 36, textL: 72 }
     };
 
     // dane ładują się dopiero po zalogowaniu (każde konto ma swoje)
     let students = [];
     let schedule = {};
     let payments = {};
+    let subjectColors = {};
 
     let selectedSlotKey = null;
+    let editingStudentId = null;
     // widok kalendarza: ile dni się mieści i od którego zaczynamy
     let viewStart = 0;
     let visibleDays = 7;
@@ -1092,6 +1135,173 @@
     let stateRef = null;
     let unsubscribeState = null;
     let cloudSaveTimer = null;
+    let cloudLoaded = false;
+    let pendingCloudSave = false;
+    let lastSyncedSubjectColorsStr = null;
+    let savingToCloud = false;
+
+    // Migracja wyłącznie w pamięci: inf-rozsz → Informatyka + liceum-rozsz
+    function migrateStudents(list) {
+      return (list || []).map(st => {
+        const next = Object.assign({}, st);
+        if (next.level === "inf-rozsz") {
+          if (!next.subject) next.subject = "Informatyka";
+          next.level = "liceum-rozsz";
+        }
+        if (next.subject == null) next.subject = "";
+        return next;
+      });
+    }
+
+    function stripDiacritics(str) {
+      return String(str || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/ł/g, "l")
+        .replace(/Ł/g, "L");
+    }
+
+    function normalizeSubjectKey(name) {
+      return stripDiacritics(String(name || ""))
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function formatSubjectName(name) {
+      const cleaned = String(name || "").replace(/\s+/g, " ").trim();
+      if (!cleaned) return "";
+      return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    }
+
+    function resolveSubjectName(raw) {
+      const key = normalizeSubjectKey(raw);
+      if (!key) return "";
+      for (const def of DEFAULT_SUBJECTS) {
+        if (normalizeSubjectKey(def) === key) return def;
+      }
+      for (const st of students) {
+        if (st.subject && normalizeSubjectKey(st.subject) === key) return st.subject;
+      }
+      return formatSubjectName(raw);
+    }
+
+    function usedCustomSubjects() {
+      const byKey = new Map();
+      students.forEach(st => {
+        if (!st.subject) return;
+        const key = normalizeSubjectKey(st.subject);
+        if (!key || DEFAULT_SUBJECT_HUES[key] !== undefined) return;
+        if (!byKey.has(key)) byKey.set(key, st.subject);
+      });
+      return Array.from(byKey.values()).sort((a, b) =>
+        a.localeCompare(b, "pl", { sensitivity: "base" })
+      );
+    }
+
+    function allocateNextHue() {
+      const used = new Set([
+        ...Object.values(DEFAULT_SUBJECT_HUES).map(Number),
+        ...Object.values(subjectColors).map(Number)
+      ]);
+      for (let cycle = 0; cycle < 50; cycle++) {
+        const offset = cycle * 15;
+        for (const base of CUSTOM_HUE_QUEUE) {
+          const hue = (base + offset) % 360;
+          if (!used.has(hue)) return hue;
+        }
+      }
+      return CUSTOM_HUE_QUEUE[0];
+    }
+
+    // assign=true tylko przy zapisie ucznia; render tylko czyta (ew. tymczasowy hue bez zapisu)
+    function getHueForSubject(subject, { assign = false } = {}) {
+      const key = normalizeSubjectKey(subject);
+      if (!key) return null;
+      if (DEFAULT_SUBJECT_HUES[key] !== undefined) return DEFAULT_SUBJECT_HUES[key];
+      if (subjectColors[key] !== undefined) return Number(subjectColors[key]);
+      const hue = allocateNextHue();
+      if (assign) subjectColors[key] = hue;
+      return hue;
+    }
+
+    function getSubjectLevelColors(subject, level) {
+      const hue = getHueForSubject(subject, { assign: false });
+      if (hue == null) return null;
+      const p = LEVEL_COLOR_PARAMS[level] || LEVEL_COLOR_PARAMS["liceum-podst"];
+      return {
+        bg: `hsla(${hue}, ${p.s}%, ${p.l}%, 0.22)`,
+        border: `hsla(${hue}, ${p.s}%, ${Math.max(p.l - 8, 22)}%, 0.55)`,
+        text: `hsl(${hue}, ${Math.min(p.s + 8, 75)}%, ${p.textL}%)`,
+        solid: `hsl(${hue}, ${p.s}%, ${p.l}%)`
+      };
+    }
+
+    function applyStudentColors(el, student, { asPill = false } = {}) {
+      if (student.subject) {
+        const colors = getSubjectLevelColors(student.subject, student.level);
+        if (colors) {
+          if (asPill) {
+            el.className = "st-pill";
+            el.style.background = colors.solid;
+            el.style.boxShadow = `0 0 10px ${colors.solid}`;
+          } else {
+            el.style.background = colors.bg;
+            el.style.borderColor = colors.border;
+            el.style.color = colors.text;
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function studentLevelLabel(st) {
+      return LEVEL_LABELS[st.level] || st.level;
+    }
+
+    function studentListDesc(st) {
+      const parts = [];
+      if (st.subject) parts.push(st.subject);
+      parts.push(studentLevelLabel(st));
+      parts.push(`Kl. ${st.grade || "—"}`);
+      return parts.join(" • ");
+    }
+
+    function studentPayDesc(st) {
+      const parts = [];
+      if (st.subject) parts.push(st.subject);
+      parts.push(studentLevelLabel(st));
+      parts.push(`${st.rate} zł/h`);
+      return parts.join(" • ");
+    }
+
+    function studentAssignLabel(st) {
+      const mid = st.subject
+        ? `${st.subject}, ${studentLevelLabel(st)}`
+        : studentLevelLabel(st);
+      return `${st.name} [${mid}] — ${st.rate} zł/h`;
+    }
+
+    function downloadDataBackup() {
+      const payload = {
+        students,
+        schedule,
+        payments,
+        subjectColors,
+        exportedAt: new Date().toISOString()
+      };
+      const date = new Date().toISOString().slice(0, 10);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `grafik-kopia-${date}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
 
     function stableStringify(v) {
       if (Array.isArray(v)) return "[" + v.map(stableStringify).join(",") + "]";
@@ -1276,6 +1486,9 @@
       if (unsubscribeState) unsubscribeState();
       unsubscribeState = null;
       stateRef = null;
+      cloudLoaded = false;
+      pendingCloudSave = false;
+      lastSyncedSubjectColorsStr = null;
       await auth.signOut();
     }
 
@@ -1287,15 +1500,40 @@
         return;
       }
 
+      // dopóki nie mamy pierwszego snapshotu z chmury — tylko lokalnie (ochrona przed nadpisaniem)
+      if (!cloudLoaded) {
+        pendingCloudSave = true;
+        if (render) renderAll();
+        return;
+      }
+
+      // snapshot stanu w momencie zapisu (żeby równoległy onSnapshot nie podmienił obiektów w trakcie set)
+      const payloadStudents = students;
+      const payloadSchedule = Object.assign({}, schedule);
+      const payloadPayments = Object.assign({}, payments);
+      const payloadSubjectColors = Object.assign({}, subjectColors);
+
+      savingToCloud = true;
       try {
         setSyncStatus("Zapisywanie…", "saving");
-        await stateRef.set({
-          students, schedule, payments,
+        const payload = {
+          students: payloadStudents,
+          schedule: payloadSchedule,
+          payments: payloadPayments,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        const scStr = stableStringify(payloadSubjectColors);
+        if (Object.keys(payloadSubjectColors).length > 0 || scStr !== lastSyncedSubjectColorsStr) {
+          payload.subjectColors = payloadSubjectColors;
+        }
+        await stateRef.set(payload, { merge: true });
+        lastSyncedSubjectColorsStr = scStr;
+        pendingCloudSave = false;
         setSyncStatus("✓ Zsynchronizowano", "ok");
       } catch (error) {
         setSyncStatus("Błąd bazy – dane zapisane lokalnie", "error");
+      } finally {
+        savingToCloud = false;
       }
 
       if (render) renderAll();
@@ -1311,6 +1549,9 @@
 
     async function handleAuthenticatedUser(user) {
       currentUser = user;
+      cloudLoaded = false;
+      pendingCloudSave = false;
+      lastSyncedSubjectColorsStr = null;
       document.getElementById("auth-screen").style.display = "none";
       document.getElementById("app-root").style.display = "flex";
       updateUserLabel();
@@ -1326,13 +1567,25 @@
         students = backup.students;
         schedule = backup.schedule;
         payments = backup.payments;
+        subjectColors = backup.subjectColors || {};
       }
       renderAll();
 
       if (unsubscribeState) unsubscribeState();
       unsubscribeState = stateRef.onSnapshot(async (snap) => {
         // własne, jeszcze niezapisane zmiany – nie nadpisuj ich (i nie zamykaj klawiatury w trakcie pisania)
-        if (snap.metadata.hasPendingWrites || cloudSaveTimer) return;
+        if (snap.metadata.hasPendingWrites || cloudSaveTimer || savingToCloud) return;
+
+        const firstCloudSnapshot = !cloudLoaded;
+        cloudLoaded = true;
+
+        // zmiany wprowadzone przed pierwszym snapshotem — wyślij lokalny stan, nie nadpisuj chmurą
+        if (firstCloudSnapshot && pendingCloudSave) {
+          pendingCloudSave = false;
+          await saveState({ render: false });
+          renderAll();
+          return;
+        }
 
         if (!snap.exists) {
           // baza pusta: nowe konto (zostaje puste) albo baza została wyczyszczona (odtwarzamy z kopii tego konta)
@@ -1340,6 +1593,7 @@
             setSyncStatus("Odtwarzanie danych z kopii…", "saving");
             await saveState({ render: false });
           } else {
+            lastSyncedSubjectColorsStr = stableStringify(subjectColors);
             setSyncStatus("✓ Nowe, puste konto", "ok");
           }
           renderAll();
@@ -1347,13 +1601,15 @@
         }
 
         const data = snap.data() || {};
-        const inStudents = Array.isArray(data.students) ? data.students : [];
+        const inStudents = migrateStudents(Array.isArray(data.students) ? data.students : []);
         const inSchedule = data.schedule && typeof data.schedule === "object" ? data.schedule : {};
         const inPayments = data.payments && typeof data.payments === "object" ? data.payments : {};
+        const inSubjectColors = data.subjectColors && typeof data.subjectColors === "object" ? data.subjectColors : {};
 
         // te same dane co już mamy – nic nie rób (nie odświeżaj ekranu)
-        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments }) ===
-            stableStringify({ students, schedule, payments })) {
+        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments, subjectColors: inSubjectColors }) ===
+            stableStringify({ students, schedule, payments, subjectColors })) {
+          lastSyncedSubjectColorsStr = stableStringify(subjectColors);
           saveBackup();
           setSyncStatus("✓ Zsynchronizowano", "ok");
           return;
@@ -1362,12 +1618,14 @@
         students = inStudents;
         schedule = inSchedule;
         payments = inPayments;
+        subjectColors = inSubjectColors;
+        lastSyncedSubjectColorsStr = stableStringify(subjectColors);
 
         saveBackup();
         setSyncStatus("✓ Zsynchronizowano", "ok");
         renderAll();
       }, (error) => {
-        // baza niedostępna – pracujemy na lokalnej kopii, zmiany nadal zapisują się lokalnie
+        // baza niedostępna – cloudLoaded zostaje false; zmiany tylko lokalnie
         setSyncStatus("Baza niedostępna – tryb lokalny", "error");
       });
     }
@@ -1382,6 +1640,9 @@
         stateRef = null;
         clearTimeout(cloudSaveTimer);
         cloudSaveTimer = null;
+        cloudLoaded = false;
+        pendingCloudSave = false;
+        lastSyncedSubjectColorsStr = null;
         resetState(); // dane poprzedniego konta nie mogą zostać w pamięci
         document.getElementById("app-root").style.display = "none";
         document.getElementById("auth-screen").style.display = "flex";
@@ -1514,16 +1775,14 @@
       card.className = "slot-card";
 
       if (student) {
-        card.classList.add("occupied", `level-${student.level}`);
+        card.classList.add("occupied");
+        if (!applyStudentColors(card, student)) {
+          card.classList.add(`level-${student.level}`);
+        }
         if (isOnce) card.classList.add("is-once");
-        // przy widoku jednego dnia (telefon) jest miejsce na dodatkowy opis
-        const sub = visibleDays === 1
-          ? `<div class="s-sub">${escapeHtml(LEVEL_LABELS[student.level] || student.level)} • ${escapeHtml(String(student.rate))} zł</div>`
-          : '';
         card.innerHTML = `
           <div class="s-main">
             <div class="s-name">${escapeHtml(student.name)}</div>
-            ${sub}
           </div>
           ${isOnce ? '<span class="badge-once">1x</span>' : ''}
         `;
@@ -1593,17 +1852,22 @@
         item.className = "student-item";
         item.innerHTML = `
           <div class="st-left">
-            <span class="st-pill ${st.level}"></span>
+            <span class="st-pill" data-pill></span>
             <div style="min-width:0;">
               <div class="st-name">${escapeHtml(st.name)}</div>
-              <div class="st-desc">${LEVEL_LABELS[st.level] || st.level} • Kl. ${escapeHtml(st.grade || '—')}</div>
+              <div class="st-desc">${escapeHtml(studentListDesc(st))}</div>
             </div>
           </div>
           <div style="display: flex; align-items: center;">
             <span class="st-rate">${st.rate} zł</span>
-            <button class="btn-icon-del" onclick="deleteStudent('${st.id}')">✕</button>
+            <button class="btn-icon-edit" title="Edytuj" onclick="openEditStudentModal('${st.id}')">✎</button>
+            <button class="btn-icon-del" title="Usuń" onclick="deleteStudent('${st.id}')">✕</button>
           </div>
         `;
+        const pill = item.querySelector("[data-pill]");
+        if (!applyStudentColors(pill, st, { asPill: true })) {
+          pill.className = `st-pill ${st.level}`;
+        }
         container.appendChild(item);
       });
     }
@@ -1635,7 +1899,7 @@
         card.innerHTML = `
           <div class="pay-stud-main">
             <div class="pay-stud-name">${escapeHtml(st.name)}</div>
-            <div class="pay-stud-sub">${LEVEL_LABELS[st.level] || st.level} • ${st.rate} zł/h</div>
+            <div class="pay-stud-sub">${escapeHtml(studentPayDesc(st))}</div>
           </div>
           <div class="status-select-wrap">
             <div class="pay-col-sub">Stan rozliczenia</div>
@@ -1765,7 +2029,7 @@
       students.forEach(st => {
         const opt = document.createElement("option");
         opt.value = st.id;
-        opt.textContent = `${st.name} [${LEVEL_LABELS[st.level] || st.level}] — ${st.rate} zł/h`;
+        opt.textContent = studentAssignLabel(st);
         if (st.id === currentStudentId) opt.selected = true;
         select.appendChild(opt);
       });
@@ -1787,28 +2051,141 @@
     }
 
     function clearSlot() {
-      if (selectedSlotKey) {
-        delete schedule[selectedSlotKey];
-        closeModal("modal-assign");
-        saveState();
+      if (!selectedSlotKey) return;
+      delete schedule[selectedSlotKey];
+      const select = document.getElementById("assign-student");
+      if (select) select.value = "";
+      document.getElementById("assign-is-once").checked = false;
+      closeModal("modal-assign");
+      renderAll();
+      saveState({ render: false });
+    }
+
+    function fillSubjectSelect(selectedSubject) {
+      const select = document.getElementById("stud-subject");
+      const customWrap = document.getElementById("stud-subject-custom-wrap");
+      const customInput = document.getElementById("stud-subject-custom");
+      select.innerHTML = "";
+
+      DEFAULT_SUBJECTS.forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+
+      usedCustomSubjects().forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+
+      const other = document.createElement("option");
+      other.value = "__other__";
+      other.textContent = "Inny (wpisz własny)…";
+      select.appendChild(other);
+
+      const key = normalizeSubjectKey(selectedSubject || "");
+      let matched = false;
+      if (key) {
+        for (const opt of select.options) {
+          if (opt.value !== "__other__" && normalizeSubjectKey(opt.value) === key) {
+            select.value = opt.value;
+            matched = true;
+            break;
+          }
+        }
+      }
+
+      if (selectedSubject && !matched) {
+        select.value = "__other__";
+        customWrap.style.display = "";
+        customInput.value = selectedSubject;
+      } else {
+        customWrap.style.display = select.value === "__other__" ? "" : "none";
+        customInput.value = "";
+        if (!selectedSubject) select.selectedIndex = 0;
       }
     }
 
+    function onSubjectSelectChange() {
+      const isOther = document.getElementById("stud-subject").value === "__other__";
+      document.getElementById("stud-subject-custom-wrap").style.display = isOther ? "" : "none";
+      if (isOther) document.getElementById("stud-subject-custom").focus();
+    }
+
+    function readSubjectFromForm() {
+      const selectVal = document.getElementById("stud-subject").value;
+      const raw = selectVal === "__other__"
+        ? document.getElementById("stud-subject-custom").value
+        : selectVal;
+      return resolveSubjectName(raw);
+    }
+
     function openStudentModal() {
+      editingStudentId = null;
+      document.getElementById("stud-modal-title").textContent = "Dodaj ucznia do bazy";
+      document.getElementById("stud-modal-submit").textContent = "Dodaj";
       document.getElementById("stud-name").value = "";
       document.getElementById("stud-grade").value = "";
       document.getElementById("stud-rate").value = "";
+      document.getElementById("stud-level").value = "podstawowka";
+      fillSubjectSelect("");
+      openModal("modal-new-student");
+    }
+
+    function openEditStudentModal(id) {
+      const st = students.find(s => s.id === id);
+      if (!st) return;
+      editingStudentId = id;
+      document.getElementById("stud-modal-title").textContent = "Edytuj ucznia";
+      document.getElementById("stud-modal-submit").textContent = "Zapisz";
+      document.getElementById("stud-name").value = st.name || "";
+      document.getElementById("stud-grade").value = st.grade || "";
+      document.getElementById("stud-rate").value = st.rate != null ? st.rate : "";
+      document.getElementById("stud-level").value =
+        ["podstawowka", "liceum-podst", "liceum-rozsz", "student"].includes(st.level)
+          ? st.level
+          : "podstawowka";
+      fillSubjectSelect(st.subject || "");
       openModal("modal-new-student");
     }
 
     function saveStudent() {
       const name = document.getElementById("stud-name").value.trim();
+      const subject = readSubjectFromForm();
       const level = document.getElementById("stud-level").value;
       const grade = document.getElementById("stud-grade").value.trim();
       const rate = parseFloat(document.getElementById("stud-rate").value);
       if (!name) return alert("Podaj imię ucznia.");
+      if (!subject) return alert("Wybierz lub wpisz przedmiot.");
+      if (!["podstawowka", "liceum-podst", "liceum-rozsz", "student"].includes(level)) {
+        return alert("Wybierz poziom kształcenia.");
+      }
       if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę.");
-      students.push({ id: "s_" + Date.now(), name, level, grade, rate });
+
+      getHueForSubject(subject, { assign: true });
+
+      if (editingStudentId) {
+        const st = students.find(s => s.id === editingStudentId);
+        if (!st) return;
+        st.name = name;
+        st.subject = subject;
+        st.level = level;
+        st.grade = grade;
+        st.rate = rate;
+      } else {
+        students.push({
+          id: "s_" + Date.now(),
+          name,
+          subject,
+          level,
+          grade,
+          rate
+        });
+      }
+      editingStudentId = null;
       closeModal("modal-new-student");
       saveState();
     }
