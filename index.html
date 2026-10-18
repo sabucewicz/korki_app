@@ -465,6 +465,277 @@
     .status-select.opt-ok { border-color: rgba(16, 185, 129, 0.5); color: #6ee7b7; background: rgba(16, 185, 129, 0.14); }
     .status-select.opt-missing { border-color: rgba(244, 63, 94, 0.5); color: #fda4af; background: rgba(244, 63, 94, 0.14); }
     .status-select.opt-overpaid { border-color: rgba(245, 158, 11, 0.5); color: #fcd34d; background: rgba(245, 158, 11, 0.14); }
+
+    /* Własne okno wyboru (custom select) */
+    .csel-field { position: relative; width: 100%; }
+    select.csel-native {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .csel-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .csel-trigger:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      outline: none;
+    }
+    .csel-trigger-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .csel-trigger-caret {
+      flex-shrink: 0;
+      opacity: 0.55;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+    .csel-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10050;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.18s ease, visibility 0.18s ease;
+    }
+    .csel-overlay.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+    .csel-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .csel-panel {
+      position: relative;
+      z-index: 1;
+      width: min(420px, 100%);
+      max-height: min(70vh, 560px);
+      display: flex;
+      flex-direction: column;
+      background: #151822;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+      transform: translateY(12px) scale(0.98);
+      opacity: 0;
+      transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.18s ease;
+      overflow: hidden;
+    }
+    .csel-overlay.open .csel-panel {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    .csel-handle {
+      display: none;
+      width: 40px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      margin: 10px auto 0;
+      flex-shrink: 0;
+    }
+    .csel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 18px 12px;
+      flex-shrink: 0;
+    }
+    .csel-title {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .csel-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .csel-close:active { transform: scale(0.94); }
+    .csel-search-wrap {
+      padding: 0 16px 12px;
+      flex-shrink: 0;
+    }
+    .csel-search-wrap[hidden] { display: none !important; }
+    .csel-search {
+      width: 100%;
+      background: #0d0f16;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+    }
+    .csel-search:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .csel-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      max-height: 60vh;
+      padding: 4px 10px 14px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .csel-list::-webkit-scrollbar { width: 6px; }
+    .csel-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+    }
+    .csel-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+    .csel-option:hover,
+    .csel-option:focus {
+      background: rgba(255, 255, 255, 0.06);
+      outline: none;
+    }
+    .csel-option:active { background: rgba(99, 102, 241, 0.18); }
+    .csel-option[aria-selected="true"] {
+      background: rgba(99, 102, 241, 0.18);
+      color: #fff;
+    }
+    .csel-option-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+    }
+    .csel-option-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .csel-option-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .csel-option.has-sub .csel-option-label {
+      font-weight: 800;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .csel-option-sub {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .csel-option-check {
+      flex-shrink: 0;
+      width: 1.1em;
+      text-align: center;
+      opacity: 0;
+      color: #a5b4fc;
+      font-weight: 800;
+    }
+    .csel-option[aria-selected="true"] .csel-option-check { opacity: 1; }
+    .csel-empty {
+      padding: 24px 12px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    body.csel-scroll-lock {
+      overflow: hidden !important;
+      overscroll-behavior: none;
+    }
+
+    @media (max-width: 640px) {
+      .csel-overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .csel-panel {
+        width: 100%;
+        max-width: none;
+        max-height: 75vh;
+        max-height: 75dvh;
+        border-radius: 24px 24px 0 0;
+        transform: translateY(100%);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .csel-overlay.open .csel-panel {
+        transform: translateY(0);
+      }
+      .csel-handle { display: block; }
+      .csel-header { padding: 12px 16px 10px; }
+      .csel-list {
+        max-height: none;
+        padding: 4px 10px calc(12px + env(safe-area-inset-bottom));
+      }
+      .csel-option { min-height: 48px; padding: 12px 14px; }
+      .csel-search { font-size: 16px; }
+      .csel-trigger.ctrl-select,
+      .csel-trigger.status-select { font-size: 16px; }
+    }
     
     .amount-input-box { display: flex; align-items: center; gap: 10px; }
     .amount-input { background: #0d0f16; border: 1px solid var(--card-border); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 1.05rem; font-weight: 800; width: 140px; text-align: right; outline: none; font-variant-numeric: tabular-nums; transition: all 0.2s; }
@@ -1031,6 +1302,22 @@
   </div>
 
   <div id="sync-status" class="sync-status">Gotowe</div>
+
+  <!-- Własne okno wyboru (nad modalami) -->
+  <div id="csel-overlay" class="csel-overlay" aria-hidden="true">
+    <div class="csel-backdrop" data-csel-dismiss></div>
+    <div class="csel-panel" role="dialog" aria-modal="true" aria-labelledby="csel-title">
+      <div class="csel-handle" aria-hidden="true"></div>
+      <div class="csel-header">
+        <h3 class="csel-title" id="csel-title">Wybierz</h3>
+        <button type="button" class="csel-close" data-csel-dismiss aria-label="Zamknij">✕</button>
+      </div>
+      <div class="csel-search-wrap" id="csel-search-wrap" hidden>
+        <input type="search" class="csel-search" id="csel-search" placeholder="Szukaj…" autocomplete="off" enterkeyhint="search" />
+      </div>
+      <div class="csel-list" id="csel-list" role="listbox" tabindex="-1"></div>
+    </div>
+  </div>
 
   <script>
     // REJESTRACJA SERVICE WORKERA DO INSTALACJI (PWA)
@@ -2137,6 +2424,13 @@
         const opt = document.createElement("option");
         opt.value = st.id;
         opt.textContent = studentAssignLabel(st);
+        const subParts = [];
+        if (st.subject) subParts.push(st.subject);
+        subParts.push(studentLevelLabel(st));
+        subParts.push(`${st.rate} zł/h`);
+        opt.dataset.subtitle = subParts.join(" • ");
+        const colors = getSubjectLevelColors(st.subject, st.level);
+        if (colors && colors.solid) opt.dataset.color = colors.solid;
         if (st.id === currentStudentId) opt.selected = true;
         select.appendChild(opt);
       });
@@ -2375,6 +2669,377 @@
 
     document.getElementById("reg-password").addEventListener("keydown", (e) => { if (e.key === "Enter") submitRegister(); });
     document.getElementById("auth-password").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+
+    /* ========== Własne okno wyboru (custom select) ========== */
+    const CSEL_SEL = "select.ctrl-select, select.status-select";
+    const cselRefreshers = new WeakMap();
+    let cselActiveSelect = null;
+    let cselActiveIndex = -1;
+    let cselOptionEls = [];
+    let cselScrollLockCount = 0;
+
+    const cselOverlay = document.getElementById("csel-overlay");
+    const cselPanel = cselOverlay.querySelector(".csel-panel");
+    const cselTitle = document.getElementById("csel-title");
+    const cselList = document.getElementById("csel-list");
+    const cselSearchWrap = document.getElementById("csel-search-wrap");
+    const cselSearch = document.getElementById("csel-search");
+
+    (function patchSelectValueSync() {
+      const valueDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");
+      const indexDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "selectedIndex");
+      if (valueDesc && valueDesc.set) {
+        Object.defineProperty(HTMLSelectElement.prototype, "value", {
+          get() { return valueDesc.get.call(this); },
+          set(v) {
+            valueDesc.set.call(this, v);
+            const refresh = cselRefreshers.get(this);
+            if (refresh) refresh();
+          },
+          configurable: true,
+          enumerable: true
+        });
+      }
+      if (indexDesc && indexDesc.set) {
+        Object.defineProperty(HTMLSelectElement.prototype, "selectedIndex", {
+          get() { return indexDesc.get.call(this); },
+          set(v) {
+            indexDesc.set.call(this, v);
+            const refresh = cselRefreshers.get(this);
+            if (refresh) refresh();
+          },
+          configurable: true,
+          enumerable: true
+        });
+      }
+    })();
+
+    function cselLockScroll() {
+      if (cselScrollLockCount === 0) document.body.classList.add("csel-scroll-lock");
+      cselScrollLockCount++;
+    }
+
+    function cselUnlockScroll() {
+      cselScrollLockCount = Math.max(0, cselScrollLockCount - 1);
+      if (cselScrollLockCount === 0) document.body.classList.remove("csel-scroll-lock");
+    }
+
+    function cselNorm(str) {
+      return stripDiacritics(String(str || "")).toLowerCase().trim();
+    }
+
+    function cselGetTitle(select) {
+      if (select.dataset.cselTitle) return select.dataset.cselTitle;
+      const wrap = select.closest(".fg, .status-select-wrap");
+      if (wrap) {
+        const label = wrap.querySelector(":scope > label, :scope > .pay-col-sub");
+        if (label && label.textContent.trim()) return label.textContent.trim();
+      }
+      return "Wybierz";
+    }
+
+    function cselSelectedLabel(select) {
+      const opt = select.options[select.selectedIndex];
+      if (!opt) return "—";
+      return (opt.textContent || "").trim() || "—";
+    }
+
+    function refreshCselTrigger(select) {
+      const trigger = select._cselTrigger;
+      if (!trigger) return;
+      const labelEl = trigger.querySelector(".csel-trigger-label");
+      if (labelEl) labelEl.textContent = cselSelectedLabel(select);
+
+      trigger.classList.remove("opt-ok", "opt-missing", "opt-overpaid");
+      ["opt-ok", "opt-missing", "opt-overpaid"].forEach(cls => {
+        if (select.classList.contains(cls)) trigger.classList.add(cls);
+      });
+
+      if (select.classList.contains("status-select")) {
+        trigger.classList.add("status-select");
+        trigger.classList.remove("ctrl-select");
+      } else {
+        trigger.classList.add("ctrl-select");
+        trigger.classList.remove("status-select");
+      }
+    }
+
+    function enhanceSelect(select) {
+      if (!(select instanceof HTMLSelectElement)) return;
+      if (!select.matches(CSEL_SEL)) return;
+      if (select.dataset.cselEnhanced === "1") {
+        refreshCselTrigger(select);
+        return;
+      }
+
+      const field = document.createElement("div");
+      field.className = "csel-field";
+
+      const trigger = document.createElement("button");
+      trigger.type = "button";
+      trigger.className = "csel-trigger";
+      if (select.classList.contains("status-select")) trigger.classList.add("status-select");
+      else trigger.classList.add("ctrl-select");
+      trigger.setAttribute("aria-haspopup", "listbox");
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.innerHTML = `<span class="csel-trigger-label"></span><span class="csel-trigger-caret" aria-hidden="true">▾</span>`;
+
+      const parent = select.parentNode;
+      parent.insertBefore(field, select);
+      field.appendChild(trigger);
+      field.appendChild(select);
+
+      select.classList.add("csel-native");
+      select.dataset.cselEnhanced = "1";
+      select.setAttribute("tabindex", "-1");
+      select._cselTrigger = trigger;
+      select._cselField = field;
+
+      const refresh = () => refreshCselTrigger(select);
+      cselRefreshers.set(select, refresh);
+      refresh();
+
+      trigger.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openCselPicker(select);
+      });
+
+      select.addEventListener("change", refresh);
+
+      const optObserver = new MutationObserver(() => refresh());
+      optObserver.observe(select, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["value", "selected", "class", "data-subtitle", "data-color"]
+      });
+      select._cselObserver = optObserver;
+    }
+
+    function enhanceAllSelects(root = document) {
+      root.querySelectorAll(CSEL_SEL).forEach(enhanceSelect);
+    }
+
+    function closeCselPicker() {
+      if (!cselOverlay.classList.contains("open")) return;
+      cselOverlay.classList.remove("open");
+      cselOverlay.setAttribute("aria-hidden", "true");
+      cselUnlockScroll();
+      if (cselActiveSelect && cselActiveSelect._cselTrigger) {
+        cselActiveSelect._cselTrigger.setAttribute("aria-expanded", "false");
+      }
+      cselActiveSelect = null;
+      cselActiveIndex = -1;
+      cselOptionEls = [];
+      cselSearch.value = "";
+      cselList.innerHTML = "";
+    }
+
+    function pickCselOption(value) {
+      const select = cselActiveSelect;
+      if (!select) return;
+      const prev = select.value;
+      select.value = value;
+      if (select.value !== value) {
+        for (let i = 0; i < select.options.length; i++) {
+          if (select.options[i].value === value) {
+            select.selectedIndex = i;
+            break;
+          }
+        }
+      }
+      if (select.classList.contains("status-select")) {
+        select.classList.remove("opt-ok", "opt-missing", "opt-overpaid");
+        if (value === "ok" || value === "missing" || value === "overpaid") {
+          select.classList.add("opt-" + value);
+        }
+      }
+      refreshCselTrigger(select);
+      if (select.value !== prev) {
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      closeCselPicker();
+    }
+
+    function renderCselOptions(filterText) {
+      const select = cselActiveSelect;
+      if (!select) return;
+      const q = cselNorm(filterText);
+      cselList.innerHTML = "";
+      cselOptionEls = [];
+
+      const options = Array.from(select.options);
+      let visible = options;
+      if (q) {
+        visible = options.filter(opt => {
+          const hay = cselNorm([opt.textContent, opt.dataset.subtitle || "", opt.value].join(" "));
+          return hay.includes(q);
+        });
+      }
+
+      if (visible.length === 0) {
+        cselList.innerHTML = `<div class="csel-empty">Brak wyników</div>`;
+        cselActiveIndex = -1;
+        return;
+      }
+
+      visible.forEach((opt, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "csel-option";
+        btn.setAttribute("role", "option");
+        btn.setAttribute("aria-selected", opt.selected ? "true" : "false");
+        btn.dataset.value = opt.value;
+        if (opt.dataset.subtitle) btn.classList.add("has-sub");
+
+        const labelText = (opt.textContent || "").trim() || "—";
+        // przy dwuliniowym wierszu ucznia pierwsza linia = imię (bez długiego tekstu opcji)
+        let mainLabel = labelText;
+        if (opt.dataset.subtitle && opt.value) {
+          const st = typeof students !== "undefined" ? students.find(s => s.id === opt.value) : null;
+          if (st && st.name) mainLabel = st.name;
+        }
+
+        let html = "";
+        if (opt.dataset.color) {
+          html += `<span class="csel-option-dot" style="background:${opt.dataset.color}" aria-hidden="true"></span>`;
+        }
+        html += `<span class="csel-option-body">`;
+        html += `<span class="csel-option-label">${escapeHtml(mainLabel)}</span>`;
+        if (opt.dataset.subtitle) {
+          html += `<span class="csel-option-sub">${escapeHtml(opt.dataset.subtitle)}</span>`;
+        }
+        html += `</span><span class="csel-option-check" aria-hidden="true">✓</span>`;
+        btn.innerHTML = html;
+
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          pickCselOption(opt.value);
+        });
+
+        cselList.appendChild(btn);
+        cselOptionEls.push(btn);
+        if (opt.selected) cselActiveIndex = idx;
+      });
+
+      if (cselActiveIndex < 0) cselActiveIndex = 0;
+      highlightCselOption(cselActiveIndex, false);
+    }
+
+    function highlightCselOption(index, scroll) {
+      if (!cselOptionEls.length) return;
+      cselActiveIndex = Math.max(0, Math.min(index, cselOptionEls.length - 1));
+      cselOptionEls.forEach((el, i) => {
+        if (i === cselActiveIndex) el.focus({ preventScroll: !scroll });
+      });
+      if (scroll && cselOptionEls[cselActiveIndex]) {
+        cselOptionEls[cselActiveIndex].scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    function openCselPicker(select) {
+      if (cselOverlay.classList.contains("open")) closeCselPicker();
+      cselActiveSelect = select;
+      cselTitle.textContent = cselGetTitle(select);
+      if (select._cselTrigger) select._cselTrigger.setAttribute("aria-expanded", "true");
+
+      const showSearch = select.options.length > 8;
+      cselSearchWrap.hidden = !showSearch;
+      cselSearch.value = "";
+
+      renderCselOptions("");
+      cselOverlay.classList.add("open");
+      cselOverlay.setAttribute("aria-hidden", "false");
+      cselLockScroll();
+
+      requestAnimationFrame(() => {
+        if (showSearch) cselSearch.focus();
+        else if (cselOptionEls[cselActiveIndex]) cselOptionEls[cselActiveIndex].focus();
+        else cselList.focus();
+      });
+    }
+
+    cselOverlay.querySelectorAll("[data-csel-dismiss]").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        closeCselPicker();
+      });
+    });
+
+    cselSearch.addEventListener("input", () => {
+      renderCselOptions(cselSearch.value);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (!cselOverlay.classList.contains("open")) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeCselPicker();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        highlightCselOption(cselActiveIndex + 1, true);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        highlightCselOption(cselActiveIndex - 1, true);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const el = cselOptionEls[cselActiveIndex];
+        if (el) pickCselOption(el.dataset.value);
+      }
+    });
+
+    // proste przeciągnięcie w dół (bottom sheet)
+    (function initCselDragClose() {
+      let startY = 0;
+      let dragging = false;
+      const onStart = (y) => {
+        if (window.innerWidth > 640) return;
+        if (cselList.scrollTop > 0) return;
+        startY = y;
+        dragging = true;
+        cselPanel.style.transition = "none";
+      };
+      const onMove = (y) => {
+        if (!dragging) return;
+        const dy = Math.max(0, y - startY);
+        cselPanel.style.transform = `translateY(${dy}px)`;
+      };
+      const onEnd = (y) => {
+        if (!dragging) return;
+        dragging = false;
+        cselPanel.style.transition = "";
+        const dy = y - startY;
+        cselPanel.style.transform = "";
+        if (dy > 80) closeCselPicker();
+      };
+      cselPanel.addEventListener("touchstart", (e) => {
+        if (e.target.closest(".csel-list") && cselList.scrollTop > 0) return;
+        onStart(e.touches[0].clientY);
+      }, { passive: true });
+      cselPanel.addEventListener("touchmove", (e) => {
+        if (!dragging) return;
+        onMove(e.touches[0].clientY);
+      }, { passive: true });
+      cselPanel.addEventListener("touchend", (e) => {
+        onEnd(e.changedTouches[0].clientY);
+      }, { passive: true });
+    })();
+
+    const cselDomObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        for (const node of m.addedNodes) {
+          if (node.nodeType !== 1) continue;
+          if (node.matches && node.matches(CSEL_SEL)) enhanceSelect(node);
+          if (node.querySelectorAll) enhanceAllSelects(node);
+        }
+      }
+    });
+    cselDomObserver.observe(document.body, { childList: true, subtree: true });
+
+    enhanceAllSelects();
 
     renderAll();
     initResponsive();
