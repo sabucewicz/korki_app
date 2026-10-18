@@ -412,7 +412,7 @@
 
     /* Baza uczniów w panelu bocznym */
     .students-scroll { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .student-item { background: rgba(255, 255, 255, 0.025); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; cursor: default; }
+    .student-item { background: rgba(255, 255, 255, 0.025); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; cursor: default; }
     .student-item:hover { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.04); transform: translateX(4px); }
     .st-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; overflow: hidden; }
     .st-pill { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
@@ -443,7 +443,7 @@
     /* PŁATNOŚCI */
     .payments-view-wrapper { width: 100%; height: 100%; display: flex; flex-direction: column; gap: 16px; }
     .payments-summary-bar { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 14px; flex-shrink: 0; }
-    .pay-kpi { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 22px; display: flex; flex-direction: column; justify-content: center; gap: 6px; transition: all 0.25s ease; }
+    .pay-kpi { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px 22px; display: flex; flex-direction: column; justify-content: center; gap: 6px; transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
     .pay-kpi.global-status-ok { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 24px rgba(16, 185, 129, 0.15); }
     .pay-kpi.global-status-danger { background: rgba(244, 63, 94, 0.14); border-color: rgba(244, 63, 94, 0.45); box-shadow: 0 0 24px rgba(244, 63, 94, 0.2); }
     .pay-kpi.global-status-warning { background: rgba(245, 158, 11, 0.14); border-color: rgba(245, 158, 11, 0.45); box-shadow: 0 0 24px rgba(245, 158, 11, 0.2); }
@@ -453,11 +453,11 @@
 
     .payments-table-panel { flex: 1; min-height: 0; background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); }
     .payments-search-row { padding: 16px 22px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .search-input { background: #0d0f16; border: 1px solid var(--card-border); color: var(--text); padding: 10px 16px; border-radius: 14px; font-size: 0.9rem; outline: none; min-width: 300px; transition: all 0.2s; }
+    .search-input { background: #0d0f16; border: 1px solid var(--card-border); color: var(--text); padding: 10px 16px; border-radius: 14px; font-size: 0.9rem; outline: none; min-width: 300px; transition: border-color 0.2s, box-shadow 0.2s; }
     .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
     .payments-scroll-area { flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; }
     
-    .pay-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); border-radius: 20px; padding: 18px 28px; display: grid; grid-template-columns: 1fr 280px 200px; align-items: center; gap: 24px; transition: all 0.25s ease; }
+    .pay-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); border-radius: 20px; padding: 18px 28px; display: grid; grid-template-columns: 1fr 280px 200px; align-items: center; gap: 24px; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
     .pay-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.16); transform: translateX(4px); }
     .pay-stud-main { display: flex; flex-direction: column; gap: 6px; }
     .pay-stud-name { font-size: 1.1rem; font-weight: 800; color: #fff; }
@@ -529,6 +529,17 @@
       visibility: hidden;
       pointer-events: none;
       transition: opacity 0.18s ease, visibility 0.18s ease;
+      overscroll-behavior: none;
+      touch-action: none;
+    }
+    .csel-overlay .csel-list,
+    .csel-overlay .csel-search,
+    .csel-overlay .csel-close,
+    .csel-overlay .csel-option {
+      touch-action: manipulation;
+    }
+    .csel-overlay .csel-list {
+      touch-action: pan-y;
     }
     .csel-overlay.open {
       opacity: 1;
@@ -557,6 +568,9 @@
       opacity: 0;
       transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.18s ease;
       overflow: hidden;
+    }
+    .csel-overlay.csel-animating .csel-panel {
+      will-change: transform, opacity;
     }
     .csel-overlay.open .csel-panel {
       transform: translateY(0) scale(1);
@@ -624,6 +638,9 @@
       max-height: 60vh;
       padding: 4px 10px 14px;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
+      contain: layout paint;
     }
     .csel-list::-webkit-scrollbar { width: 6px; }
     .csel-list::-webkit-scrollbar-thumb {
@@ -645,6 +662,8 @@
       text-align: left;
       cursor: pointer;
       transition: background 0.12s ease;
+      content-visibility: auto;
+      contain-intrinsic-size: auto 48px;
     }
     .csel-option:hover,
     .csel-option:focus {
@@ -746,7 +765,14 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
+        touch-action: pan-y;
+        contain: layout paint;
         padding: 4px 10px 8px;
+      }
+      .csel-backdrop {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.85);
       }
       .csel-option { min-height: 48px; padding: 12px 14px; }
       .csel-search { font-size: 16px; }
@@ -755,7 +781,7 @@
     }
     
     .amount-input-box { display: flex; align-items: center; gap: 10px; }
-    .amount-input { background: #0d0f16; border: 1px solid var(--card-border); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 1.05rem; font-weight: 800; width: 140px; text-align: right; outline: none; font-variant-numeric: tabular-nums; transition: all 0.2s; }
+    .amount-input { background: #0d0f16; border: 1px solid var(--card-border); color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 1.05rem; font-weight: 800; width: 140px; text-align: right; outline: none; font-variant-numeric: tabular-nums; transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s; }
     .amount-input:disabled { opacity: 0.35; cursor: not-allowed; border-color: rgba(255, 255, 255, 0.05); background: rgba(0, 0, 0, 0.2); }
     .amount-input:focus:not(:disabled) { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
 
@@ -769,7 +795,7 @@
     .modal-sheet-body { display: contents; }
     .fg { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
     .fg label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
-    .ctrl-input, .ctrl-select { background: #0d0f16; border: 1px solid var(--card-border); color: var(--text); padding: 14px 16px; border-radius: 16px; font-size: 0.95rem; outline: none; width: 100%; transition: all 0.2s; -webkit-appearance: none; }
+    .ctrl-input, .ctrl-select { background: #0d0f16; border: 1px solid var(--card-border); color: var(--text); padding: 14px 16px; border-radius: 16px; font-size: 0.95rem; outline: none; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
     .ctrl-input:focus, .ctrl-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); }
     .checkbox-container { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 16px; cursor: pointer; margin: 18px 0; transition: all 0.2s; }
     .checkbox-container:active { transform: scale(0.97); }
@@ -961,10 +987,18 @@
         border-radius: 22px 22px 0 0;
         border-width: 1px 0 0 0;
         padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-        background: rgba(14, 17, 24, 0.94);
-        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        background: #0e1118;
+        backdrop-filter: none; -webkit-backdrop-filter: none;
         box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
         gap: 8px;
+      }
+      .panel, .pay-kpi, .payments-table-panel {
+        backdrop-filter: none; -webkit-backdrop-filter: none;
+        background: #12151f;
+      }
+      .cal-header-cell {
+        backdrop-filter: none; -webkit-backdrop-filter: none;
+        background: #0e1118;
       }
       .nav-tab-btn { padding: 13px 8px; border-radius: 16px; font-size: 0.92rem; }
 
@@ -1010,7 +1044,13 @@
 
     /* telefony wąskie: panele i modale od góry (nad klawiaturą) */
     @media (max-width: 640px) {
-      .modal-backdrop { align-items: flex-start; padding: 0; }
+      .modal-backdrop {
+        align-items: flex-start;
+        padding: 0;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(0, 0, 0, 0.9);
+      }
       .modal-dialog {
         position: fixed;
         top: var(--vv-offset-top, 0px);
@@ -1035,6 +1075,8 @@
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
+        touch-action: pan-y;
+        contain: layout paint;
       }
       .modal-dialog > .modal-btns {
         flex-shrink: 0;
@@ -1287,7 +1329,7 @@
             <div class="panel-title">
               <span>💰 Ewidencja Wpłat</span>
             </div>
-            <input type="text" id="payment-search" class="search-input" placeholder="🔍 Szukaj ucznia..." oninput="renderPaymentsView()" />
+            <input type="text" id="payment-search" class="search-input" placeholder="🔍 Szukaj ucznia..." />
           </div>
           <div class="payments-scroll-area" id="payments-list-container"></div>
         </div>
@@ -1416,14 +1458,35 @@
     // =========================================================
     function backupKey(uid) { return "tf_backup_" + uid; }
 
-    function saveBackup() {
+    let backupSaveTimer = null;
+    function saveBackup({ immediate = false } = {}) {
       if (!currentUser) return;
-      try {
-        localStorage.setItem(backupKey(currentUser.uid), JSON.stringify({
-          students, schedule, payments, subjectColors, savedAt: Date.now()
-        }));
-      } catch (e) { /* brak miejsca / tryb prywatny – trudno */ }
+      const write = () => {
+        backupSaveTimer = null;
+        try {
+          localStorage.setItem(backupKey(currentUser.uid), JSON.stringify({
+            students, schedule, payments, subjectColors, savedAt: Date.now()
+          }));
+        } catch (e) { /* brak miejsca / tryb prywatny – trudno */ }
+      };
+      if (immediate) {
+        if (backupSaveTimer) { clearTimeout(backupSaveTimer); backupSaveTimer = null; }
+        write();
+        return;
+      }
+      if (backupSaveTimer) clearTimeout(backupSaveTimer);
+      backupSaveTimer = setTimeout(write, 300);
     }
+
+    function flushBackup() {
+      if (!currentUser) return;
+      saveBackup({ immediate: true });
+    }
+
+    window.addEventListener("pagehide", flushBackup);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") flushBackup();
+    });
 
     function loadBackup(uid) {
       try {
@@ -1951,7 +2014,7 @@
     }
 
     async function saveState({ render = true } = {}) {
-      saveBackup(); // najpierw lokalna kopia – działa nawet gdy baza padnie
+      saveBackup({ immediate: true }); // lokalna kopia przed zapisem do bazy
 
       if (!currentUser || !stateRef) {
         if (render) renderAll();
@@ -1998,7 +2061,7 @@
     }
 
     function scheduleCloudSave() {
-      saveBackup();
+      saveBackup(); // debounce 300 ms – Firestore i tak za 500 ms
       updatePaymentsSummaryValuesOnly();
 
       clearTimeout(cloudSaveTimer);
@@ -2068,7 +2131,7 @@
         if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments, subjectColors: inSubjectColors }) ===
             stableStringify({ students, schedule, payments, subjectColors })) {
           lastSyncedSubjectColorsStr = stableStringify(subjectColors);
-          saveBackup();
+          saveBackup({ immediate: true });
           setSyncStatus("✓ Zsynchronizowano", "ok");
           return;
         }
@@ -2079,7 +2142,7 @@
         subjectColors = inSubjectColors;
         lastSyncedSubjectColorsStr = stableStringify(subjectColors);
 
-        saveBackup();
+        saveBackup({ immediate: true });
         setSyncStatus("✓ Zsynchronizowano", "ok");
         renderAll();
       }, (error) => {
@@ -2330,30 +2393,62 @@
       });
     }
 
+    function filterPaymentsSearch() {
+      const container = document.getElementById("payments-list-container");
+      if (!container) return;
+      const searchVal = stripDiacritics((document.getElementById("payment-search")?.value || "").toLowerCase().trim());
+      const cards = container.querySelectorAll(".pay-card");
+      let visible = 0;
+      cards.forEach(card => {
+        const hay = card.dataset.searchName || "";
+        const show = !searchVal || hay.includes(searchVal);
+        card.hidden = !show;
+        if (show) visible++;
+      });
+      let empty = container.querySelector(".pay-search-empty");
+      if (cards.length === 0) {
+        if (empty) empty.remove();
+        return;
+      }
+      if (visible === 0) {
+        if (!empty) {
+          empty = document.createElement("div");
+          empty.className = "pay-search-empty";
+          empty.style.cssText = "color: var(--text-muted); font-size: 0.9rem; padding: 40px 10px; text-align: center;";
+          empty.textContent = "Brak wyników.";
+          container.appendChild(empty);
+        }
+        empty.hidden = false;
+      } else if (empty) {
+        empty.hidden = true;
+      }
+    }
+
+    let paymentSearchTimer = null;
+    function onPaymentSearchInput() {
+      clearTimeout(paymentSearchTimer);
+      paymentSearchTimer = setTimeout(filterPaymentsSearch, 100);
+    }
+
     function renderPaymentsView() {
       const container = document.getElementById("payments-list-container");
-      const searchVal = (document.getElementById("payment-search")?.value || "").toLowerCase().trim();
       container.innerHTML = "";
 
       updatePaymentsSummaryValuesOnly();
 
-      const filteredStudents = students.filter(st => {
-        if (!searchVal) return true;
-        return st.name.toLowerCase().includes(searchVal);
-      });
-
-      if (filteredStudents.length === 0) {
+      if (students.length === 0) {
         container.innerHTML = `<div style="color: var(--text-muted); font-size: 0.9rem; padding: 40px 10px; text-align: center;">Brak wyników.</div>`;
         return;
       }
 
-      filteredStudents.forEach(st => {
+      students.forEach(st => {
         const pay = payments[st.id] || { status: 'ok', amount: 0 };
         const status = pay.status || 'ok';
         const isAmountActive = status !== 'ok';
 
         const card = document.createElement("div");
         card.className = "pay-card";
+        card.dataset.searchName = stripDiacritics((st.name || "").toLowerCase());
         card.innerHTML = `
           <div class="pay-stud-main">
             <div class="pay-stud-name">${escapeHtml(st.name)}</div>
@@ -2377,6 +2472,9 @@
         `;
         container.appendChild(card);
       });
+
+      if (typeof enhanceAllSelects === "function") enhanceAllSelects(container);
+      filterPaymentsSearch();
     }
 
     function changePaymentStatus(studentId, newStatus) {
@@ -2500,6 +2598,7 @@
       });
 
       document.getElementById("assign-is-once").checked = Boolean(isOnce);
+      if (typeof notifyCselSelectChanged === "function") notifyCselSelectChanged(select);
       openModal("modal-assign");
     }
 
@@ -2572,6 +2671,7 @@
         customInput.value = "";
         if (!selectedSubject) select.selectedIndex = 0;
       }
+      if (typeof notifyCselSelectChanged === "function") notifyCselSelectChanged(select);
     }
 
     function onSubjectSelectChange() {
@@ -2667,32 +2767,105 @@
       }
     }
 
-    function openModal(id) { document.getElementById(id).classList.add("open"); }
-    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+    function openModal(id) {
+      document.getElementById(id).classList.add("open");
+      if (typeof syncVvListeners === "function") syncVvListeners();
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("open");
+      if (typeof syncVvListeners === "function") syncVvListeners();
+    }
     function escapeHtml(text) { if (!text) return ""; const div = document.createElement("div"); div.textContent = text; return div.innerHTML; }
 
-    window.addEventListener("click", e => { if (e.target.classList.contains("modal-backdrop")) { e.target.classList.remove("open"); } });
+    /* zamknięcie modala tapnięciem w tło – tylko gdy start i koniec na tle; bez duchowego clicka */
+    (function initModalBackdropDismiss() {
+      const openedAt = new WeakMap();
+      const downOnBackdrop = new WeakMap();
+      document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
+        backdrop.addEventListener("pointerdown", (e) => {
+          downOnBackdrop.set(backdrop, e.target === backdrop);
+        });
+        backdrop.addEventListener("click", (e) => {
+          if (e.target !== backdrop) return;
+          if (!downOnBackdrop.get(backdrop)) return;
+          downOnBackdrop.set(backdrop, false);
+          const t0 = openedAt.get(backdrop) || 0;
+          if (Date.now() - t0 < 280) return;
+          backdrop.classList.remove("open");
+          if (typeof syncVvListeners === "function") syncVvListeners();
+        });
+      });
+      const _open = openModal;
+      openModal = function (id) {
+        const el = document.getElementById(id);
+        if (el) openedAt.set(el, Date.now());
+        _open(id);
+      };
+    })();
 
-    /* visualViewport → --vvh / --vv-offset-top (klawiatura iOS/Android) */
+    /* visualViewport → --vvh / --vv-offset-top tylko gdy panel/modal otwarty */
+    let syncVvListeners = () => {};
     (function initVisualViewportVars() {
       const root = document.documentElement;
-      const update = () => {
+      let raf = 0;
+      let listening = false;
+      let lastVvh = "";
+      let lastOff = "";
+
+      const apply = () => {
+        raf = 0;
         const vv = window.visualViewport;
+        let vvh, off;
         if (vv) {
-          root.style.setProperty("--vvh", Math.round(vv.height) + "px");
-          root.style.setProperty("--vv-offset-top", Math.round(vv.offsetTop) + "px");
+          vvh = Math.round(vv.height) + "px";
+          off = Math.round(vv.offsetTop) + "px";
         } else {
-          root.style.setProperty("--vvh", "100dvh");
-          root.style.setProperty("--vv-offset-top", "0px");
+          vvh = "100dvh";
+          off = "0px";
         }
+        if (vvh !== lastVvh) { root.style.setProperty("--vvh", vvh); lastVvh = vvh; }
+        if (off !== lastOff) { root.style.setProperty("--vv-offset-top", off); lastOff = off; }
       };
-      update();
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", update);
-        window.visualViewport.addEventListener("scroll", update);
+
+      const schedule = () => {
+        if (raf) return;
+        raf = requestAnimationFrame(apply);
+      };
+
+      const onOrientation = () => setTimeout(schedule, 200);
+
+      function attach() {
+        if (listening) return;
+        listening = true;
+        apply();
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", schedule, { passive: true });
+          window.visualViewport.addEventListener("scroll", schedule, { passive: true });
+        }
+        window.addEventListener("resize", schedule, { passive: true });
+        window.addEventListener("orientationchange", onOrientation);
       }
-      window.addEventListener("resize", update);
-      window.addEventListener("orientationchange", () => setTimeout(update, 200));
+
+      function detach() {
+        if (!listening) return;
+        listening = false;
+        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener("resize", schedule);
+          window.visualViewport.removeEventListener("scroll", schedule);
+        }
+        window.removeEventListener("resize", schedule);
+        window.removeEventListener("orientationchange", onOrientation);
+      }
+
+      syncVvListeners = function () {
+        const cselOpen = document.getElementById("csel-overlay")?.classList.contains("open");
+        const modalOpen = !!document.querySelector(".modal-backdrop.open");
+        if (cselOpen || modalOpen) attach();
+        else detach();
+      };
+
+      apply(); // wartości startowe bez ciągłego nasłuchu
     })();
 
     /* po focusie w panelu — przewiń pole do widoku (po otwarciu klawiatury) */
@@ -2842,9 +3015,17 @@
       return (opt.textContent || "").trim() || "—";
     }
 
+    function cselTriggerSig(select) {
+      return select.options.length + "|" + select.value + "|" + select.className;
+    }
+
     function refreshCselTrigger(select) {
       const trigger = select._cselTrigger;
       if (!trigger) return;
+      const sig = cselTriggerSig(select);
+      if (select._cselSig === sig) return;
+      select._cselSig = sig;
+
       const labelEl = trigger.querySelector(".csel-trigger-label");
       if (labelEl) labelEl.textContent = cselSelectedLabel(select);
 
@@ -2859,6 +3040,16 @@
       } else {
         trigger.classList.add("ctrl-select");
         trigger.classList.remove("status-select");
+      }
+    }
+
+    function notifyCselSelectChanged(select) {
+      if (!(select instanceof HTMLSelectElement)) return;
+      if (select.dataset.cselEnhanced === "1") {
+        select._cselSig = null;
+        refreshCselTrigger(select);
+      } else {
+        enhanceSelect(select);
       }
     }
 
@@ -2904,25 +3095,21 @@
       });
 
       select.addEventListener("change", refresh);
-
-      const optObserver = new MutationObserver(() => refresh());
-      optObserver.observe(select, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["value", "selected", "class", "data-subtitle", "data-color"]
-      });
-      select._cselObserver = optObserver;
     }
 
     function enhanceAllSelects(root = document) {
       root.querySelectorAll(CSEL_SEL).forEach(enhanceSelect);
     }
 
+    let cselOpenedAt = 0;
+    let cselSearchTimer = null;
+
     function closeCselPicker() {
       if (!cselOverlay.classList.contains("open")) return;
       cselOverlay.classList.remove("open");
+      cselOverlay.classList.remove("csel-animating");
       cselOverlay.setAttribute("aria-hidden", "true");
+      cselPanel.style.willChange = "auto";
       cselUnlockScroll();
       if (cselActiveSelect && cselActiveSelect._cselTrigger) {
         cselActiveSelect._cselTrigger.setAttribute("aria-expanded", "false");
@@ -2931,7 +3118,10 @@
       cselActiveIndex = -1;
       cselOptionEls = [];
       cselSearch.value = "";
+      clearTimeout(cselSearchTimer);
+      cselSearchTimer = null;
       cselList.innerHTML = "";
+      syncVvListeners();
     }
 
     function pickCselOption(value) {
@@ -2953,6 +3143,7 @@
           select.classList.add("opt-" + value);
         }
       }
+      select._cselSig = null;
       refreshCselTrigger(select);
       if (select.value !== prev) {
         select.dispatchEvent(new Event("change", { bubbles: true }));
@@ -2960,39 +3151,24 @@
       closeCselPicker();
     }
 
-    function renderCselOptions(filterText) {
+    function buildCselOptions() {
       const select = cselActiveSelect;
       if (!select) return;
-      const q = cselNorm(filterText);
       cselList.innerHTML = "";
       cselOptionEls = [];
+      cselActiveIndex = -1;
 
-      const options = Array.from(select.options);
-      let visible = options;
-      if (q) {
-        visible = options.filter(opt => {
-          const hay = cselNorm([opt.textContent, opt.dataset.subtitle || "", opt.value].join(" "));
-          return hay.includes(q);
-        });
-      }
-
-      if (visible.length === 0) {
-        cselList.innerHTML = `<div class="csel-empty">Brak wyników</div>`;
-        cselActiveIndex = -1;
-        return;
-      }
-
-      visible.forEach((opt, idx) => {
+      Array.from(select.options).forEach((opt) => {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "csel-option";
         btn.setAttribute("role", "option");
         btn.setAttribute("aria-selected", opt.selected ? "true" : "false");
         btn.dataset.value = opt.value;
+        btn.dataset.searchHay = cselNorm([opt.textContent, opt.dataset.subtitle || "", opt.value].join(" "));
         if (opt.dataset.subtitle) btn.classList.add("has-sub");
 
         const labelText = (opt.textContent || "").trim() || "—";
-        // przy dwuliniowym wierszu ucznia pierwsza linia = imię (bez długiego tekstu opcji)
         let mainLabel = labelText;
         if (opt.dataset.subtitle && opt.value) {
           const st = typeof students !== "undefined" ? students.find(s => s.id === opt.value) : null;
@@ -3018,22 +3194,68 @@
 
         cselList.appendChild(btn);
         cselOptionEls.push(btn);
-        if (opt.selected) cselActiveIndex = idx;
+        if (opt.selected) cselActiveIndex = cselOptionEls.length - 1;
       });
 
+      if (!cselOptionEls.length) {
+        cselList.innerHTML = `<div class="csel-empty">Brak wyników</div>`;
+        cselActiveIndex = -1;
+        return;
+      }
       if (cselActiveIndex < 0) cselActiveIndex = 0;
+    }
+
+    function filterCselOptions(filterText) {
+      const q = cselNorm(filterText);
+      let emptyEl = cselList.querySelector(".csel-empty");
+      if (!cselOptionEls.length) {
+        if (!emptyEl) {
+          cselList.innerHTML = `<div class="csel-empty">Brak wyników</div>`;
+        }
+        cselActiveIndex = -1;
+        return;
+      }
+      let visibleCount = 0;
+      let firstVisible = -1;
+      cselOptionEls.forEach((btn, idx) => {
+        const show = !q || (btn.dataset.searchHay || "").includes(q);
+        btn.hidden = !show;
+        if (show) {
+          if (firstVisible < 0) firstVisible = idx;
+          visibleCount++;
+        }
+      });
+      if (visibleCount === 0) {
+        if (!emptyEl) {
+          emptyEl = document.createElement("div");
+          emptyEl.className = "csel-empty";
+          emptyEl.textContent = "Brak wyników";
+          cselList.appendChild(emptyEl);
+        }
+        emptyEl.hidden = false;
+        cselActiveIndex = -1;
+        return;
+      }
+      if (emptyEl) emptyEl.hidden = true;
+      if (cselActiveIndex < 0 || cselOptionEls[cselActiveIndex]?.hidden) {
+        cselActiveIndex = firstVisible;
+      }
       highlightCselOption(cselActiveIndex, false);
     }
 
     function highlightCselOption(index, scroll) {
-      if (!cselOptionEls.length) return;
-      cselActiveIndex = Math.max(0, Math.min(index, cselOptionEls.length - 1));
-      cselOptionEls.forEach((el, i) => {
-        if (i === cselActiveIndex) el.focus({ preventScroll: !scroll });
-      });
-      if (scroll && cselOptionEls[cselActiveIndex]) {
-        cselOptionEls[cselActiveIndex].scrollIntoView({ block: "nearest" });
+      const visible = cselOptionEls.filter(el => !el.hidden);
+      if (!visible.length) return;
+      let target = cselOptionEls[index];
+      if (!target || target.hidden) {
+        target = visible[0];
+        index = cselOptionEls.indexOf(target);
       }
+      cselActiveIndex = index;
+      visible.forEach(el => {
+        if (el === target) el.focus({ preventScroll: !scroll });
+      });
+      if (scroll && target) target.scrollIntoView({ block: "nearest" });
     }
 
     function openCselPicker(select) {
@@ -3046,28 +3268,55 @@
       cselSearchWrap.hidden = !showSearch;
       cselSearch.value = "";
 
-      renderCselOptions("");
+      buildCselOptions();
+      filterCselOptions("");
+      cselOpenedAt = Date.now();
+      cselOverlay.classList.add("csel-animating");
+      cselPanel.style.willChange = "transform, opacity";
       cselOverlay.classList.add("open");
       cselOverlay.setAttribute("aria-hidden", "false");
       cselLockScroll();
+      syncVvListeners();
+
+      const clearWillChange = (e) => {
+        if (e && e.target !== cselPanel) return;
+        cselPanel.style.willChange = "auto";
+        cselOverlay.classList.remove("csel-animating");
+        cselPanel.removeEventListener("transitionend", clearWillChange);
+      };
+      cselPanel.addEventListener("transitionend", clearWillChange);
 
       requestAnimationFrame(() => {
-        // na telefonie bez autofocusu wyszukiwarki — klawiatura nie zasłania listy
         if (showSearch && window.innerWidth > 640) cselSearch.focus();
-        else if (cselOptionEls[cselActiveIndex]) cselOptionEls[cselActiveIndex].focus({ preventScroll: true });
-        else cselList.focus({ preventScroll: true });
+        else if (cselOptionEls[cselActiveIndex] && !cselOptionEls[cselActiveIndex].hidden) {
+          cselOptionEls[cselActiveIndex].focus({ preventScroll: true });
+        } else cselList.focus({ preventScroll: true });
       });
     }
 
-    cselOverlay.querySelectorAll("[data-csel-dismiss]").forEach(el => {
-      el.addEventListener("click", (e) => {
+    /* tło: zamknięcie tylko gdy start i koniec na tle; ✕ osobno; bez duchowego clicka */
+    (function initCselBackdropDismiss() {
+      const backdrop = cselOverlay.querySelector(".csel-backdrop");
+      let downOnBackdrop = false;
+      backdrop.addEventListener("pointerdown", (e) => {
+        downOnBackdrop = e.target === backdrop;
+      });
+      backdrop.addEventListener("click", (e) => {
+        if (e.target !== backdrop) return;
+        if (!downOnBackdrop) return;
+        downOnBackdrop = false;
+        if (Date.now() - cselOpenedAt < 280) return;
+        closeCselPicker();
+      });
+      cselOverlay.querySelector(".csel-close").addEventListener("click", (e) => {
         e.preventDefault();
         closeCselPicker();
       });
-    });
+    })();
 
     cselSearch.addEventListener("input", () => {
-      renderCselOptions(cselSearch.value);
+      clearTimeout(cselSearchTimer);
+      cselSearchTimer = setTimeout(() => filterCselOptions(cselSearch.value), 100);
     });
 
     document.addEventListener("keydown", (e) => {
@@ -3079,64 +3328,27 @@
       }
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        highlightCselOption(cselActiveIndex + 1, true);
+        const visible = cselOptionEls.map((el, i) => (!el.hidden ? i : -1)).filter(i => i >= 0);
+        const pos = visible.indexOf(cselActiveIndex);
+        const next = visible[Math.min(visible.length - 1, Math.max(0, pos) + 1)];
+        if (next != null) highlightCselOption(next, true);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        highlightCselOption(cselActiveIndex - 1, true);
+        const visible = cselOptionEls.map((el, i) => (!el.hidden ? i : -1)).filter(i => i >= 0);
+        const pos = visible.indexOf(cselActiveIndex);
+        const prev = visible[Math.max(0, (pos < 0 ? 0 : pos) - 1)];
+        if (prev != null) highlightCselOption(prev, true);
       } else if (e.key === "Enter") {
         e.preventDefault();
         const el = cselOptionEls[cselActiveIndex];
-        if (el) pickCselOption(el.dataset.value);
+        if (el && !el.hidden) pickCselOption(el.dataset.value);
       }
     });
 
-    // przeciągnięcie w górę zamyka panel (top sheet); zamknięcie też przez tło / ✕
-    (function initCselDragClose() {
-      let startY = 0;
-      let dragging = false;
-      const onStart = (y) => {
-        if (window.innerWidth > 640) return;
-        if (cselList.scrollTop > 0) return;
-        startY = y;
-        dragging = true;
-        cselPanel.style.transition = "none";
-      };
-      const onMove = (y) => {
-        if (!dragging) return;
-        const dy = Math.min(0, y - startY); // tylko w górę
-        cselPanel.style.transform = `translateY(${dy}px)`;
-      };
-      const onEnd = (y) => {
-        if (!dragging) return;
-        dragging = false;
-        cselPanel.style.transition = "";
-        const up = startY - y;
-        cselPanel.style.transform = "";
-        if (up > 80) closeCselPicker();
-      };
-      cselPanel.addEventListener("touchstart", (e) => {
-        if (e.target.closest(".csel-list") && cselList.scrollTop > 0) return;
-        onStart(e.touches[0].clientY);
-      }, { passive: true });
-      cselPanel.addEventListener("touchmove", (e) => {
-        if (!dragging) return;
-        onMove(e.touches[0].clientY);
-      }, { passive: true });
-      cselPanel.addEventListener("touchend", (e) => {
-        onEnd(e.changedTouches[0].clientY);
-      }, { passive: true });
-    })();
+    // gest przeciągnięcia usunięty — zamykanie: tło / ✕ / Esc (nie z listy)
 
-    const cselDomObserver = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        for (const node of m.addedNodes) {
-          if (node.nodeType !== 1) continue;
-          if (node.matches && node.matches(CSEL_SEL)) enhanceSelect(node);
-          if (node.querySelectorAll) enhanceAllSelects(node);
-        }
-      }
-    });
-    cselDomObserver.observe(document.body, { childList: true, subtree: true });
+    const paymentSearchEl = document.getElementById("payment-search");
+    if (paymentSearchEl) paymentSearchEl.addEventListener("input", onPaymentSearchInput);
 
     enhanceAllSelects();
 
