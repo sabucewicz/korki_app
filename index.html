@@ -170,10 +170,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 0;
       transition: all 0.2s;
       white-space: nowrap;
     }
+
+    .nav-tab-label-short { display: none; }
 
     .nav-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
     .nav-tab-btn:active { transform: scale(0.96); }
@@ -589,6 +591,8 @@
     }
     @media (max-width: 1250px) {
       .hide-mobile { display: none; }
+      .nav-tab-label-full { display: none; }
+      .nav-tab-label-short { display: inline; }
     }
 
     /* TRYB "JEDNA KOLUMNA": tablet, telefon, bardzo małe okno */
@@ -645,6 +649,8 @@
       header { display: grid; grid-template-columns: 1fr; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 10px; }
       .brand { width: 100%; justify-content: space-between; }
       .hide-mobile { display: none; }
+      .nav-tab-label-full { display: none; }
+      .nav-tab-label-short { display: inline; }
       .main-nav-tabs {
         position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
         width: auto;
@@ -838,8 +844,8 @@
 
       <!-- NAWIGACJA ZAKŁADEK -->
       <nav class="main-nav-tabs">
-        <button class="nav-tab-btn active" id="tab-btn-schedule" onclick="switchMainTab('schedule')"><span>📅 Harmonogram<span class="hide-mobile"> i Baza</span></span></button>
-        <button class="nav-tab-btn" id="tab-btn-payments" onclick="switchMainTab('payments')"><span>💳 Płatności<span class="hide-mobile"> i Rozliczenia</span></span></button>
+        <button class="nav-tab-btn active" id="tab-btn-schedule" onclick="switchMainTab('schedule')"><span class="nav-tab-label-full">📅 Harmonogram i Baza</span><span class="nav-tab-label-short">📅 Harmonogram</span></button>
+        <button class="nav-tab-btn" id="tab-btn-payments" onclick="switchMainTab('payments')"><span class="nav-tab-label-full">💳 Płatności i Rozliczenia</span><span class="nav-tab-label-short">💳 Płatności</span></button>
       </nav>
 
       <div class="kpi-bar">
