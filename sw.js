@@ -1,13 +1,13 @@
 // TutorFlow Pro – service worker (instalacja jako aplikacja + działanie po chwilowym braku internetu)
-const CACHE_NAME = 'tutorflow-cache-v3';
+const CACHE_NAME = 'tutorflow-cache-v4';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  './icon-maskable-512.png',
-  './apple-touch-icon.png'
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png',
+  './icons/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', event => {
