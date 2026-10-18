@@ -387,8 +387,10 @@
     .slot-card.occupied { border-style: solid; border-width: 1px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); }
 
     .slot-card.level-podstawowka { background: var(--col-podstawowka-bg); border-color: var(--col-podstawowka-border); color: var(--col-podstawowka-text); }
-    .slot-card.level-liceum-podst { background: var(--col-liceum-podst-bg); border-color: var(--col-liceum-podst-border); color: var(--col-liceum-podst-text); }
-    .slot-card.level-liceum-rozsz { background: var(--col-liceum-rozsz-bg); border-color: var(--col-liceum-rozsz-border); color: var(--col-liceum-rozsz-text); }
+    .slot-card.level-liceum-podst,
+    .slot-card.level-technikum-podst { background: var(--col-liceum-podst-bg); border-color: var(--col-liceum-podst-border); color: var(--col-liceum-podst-text); }
+    .slot-card.level-liceum-rozsz,
+    .slot-card.level-technikum-rozsz { background: var(--col-liceum-rozsz-bg); border-color: var(--col-liceum-rozsz-border); color: var(--col-liceum-rozsz-text); }
     .slot-card.level-inf-rozsz { background: var(--col-inf-rozsz-bg); border-color: var(--col-inf-rozsz-border); color: var(--col-inf-rozsz-text); }
     .slot-card.is-once {
       background: repeating-linear-gradient(-45deg, rgba(236, 72, 153, 0.14), rgba(236, 72, 153, 0.14) 8px, rgba(236, 72, 153, 0.24) 8px, rgba(236, 72, 153, 0.24) 16px) !important; border-color: var(--col-once-border) !important; color: var(--col-once-text) !important;
@@ -411,15 +413,19 @@
     .st-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .st-pill { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .st-pill.podstawowka { background: #10b981; box-shadow: 0 0 10px #10b981; }
-    .st-pill.liceum-podst { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
-    .st-pill.liceum-rozsz { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
+    .st-pill.liceum-podst, .st-pill.technikum-podst { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+    .st-pill.liceum-rozsz, .st-pill.technikum-rozsz { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
     .st-pill.inf-rozsz { background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
     .st-name { font-size: 0.95rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .st-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
-    .st-rate { font-size: 0.95rem; font-weight: 800; color: var(--success); margin-right: 12px; font-variant-numeric: tabular-nums; }
+    .st-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .st-rate {
+      font-size: 0.9rem; font-weight: 800; color: var(--success);
+      font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0;
+    }
     
     .btn-icon-edit, .btn-icon-del { border: 1px solid; cursor: pointer; width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.2s; flex-shrink: 0; }
-    .btn-icon-edit { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc; margin-right: 6px; }
+    .btn-icon-edit { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.3); color: #a5b4fc; }
     .btn-icon-edit:hover { background: var(--accent); color: #fff; }
     .btn-icon-edit:active { transform: scale(0.9); }
     .btn-icon-del { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.25); color: var(--danger); }
@@ -1000,8 +1006,10 @@
         <label>Poziom kształcenia</label>
         <select id="stud-level" class="ctrl-select">
           <option value="podstawowka">Podstawówka</option>
-          <option value="liceum-podst">Liceum/technikum – podstawa</option>
-          <option value="liceum-rozsz">Liceum/technikum – rozszerzenie</option>
+          <option value="liceum-podst">Liceum – podstawa</option>
+          <option value="liceum-rozsz">Liceum – rozszerzenie</option>
+          <option value="technikum-podst">Technikum – podstawa</option>
+          <option value="technikum-rozsz">Technikum – rozszerzenie</option>
           <option value="student">Student</option>
         </select>
       </div>
@@ -1096,11 +1104,18 @@
 
     const LEVEL_LABELS = {
       "podstawowka": "Podstawówka",
-      "liceum-podst": "Liceum/technikum – podstawa",
-      "liceum-rozsz": "Liceum/technikum – rozszerzenie",
+      "liceum-podst": "Liceum – podstawa",
+      "liceum-rozsz": "Liceum – rozszerzenie",
+      "technikum-podst": "Technikum – podstawa",
+      "technikum-rozsz": "Technikum – rozszerzenie",
       "student": "Student",
       "inf-rozsz": "Informatyka rozszerzenie"
     };
+
+    const VALID_LEVELS = [
+      "podstawowka", "liceum-podst", "liceum-rozsz",
+      "technikum-podst", "technikum-rozsz", "student"
+    ];
 
     const DEFAULT_SUBJECTS = ["Matematyka", "Język polski", "Język angielski"];
     const DEFAULT_SUBJECT_HUES = {
@@ -1109,10 +1124,13 @@
       "jezyk angielski": 145
     };
     const CUSTOM_HUE_QUEUE = [35, 275, 185, 60, 320, 100, 245];
+    // technikum korzysta z tych samych parametrów jasności co odpowiadające poziomy liceum
     const LEVEL_COLOR_PARAMS = {
       "podstawowka": { s: 48, l: 58, textL: 78 },
       "liceum-podst": { s: 58, l: 46, textL: 74 },
       "liceum-rozsz": { s: 68, l: 36, textL: 72 },
+      "technikum-podst": { s: 58, l: 46, textL: 74 },
+      "technikum-rozsz": { s: 68, l: 36, textL: 72 },
       "student": { s: 78, l: 28, textL: 70 },
       "inf-rozsz": { s: 68, l: 36, textL: 72 }
     };
@@ -1858,8 +1876,8 @@
               <div class="st-desc">${escapeHtml(studentListDesc(st))}</div>
             </div>
           </div>
-          <div style="display: flex; align-items: center;">
-            <span class="st-rate">${st.rate} zł</span>
+          <div class="st-right">
+            <span class="st-rate">${escapeHtml(String(st.rate))}&nbsp;zł</span>
             <button class="btn-icon-edit" title="Edytuj" onclick="openEditStudentModal('${st.id}')">✎</button>
             <button class="btn-icon-del" title="Usuń" onclick="deleteStudent('${st.id}')">✕</button>
           </div>
@@ -2145,9 +2163,7 @@
       document.getElementById("stud-grade").value = st.grade || "";
       document.getElementById("stud-rate").value = st.rate != null ? st.rate : "";
       document.getElementById("stud-level").value =
-        ["podstawowka", "liceum-podst", "liceum-rozsz", "student"].includes(st.level)
-          ? st.level
-          : "podstawowka";
+        VALID_LEVELS.includes(st.level) ? st.level : "podstawowka";
       fillSubjectSelect(st.subject || "");
       openModal("modal-new-student");
     }
@@ -2160,7 +2176,7 @@
       const rate = parseFloat(document.getElementById("stud-rate").value);
       if (!name) return alert("Podaj imię ucznia.");
       if (!subject) return alert("Wybierz lub wpisz przedmiot.");
-      if (!["podstawowka", "liceum-podst", "liceum-rozsz", "student"].includes(level)) {
+      if (!VALID_LEVELS.includes(level)) {
         return alert("Wybierz poziom kształcenia.");
       }
       if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę.");
