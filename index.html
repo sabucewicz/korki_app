@@ -1000,7 +1000,7 @@
       </div>
       <div class="fg" id="stud-subject-custom-wrap" style="display: none;">
         <label>Nazwa przedmiotu</label>
-        <input type="text" id="stud-subject-custom" class="ctrl-input" placeholder="np. Fizyka" autocomplete="off" />
+        <input type="text" id="stud-subject-custom" class="ctrl-input" placeholder="np. Filozofia, Łacina…" autocomplete="off" />
       </div>
       <div class="fg">
         <label>Poziom kształcenia</label>
@@ -1128,13 +1128,39 @@
       "technikum-podst", "technikum-rozsz", "student"
     ];
 
-    const DEFAULT_SUBJECTS = ["Matematyka", "Język polski", "Język angielski"];
+    // popularne przedmioty korepetycji + stałe, kontrastowe odcienie (HSL hue)
+    const DEFAULT_SUBJECTS = [
+      "Matematyka",
+      "Język polski",
+      "Język angielski",
+      "Język niemiecki",
+      "Język francuski",
+      "Język hiszpański",
+      "Fizyka",
+      "Chemia",
+      "Biologia",
+      "Informatyka",
+      "Historia",
+      "Geografia",
+      "WOS"
+    ];
     const DEFAULT_SUBJECT_HUES = {
-      "matematyka": 215,
-      "jezyk polski": 355,
-      "jezyk angielski": 145
+      "matematyka": 48,        // żółty
+      "jezyk polski": 0,       // czerwony
+      "jezyk angielski": 145,  // zieleń
+      "jezyk niemiecki": 28,   // pomarańcz
+      "jezyk francuski": 240,  // indygo
+      "jezyk hiszpanski": 320, // magenta
+      "fizyka": 210,           // niebieski
+      "chemia": 275,           // fiolet
+      "biologia": 105,         // limonka
+      "informatyka": 185,      // cyan
+      "historia": 340,         // bordowy
+      "geografia": 165,        // teal
+      "wos": 300               // fioletowo-różowy
     };
-    const CUSTOM_HUE_QUEUE = [35, 275, 185, 60, 320, 100, 245];
+    // wolne sloty hue dla własnych przedmiotów (daleko od domyślnych)
+    const CUSTOM_HUE_QUEUE = [60, 85, 125, 200, 230, 255, 355, 15];
     // technikum korzysta z tych samych parametrów jasności co odpowiadające poziomy liceum
     const LEVEL_COLOR_PARAMS = {
       "podstawowka": { s: 48, l: 58, textL: 78 },
@@ -1228,19 +1254,35 @@
       );
     }
 
+    function hueDistance(a, b) {
+      const d = Math.abs(a - b) % 360;
+      return Math.min(d, 360 - d);
+    }
+
     function allocateNextHue() {
-      const used = new Set([
+      const used = [
         ...Object.values(DEFAULT_SUBJECT_HUES).map(Number),
         ...Object.values(subjectColors).map(Number)
-      ]);
-      for (let cycle = 0; cycle < 50; cycle++) {
+      ];
+      const minDistToUsed = (hue) => {
+        if (used.length === 0) return 180;
+        return Math.min(...used.map(u => hueDistance(hue, u)));
+      };
+      let bestHue = CUSTOM_HUE_QUEUE[0];
+      let bestScore = -1;
+      for (let cycle = 0; cycle < 24; cycle++) {
         const offset = cycle * 15;
         for (const base of CUSTOM_HUE_QUEUE) {
           const hue = (base + offset) % 360;
-          if (!used.has(hue)) return hue;
+          const score = minDistToUsed(hue);
+          if (score > bestScore) {
+            bestScore = score;
+            bestHue = hue;
+            if (score >= 22) return hue;
+          }
         }
       }
-      return CUSTOM_HUE_QUEUE[0];
+      return bestHue;
     }
 
     // assign=true tylko przy zapisie ucznia; render tylko czyta (ew. tymczasowy hue bez zapisu)
@@ -1293,15 +1335,36 @@
       return LEVEL_LABELS_SHORT[st.level] || LEVEL_LABELS[st.level] || st.level;
     }
 
-    // "Język angielski" → "Angielski" (tylko do wyświetlania)
+    const SUBJECT_ABBREVS = {
+      "matematyka": "MAT",
+      "jezyk polski": "POL",
+      "jezyk angielski": "ANG",
+      "jezyk niemiecki": "NIE",
+      "jezyk francuski": "FRA",
+      "jezyk hiszpanski": "ESP",
+      "informatyka": "INF",
+      "fizyka": "FIZ",
+      "chemia": "CHE",
+      "biologia": "BIO",
+      "historia": "HIS",
+      "geografia": "GEO",
+      "wos": "WOS"
+    };
+
+    // Matematyka → MAT, Język polski → POL (tylko do wyświetlania)
     function shortSubjectLabel(subject) {
       const name = String(subject || "").replace(/\s+/g, " ").trim();
       if (!name) return "";
+      const key = normalizeSubjectKey(name);
+      if (SUBJECT_ABBREVS[key]) return SUBJECT_ABBREVS[key];
+      // własne przedmioty: pierwsze 3 litery (bez "język ")
+      let base = name;
       const parts = name.split(" ");
       if (parts.length > 1 && normalizeSubjectKey(parts[0]) === "jezyk") {
-        return formatSubjectName(parts.slice(1).join(" "));
+        base = parts.slice(1).join(" ");
       }
-      return formatSubjectName(name);
+      const letters = stripDiacritics(base).replace(/[^a-zA-Z]/g, "");
+      return (letters.slice(0, 3) || "?").toUpperCase();
     }
 
     function studentListDesc(st) {
@@ -2127,7 +2190,7 @@
 
       const other = document.createElement("option");
       other.value = "__other__";
-      other.textContent = "Inny (wpisz własny)…";
+      other.textContent = "── Własny przedmiot…";
       select.appendChild(other);
 
       const key = normalizeSubjectKey(selectedSubject || "");
