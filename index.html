@@ -410,14 +410,14 @@
     .students-scroll { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     .student-item { background: rgba(255, 255, 255, 0.025); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; cursor: default; }
     .student-item:hover { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.04); transform: translateX(4px); }
-    .st-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .st-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; overflow: hidden; }
     .st-pill { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .st-pill.podstawowka { background: #10b981; box-shadow: 0 0 10px #10b981; }
     .st-pill.liceum-podst, .st-pill.technikum-podst { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
     .st-pill.liceum-rozsz, .st-pill.technikum-rozsz { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
     .st-pill.inf-rozsz { background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
     .st-name { font-size: 0.95rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .st-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .st-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .st-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .st-rate {
       font-size: 0.9rem; font-weight: 800; color: var(--success);
@@ -457,7 +457,7 @@
     .pay-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.16); transform: translateX(4px); }
     .pay-stud-main { display: flex; flex-direction: column; gap: 6px; }
     .pay-stud-name { font-size: 1.1rem; font-weight: 800; color: #fff; }
-    .pay-stud-sub { font-size: 0.8rem; color: var(--text-muted); }
+    .pay-stud-sub { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .pay-col-sub { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
     
     .status-select-wrap { display: flex; flex-direction: column; width: 100%; }
@@ -1112,6 +1112,17 @@
       "inf-rozsz": "Informatyka rozszerzenie"
     };
 
+    // krótkie etykiety do list (baza uczniów, płatności)
+    const LEVEL_LABELS_SHORT = {
+      "podstawowka": "SP",
+      "liceum-podst": "LO podst.",
+      "liceum-rozsz": "LO rozs.",
+      "technikum-podst": "Tech. podst.",
+      "technikum-rozsz": "Tech. rozs.",
+      "student": "Student",
+      "inf-rozsz": "Inf. rozs."
+    };
+
     const VALID_LEVELS = [
       "podstawowka", "liceum-podst", "liceum-rozsz",
       "technikum-podst", "technikum-rozsz", "student"
@@ -1278,26 +1289,41 @@
       return LEVEL_LABELS[st.level] || st.level;
     }
 
+    function studentLevelLabelShort(st) {
+      return LEVEL_LABELS_SHORT[st.level] || LEVEL_LABELS[st.level] || st.level;
+    }
+
+    // "Język angielski" → "Angielski" (tylko do wyświetlania)
+    function shortSubjectLabel(subject) {
+      const name = String(subject || "").replace(/\s+/g, " ").trim();
+      if (!name) return "";
+      const parts = name.split(" ");
+      if (parts.length > 1 && normalizeSubjectKey(parts[0]) === "jezyk") {
+        return formatSubjectName(parts.slice(1).join(" "));
+      }
+      return formatSubjectName(name);
+    }
+
     function studentListDesc(st) {
       const parts = [];
-      if (st.subject) parts.push(st.subject);
-      parts.push(studentLevelLabel(st));
+      if (st.subject) parts.push(shortSubjectLabel(st.subject));
+      parts.push(studentLevelLabelShort(st));
       parts.push(`Kl. ${st.grade || "—"}`);
-      return parts.join(" • ");
+      return parts.join(" · ");
     }
 
     function studentPayDesc(st) {
       const parts = [];
-      if (st.subject) parts.push(st.subject);
-      parts.push(studentLevelLabel(st));
+      if (st.subject) parts.push(shortSubjectLabel(st.subject));
+      parts.push(studentLevelLabelShort(st));
       parts.push(`${st.rate} zł/h`);
-      return parts.join(" • ");
+      return parts.join(" · ");
     }
 
     function studentAssignLabel(st) {
       const mid = st.subject
-        ? `${st.subject}, ${studentLevelLabel(st)}`
-        : studentLevelLabel(st);
+        ? `${shortSubjectLabel(st.subject)}, ${studentLevelLabelShort(st)}`
+        : studentLevelLabelShort(st);
       return `${st.name} [${mid}] — ${st.rate} zł/h`;
     }
 
