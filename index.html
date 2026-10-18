@@ -1544,7 +1544,7 @@
         if (Object.keys(payloadSubjectColors).length > 0 || scStr !== lastSyncedSubjectColorsStr) {
           payload.subjectColors = payloadSubjectColors;
         }
-        await stateRef.set(payload, { merge: true });
+        await stateRef.set(payload, { mergeFields: Object.keys(payload) });
         lastSyncedSubjectColorsStr = scStr;
         pendingCloudSave = false;
         setSyncStatus("✓ Zsynchronizowano", "ok");
