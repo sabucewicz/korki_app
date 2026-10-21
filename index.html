@@ -41,22 +41,22 @@
       --success: #10b981;
       --warning: #f59e0b;
 
-      /* Kolory poziomów */
-      --col-podstawowka-bg: rgba(16, 185, 129, 0.14);
-      --col-podstawowka-border: rgba(16, 185, 129, 0.45);
-      --col-podstawowka-text: #6ee7b7;
+      /* Kolory poziomów (żywe, na ciemnym motywie) */
+      --col-podstawowka-bg: rgba(74, 222, 128, 0.18);
+      --col-podstawowka-border: rgba(74, 222, 128, 0.55);
+      --col-podstawowka-text: #4ade80;
 
-      --col-liceum-podst-bg: rgba(245, 158, 11, 0.14);
-      --col-liceum-podst-border: rgba(245, 158, 11, 0.45);
-      --col-liceum-podst-text: #fcd34d;
+      --col-liceum-podst-bg: rgba(250, 204, 21, 0.18);
+      --col-liceum-podst-border: rgba(250, 204, 21, 0.55);
+      --col-liceum-podst-text: #facc15;
 
-      --col-liceum-rozsz-bg: rgba(139, 92, 246, 0.16);
-      --col-liceum-rozsz-border: rgba(139, 92, 246, 0.5);
-      --col-liceum-rozsz-text: #c4b5fd;
+      --col-liceum-rozsz-bg: rgba(56, 189, 248, 0.18);
+      --col-liceum-rozsz-border: rgba(56, 189, 248, 0.55);
+      --col-liceum-rozsz-text: #38bdf8;
 
-      --col-inf-rozsz-bg: rgba(6, 182, 212, 0.16);
-      --col-inf-rozsz-border: rgba(6, 182, 212, 0.5);
-      --col-inf-rozsz-text: #67e8f9;
+      --col-student-bg: rgba(192, 132, 252, 0.18);
+      --col-student-border: rgba(192, 132, 252, 0.55);
+      --col-student-text: #c084fc;
 
       /* Lekcja jednorazowa */
       --col-once-bg: rgba(236, 72, 153, 0.18);
@@ -408,7 +408,7 @@
     .slot-card.level-technikum-podst { background: var(--col-liceum-podst-bg); border-color: var(--col-liceum-podst-border); color: var(--col-liceum-podst-text); }
     .slot-card.level-liceum-rozsz,
     .slot-card.level-technikum-rozsz { background: var(--col-liceum-rozsz-bg); border-color: var(--col-liceum-rozsz-border); color: var(--col-liceum-rozsz-text); }
-    .slot-card.level-inf-rozsz { background: var(--col-inf-rozsz-bg); border-color: var(--col-inf-rozsz-border); color: var(--col-inf-rozsz-text); }
+    .slot-card.level-student { background: var(--col-student-bg); border-color: var(--col-student-border); color: var(--col-student-text); }
     .slot-card.is-once {
       background: repeating-linear-gradient(-45deg, rgba(236, 72, 153, 0.14), rgba(236, 72, 153, 0.14) 8px, rgba(236, 72, 153, 0.24) 8px, rgba(236, 72, 153, 0.24) 16px) !important; border-color: var(--col-once-border) !important; color: var(--col-once-text) !important;
     }
@@ -431,10 +431,10 @@
     .st-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; overflow: visible; padding-left: 4px; margin-left: -4px; }
     .st-left > div { min-width: 0; overflow: hidden; }
     .st-pill { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-    .st-pill.podstawowka { background: #10b981; box-shadow: 0 0 10px #10b981; }
-    .st-pill.liceum-podst, .st-pill.technikum-podst { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
-    .st-pill.liceum-rozsz, .st-pill.technikum-rozsz { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
-    .st-pill.inf-rozsz { background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
+    .st-pill.podstawowka { background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+    .st-pill.liceum-podst, .st-pill.technikum-podst { background: #facc15; box-shadow: 0 0 10px #facc15; }
+    .st-pill.liceum-rozsz, .st-pill.technikum-rozsz { background: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
+    .st-pill.student { background: #c084fc; box-shadow: 0 0 10px #c084fc; }
     .st-name { font-size: 0.95rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .st-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .st-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -1493,7 +1493,7 @@
         backupSaveTimer = null;
         try {
           localStorage.setItem(backupKey(currentUser.uid), JSON.stringify({
-            students, schedule, payments, subjectColors,
+            students, schedule, payments,
             scheduleHourStart, scheduleHourEnd,
             savedAt: Date.now()
           }));
@@ -1528,7 +1528,6 @@
           students: migrateStudents(Array.isArray(d.students) ? d.students : []),
           schedule: d.schedule && typeof d.schedule === "object" ? d.schedule : {},
           payments: d.payments && typeof d.payments === "object" ? d.payments : {},
-          subjectColors: d.subjectColors && typeof d.subjectColors === "object" ? d.subjectColors : {},
           scheduleHourStart: hours.start,
           scheduleHourEnd: hours.end
         };
@@ -1543,7 +1542,6 @@
       students = [];
       schedule = {};
       payments = {};
-      subjectColors = {};
       applyScheduleHours(DEFAULT_SCHEDULE_HOUR_START, DEFAULT_SCHEDULE_HOUR_END);
     }
 
@@ -1610,7 +1608,7 @@
       "technikum-podst", "technikum-rozsz", "student"
     ];
 
-    // popularne przedmioty korepetycji + stałe, kontrastowe odcienie (HSL hue)
+    // popularne przedmioty korepetycji (kolor UI zależy od poziomu, nie od przedmiotu)
     const DEFAULT_SUBJECTS = [
       "Matematyka",
       "Język polski",
@@ -1626,39 +1624,21 @@
       "Geografia",
       "WOS"
     ];
-    const DEFAULT_SUBJECT_HUES = {
-      "matematyka": 48,        // żółty
-      "jezyk polski": 0,       // czerwony
-      "jezyk angielski": 145,  // zieleń
-      "jezyk niemiecki": 28,   // pomarańcz
-      "jezyk francuski": 240,  // indygo
-      "jezyk hiszpanski": 320, // magenta
-      "fizyka": 210,           // niebieski
-      "chemia": 275,           // fiolet
-      "biologia": 105,         // limonka
-      "informatyka": 185,      // cyan
-      "historia": 340,         // bordowy
-      "geografia": 165,        // teal
-      "wos": 300               // fioletowo-różowy
-    };
-    // wolne sloty hue dla własnych przedmiotów (daleko od domyślnych)
-    const CUSTOM_HUE_QUEUE = [60, 85, 125, 200, 230, 255, 355, 15];
-    // technikum korzysta z tych samych parametrów jasności co odpowiadające poziomy liceum
-    const LEVEL_COLOR_PARAMS = {
-      "podstawowka": { s: 48, l: 58, textL: 78 },
-      "liceum-podst": { s: 58, l: 46, textL: 74 },
-      "liceum-rozsz": { s: 68, l: 36, textL: 72 },
-      "technikum-podst": { s: 58, l: 46, textL: 74 },
-      "technikum-rozsz": { s: 68, l: 36, textL: 72 },
-      "student": { s: 78, l: 28, textL: 70 },
-      "inf-rozsz": { s: 68, l: 36, textL: 72 }
+    // kolor kropki / karty = wyłącznie poziom kształcenia (przedmiot bez znaczenia)
+    const LEVEL_SOLID = {
+      "podstawowka": "#4ade80",       // SP — pastelowa zieleń
+      "liceum-podst": "#facc15",      // średnia podstawa — ciepły żółty
+      "technikum-podst": "#facc15",
+      "liceum-rozsz": "#38bdf8",      // średnia rozszerzenie — jasnoniebieski
+      "technikum-rozsz": "#38bdf8",
+      "student": "#c084fc",           // matura / egzamin — delikatny fiolet
+      "inf-rozsz": "#38bdf8"          // legacy → jak rozszerzenie
     };
 
     // dane ładują się dopiero po zalogowaniu (każde konto ma swoje)
     let students = [];
     let schedule = {};
     let payments = {};
-    let subjectColors = {};
 
     let selectedSlotKey = null;
     let editingStudentId = null;
@@ -1674,7 +1654,6 @@
     let cloudSaveTimer = null;
     let cloudLoaded = false;
     let pendingCloudSave = false;
-    let lastSyncedSubjectColorsStr = null;
     let savingToCloud = false;
 
     // Migracja wyłącznie w pamięci: inf-rozsz → Informatyka + liceum-rozsz
@@ -1725,10 +1704,11 @@
 
     function usedCustomSubjects() {
       const byKey = new Map();
+      const defaultKeys = new Set(DEFAULT_SUBJECTS.map(normalizeSubjectKey));
       students.forEach(st => {
         if (!st.subject) return;
         const key = normalizeSubjectKey(st.subject);
-        if (!key || DEFAULT_SUBJECT_HUES[key] !== undefined) return;
+        if (!key || defaultKeys.has(key)) return;
         if (!byKey.has(key)) byKey.set(key, st.subject);
       });
       return Array.from(byKey.values()).sort((a, b) =>
@@ -1736,77 +1716,42 @@
       );
     }
 
-    function hueDistance(a, b) {
-      const d = Math.abs(a - b) % 360;
-      return Math.min(d, 360 - d);
-    }
-
-    function allocateNextHue() {
-      const used = [
-        ...Object.values(DEFAULT_SUBJECT_HUES).map(Number),
-        ...Object.values(subjectColors).map(Number)
-      ];
-      const minDistToUsed = (hue) => {
-        if (used.length === 0) return 180;
-        return Math.min(...used.map(u => hueDistance(hue, u)));
-      };
-      let bestHue = CUSTOM_HUE_QUEUE[0];
-      let bestScore = -1;
-      for (let cycle = 0; cycle < 24; cycle++) {
-        const offset = cycle * 15;
-        for (const base of CUSTOM_HUE_QUEUE) {
-          const hue = (base + offset) % 360;
-          const score = minDistToUsed(hue);
-          if (score > bestScore) {
-            bestScore = score;
-            bestHue = hue;
-            if (score >= 22) return hue;
-          }
-        }
-      }
-      return bestHue;
-    }
-
-    // assign=true tylko przy zapisie ucznia; render tylko czyta (ew. tymczasowy hue bez zapisu)
-    function getHueForSubject(subject, { assign = false } = {}) {
-      const key = normalizeSubjectKey(subject);
-      if (!key) return null;
-      if (DEFAULT_SUBJECT_HUES[key] !== undefined) return DEFAULT_SUBJECT_HUES[key];
-      if (subjectColors[key] !== undefined) return Number(subjectColors[key]);
-      const hue = allocateNextHue();
-      if (assign) subjectColors[key] = hue;
-      return hue;
-    }
-
-    function getSubjectLevelColors(subject, level) {
-      const hue = getHueForSubject(subject, { assign: false });
-      if (hue == null) return null;
-      const p = LEVEL_COLOR_PARAMS[level] || LEVEL_COLOR_PARAMS["liceum-podst"];
+    function hexToRgb(hex) {
+      const h = String(hex || "").replace("#", "");
+      if (h.length !== 6) return null;
       return {
-        bg: `hsla(${hue}, ${p.s}%, ${p.l}%, 0.22)`,
-        border: `hsla(${hue}, ${p.s}%, ${Math.max(p.l - 8, 22)}%, 0.55)`,
-        text: `hsl(${hue}, ${Math.min(p.s + 8, 75)}%, ${p.textL}%)`,
-        solid: `hsl(${hue}, ${p.s}%, ${p.l}%)`
+        r: parseInt(h.slice(0, 2), 16),
+        g: parseInt(h.slice(2, 4), 16),
+        b: parseInt(h.slice(4, 6), 16)
+      };
+    }
+
+    function getLevelColors(level) {
+      const solid = LEVEL_SOLID[level] || LEVEL_SOLID["liceum-podst"];
+      const rgb = hexToRgb(solid);
+      if (!rgb) return null;
+      const { r, g, b } = rgb;
+      return {
+        bg: `rgba(${r}, ${g}, ${b}, 0.18)`,
+        border: `rgba(${r}, ${g}, ${b}, 0.55)`,
+        text: solid,
+        solid
       };
     }
 
     function applyStudentColors(el, student, { asPill = false } = {}) {
-      if (student.subject) {
-        const colors = getSubjectLevelColors(student.subject, student.level);
-        if (colors) {
-          if (asPill) {
-            el.className = "st-pill";
-            el.style.background = colors.solid;
-            el.style.boxShadow = `0 0 10px ${colors.solid}`;
-          } else {
-            el.style.background = colors.bg;
-            el.style.borderColor = colors.border;
-            el.style.color = colors.text;
-          }
-          return true;
-        }
+      const colors = getLevelColors(student.level);
+      if (!colors) return false;
+      if (asPill) {
+        el.className = "st-pill";
+        el.style.background = colors.solid;
+        el.style.boxShadow = `0 0 10px ${colors.solid}`;
+      } else {
+        el.style.background = colors.bg;
+        el.style.borderColor = colors.border;
+        el.style.color = colors.text;
       }
-      return false;
+      return true;
     }
 
     function studentLevelLabel(st) {
@@ -2110,7 +2055,6 @@
       stateRef = null;
       cloudLoaded = false;
       pendingCloudSave = false;
-      lastSyncedSubjectColorsStr = null;
       await auth.signOut();
     }
 
@@ -2135,7 +2079,6 @@
       const payloadStudents = students;
       const payloadSchedule = Object.assign({}, schedule);
       const payloadPayments = Object.assign({}, payments);
-      const payloadSubjectColors = Object.assign({}, subjectColors);
       const payloadHourStart = scheduleHourStart;
       const payloadHourEnd = scheduleHourEnd;
 
@@ -2150,12 +2093,7 @@
           scheduleHourEnd: payloadHourEnd,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        const scStr = stableStringify(payloadSubjectColors);
-        if (Object.keys(payloadSubjectColors).length > 0 || scStr !== lastSyncedSubjectColorsStr) {
-          payload.subjectColors = payloadSubjectColors;
-        }
         await stateRef.set(payload, { mergeFields: Object.keys(payload) });
-        lastSyncedSubjectColorsStr = scStr;
         pendingCloudSave = false;
         setSyncStatus("✓ Zsynchronizowano", "ok");
       } catch (error) {
@@ -2179,7 +2117,6 @@
       currentUser = user;
       cloudLoaded = false;
       pendingCloudSave = false;
-      lastSyncedSubjectColorsStr = null;
       document.getElementById("auth-screen").style.display = "none";
       document.getElementById("app-root").style.display = "flex";
       updateUserLabel();
@@ -2195,7 +2132,6 @@
         students = backup.students;
         schedule = backup.schedule;
         payments = backup.payments;
-        subjectColors = backup.subjectColors || {};
         applyScheduleHours(
           backup.scheduleHourStart ?? DEFAULT_SCHEDULE_HOUR_START,
           backup.scheduleHourEnd ?? DEFAULT_SCHEDULE_HOUR_END
@@ -2225,7 +2161,6 @@
             setSyncStatus("Odtwarzanie danych z kopii…", "saving");
             await saveState({ render: false });
           } else {
-            lastSyncedSubjectColorsStr = stableStringify(subjectColors);
             setSyncStatus("✓ Nowe, puste konto", "ok");
           }
           renderAll();
@@ -2236,7 +2171,6 @@
         const inStudents = migrateStudents(Array.isArray(data.students) ? data.students : []);
         const inSchedule = data.schedule && typeof data.schedule === "object" ? data.schedule : {};
         const inPayments = data.payments && typeof data.payments === "object" ? data.payments : {};
-        const inSubjectColors = data.subjectColors && typeof data.subjectColors === "object" ? data.subjectColors : {};
         // brak pól u starych użytkowników → domyślnie 14:00–22:00
         const inHours = normalizeScheduleHours(
           data.scheduleHourStart ?? DEFAULT_SCHEDULE_HOUR_START,
@@ -2244,9 +2178,8 @@
         );
 
         // te same dane co już mamy – nic nie rób (nie odświeżaj ekranu)
-        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments, subjectColors: inSubjectColors, scheduleHourStart: inHours.start, scheduleHourEnd: inHours.end }) ===
-            stableStringify({ students, schedule, payments, subjectColors, scheduleHourStart, scheduleHourEnd })) {
-          lastSyncedSubjectColorsStr = stableStringify(subjectColors);
+        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments, scheduleHourStart: inHours.start, scheduleHourEnd: inHours.end }) ===
+            stableStringify({ students, schedule, payments, scheduleHourStart, scheduleHourEnd })) {
           saveBackup({ immediate: true });
           setSyncStatus("✓ Zsynchronizowano", "ok");
           if (data.scheduleHourStart == null || data.scheduleHourEnd == null) {
@@ -2258,9 +2191,7 @@
         students = inStudents;
         schedule = inSchedule;
         payments = inPayments;
-        subjectColors = inSubjectColors;
         applyScheduleHours(inHours.start, inHours.end);
-        lastSyncedSubjectColorsStr = stableStringify(subjectColors);
 
         saveBackup({ immediate: true });
         setSyncStatus("✓ Zsynchronizowano", "ok");
@@ -2288,7 +2219,6 @@
         cloudSaveTimer = null;
         cloudLoaded = false;
         pendingCloudSave = false;
-        lastSyncedSubjectColorsStr = null;
         resetState(); // dane poprzedniego konta nie mogą zostać w pamięci
         document.getElementById("app-root").style.display = "none";
         document.getElementById("auth-screen").style.display = "flex";
@@ -2727,7 +2657,7 @@
         subParts.push(studentLevelLabel(st));
         subParts.push(`${st.rate} zł/h`);
         opt.dataset.subtitle = subParts.join(" • ");
-        const colors = getSubjectLevelColors(st.subject, st.level);
+        const colors = getLevelColors(st.level);
         if (colors && colors.solid) opt.dataset.color = colors.solid;
         if (st.id === currentStudentId) opt.selected = true;
         select.appendChild(opt);
@@ -2863,8 +2793,6 @@
         return alert("Wybierz poziom kształcenia.");
       }
       if (isNaN(rate) || rate <= 0) return alert("Wprowadź prawidłową stawkę.");
-
-      getHueForSubject(subject, { assign: true });
 
       if (editingStudentId) {
         const st = students.find(s => s.id === editingStudentId);
