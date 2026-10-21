@@ -164,10 +164,10 @@
 
     .nav-tab-btn {
       background: transparent;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: var(--text-muted);
       padding: 8px 20px;
-      border-radius: 12px;
+      border-radius: 12px 12px 0 0;
       font-size: 0.88rem;
       font-weight: 700;
       cursor: pointer;
@@ -181,11 +181,12 @@
 
     .nav-tab-label-short { display: none; }
 
-    .nav-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.22); }
     .nav-tab-btn:active { transform: scale(0.96); }
     .nav-tab-btn.active {
       background: var(--accent);
       color: #fff;
+      border-color: rgba(129, 140, 248, 0.65);
       box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
     }
 
@@ -411,10 +412,12 @@
     }
 
     /* Baza uczniów w panelu bocznym */
-    .students-scroll { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .student-item { background: rgba(255, 255, 255, 0.025); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; cursor: default; }
+    .students-scroll { flex: 1; overflow-y: auto; overflow-x: visible; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .student-item { background: rgba(255, 255, 255, 0.025); border: 1px solid var(--card-border); border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease; cursor: default; overflow: visible; }
     .student-item:hover { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.04); transform: translateX(4px); }
-    .st-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; overflow: hidden; }
+    /* overflow tylko na tekście — poświata .st-pill (box-shadow) nie może być ucinana */
+    .st-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; overflow: visible; padding-left: 4px; margin-left: -4px; }
+    .st-left > div { min-width: 0; overflow: hidden; }
     .st-pill { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .st-pill.podstawowka { background: #10b981; box-shadow: 0 0 10px #10b981; }
     .st-pill.liceum-podst, .st-pill.technikum-podst { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
@@ -1199,9 +1202,16 @@
         </div>
 
         <div class="acc-section">
-          <div class="acc-hint">Pobierz kopię zapasową danych tego konta (uczniowie, grafik, płatności). Tylko eksport — nic nie zmienia w bazie.</div>
-          <div class="modal-btns" style="margin-top:0;">
-            <button class="btn-m btn-m-cancel" type="button" onclick="downloadDataBackup()">Pobierz kopię danych (JSON)</button>
+          <div class="acc-hint">Zakres godzin wyświetlanych w harmonogramie. Domyślnie 14:00–22:00.</div>
+          <div style="display:flex; gap:12px; margin-top:10px;">
+            <div class="fg" style="flex:1; margin-bottom:0;">
+              <label for="acc-hour-start">Od</label>
+              <select id="acc-hour-start" class="ctrl-select" onchange="onScheduleHoursChange()"></select>
+            </div>
+            <div class="fg" style="flex:1; margin-bottom:0;">
+              <label for="acc-hour-end">Do</label>
+              <select id="acc-hour-end" class="ctrl-select" onchange="onScheduleHoursChange()"></select>
+            </div>
           </div>
         </div>
 
@@ -1465,7 +1475,9 @@
         backupSaveTimer = null;
         try {
           localStorage.setItem(backupKey(currentUser.uid), JSON.stringify({
-            students, schedule, payments, subjectColors, savedAt: Date.now()
+            students, schedule, payments, subjectColors,
+            scheduleHourStart, scheduleHourEnd,
+            savedAt: Date.now()
           }));
         } catch (e) { /* brak miejsca / tryb prywatny – trudno */ }
       };
@@ -1493,11 +1505,14 @@
         const raw = localStorage.getItem(backupKey(uid));
         if (!raw) return null;
         const d = JSON.parse(raw);
+        const hours = normalizeScheduleHours(d.scheduleHourStart, d.scheduleHourEnd);
         return {
           students: migrateStudents(Array.isArray(d.students) ? d.students : []),
           schedule: d.schedule && typeof d.schedule === "object" ? d.schedule : {},
           payments: d.payments && typeof d.payments === "object" ? d.payments : {},
-          subjectColors: d.subjectColors && typeof d.subjectColors === "object" ? d.subjectColors : {}
+          subjectColors: d.subjectColors && typeof d.subjectColors === "object" ? d.subjectColors : {},
+          scheduleHourStart: hours.start,
+          scheduleHourEnd: hours.end
         };
       } catch (e) { return null; }
     }
@@ -1511,10 +1526,45 @@
       schedule = {};
       payments = {};
       subjectColors = {};
+      applyScheduleHours(DEFAULT_SCHEDULE_HOUR_START, DEFAULT_SCHEDULE_HOUR_END);
     }
 
     const DAYS = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
-    const HOURS = ["14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+    const DEFAULT_SCHEDULE_HOUR_START = 14;
+    const DEFAULT_SCHEDULE_HOUR_END = 22;
+
+    function buildHoursList(start, end) {
+      const list = [];
+      for (let h = start; h <= end; h++) {
+        list.push(String(h).padStart(2, "0") + ":00");
+      }
+      return list;
+    }
+
+    function normalizeScheduleHours(start, end) {
+      let s = Number(start);
+      let e = Number(end);
+      if (!Number.isInteger(s) || s < 0 || s > 23) s = DEFAULT_SCHEDULE_HOUR_START;
+      if (!Number.isInteger(e) || e < 0 || e > 23) e = DEFAULT_SCHEDULE_HOUR_END;
+      if (e < s) { const t = s; s = e; e = t; }
+      if (e === s) {
+        if (s < 23) e = s + 1;
+        else s = 22;
+      }
+      return { start: s, end: e };
+    }
+
+    function applyScheduleHours(start, end) {
+      const n = normalizeScheduleHours(start, end);
+      scheduleHourStart = n.start;
+      scheduleHourEnd = n.end;
+      HOURS = buildHoursList(scheduleHourStart, scheduleHourEnd);
+      return n;
+    }
+
+    let scheduleHourStart = DEFAULT_SCHEDULE_HOUR_START;
+    let scheduleHourEnd = DEFAULT_SCHEDULE_HOUR_END;
+    let HOURS = buildHoursList(scheduleHourStart, scheduleHourEnd);
 
     const LEVEL_LABELS = {
       "podstawowka": "Podstawówka",
@@ -1804,24 +1854,42 @@
       return `${st.name} [${mid}] — ${st.rate} zł/h`;
     }
 
-    function downloadDataBackup() {
-      const payload = {
-        students,
-        schedule,
-        payments,
-        subjectColors,
-        exportedAt: new Date().toISOString()
+    function populateScheduleHourSelects() {
+      const startSel = document.getElementById("acc-hour-start");
+      const endSel = document.getElementById("acc-hour-end");
+      if (!startSel || !endSel) return;
+
+      const fill = (sel, selected) => {
+        if (sel.options.length !== 24) {
+          sel.innerHTML = "";
+          for (let h = 0; h <= 23; h++) {
+            const opt = document.createElement("option");
+            opt.value = String(h);
+            opt.textContent = String(h).padStart(2, "0") + ":00";
+            sel.appendChild(opt);
+          }
+        }
+        sel.value = String(selected);
       };
-      const date = new Date().toISOString().slice(0, 10);
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `grafik-kopia-${date}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      fill(startSel, scheduleHourStart);
+      fill(endSel, scheduleHourEnd);
+    }
+
+    function onScheduleHoursChange() {
+      const startSel = document.getElementById("acc-hour-start");
+      const endSel = document.getElementById("acc-hour-end");
+      if (!startSel || !endSel) return;
+      let start = Number(startSel.value);
+      let end = Number(endSel.value);
+      if (end < start) {
+        end = start;
+        endSel.value = String(end);
+      }
+      applyScheduleHours(start, end);
+      populateScheduleHourSelects();
+      scheduleCloudSave();
+      renderAll();
+      accMessage("", "Zapisano zakres godzin harmonogramu.");
     }
 
     function stableStringify(v) {
@@ -1957,6 +2025,7 @@
       accMessage("", "");
       document.getElementById("acc-password").value = "";
       refreshAccountModal();
+      populateScheduleHourSelects();
       openModal("modal-account");
     }
 
@@ -2033,6 +2102,8 @@
       const payloadSchedule = Object.assign({}, schedule);
       const payloadPayments = Object.assign({}, payments);
       const payloadSubjectColors = Object.assign({}, subjectColors);
+      const payloadHourStart = scheduleHourStart;
+      const payloadHourEnd = scheduleHourEnd;
 
       savingToCloud = true;
       try {
@@ -2041,6 +2112,8 @@
           students: payloadStudents,
           schedule: payloadSchedule,
           payments: payloadPayments,
+          scheduleHourStart: payloadHourStart,
+          scheduleHourEnd: payloadHourEnd,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         const scStr = stableStringify(payloadSubjectColors);
@@ -2089,6 +2162,10 @@
         schedule = backup.schedule;
         payments = backup.payments;
         subjectColors = backup.subjectColors || {};
+        applyScheduleHours(
+          backup.scheduleHourStart ?? DEFAULT_SCHEDULE_HOUR_START,
+          backup.scheduleHourEnd ?? DEFAULT_SCHEDULE_HOUR_END
+        );
       }
       renderAll();
 
@@ -2126,13 +2203,21 @@
         const inSchedule = data.schedule && typeof data.schedule === "object" ? data.schedule : {};
         const inPayments = data.payments && typeof data.payments === "object" ? data.payments : {};
         const inSubjectColors = data.subjectColors && typeof data.subjectColors === "object" ? data.subjectColors : {};
+        // brak pól u starych użytkowników → domyślnie 14:00–22:00
+        const inHours = normalizeScheduleHours(
+          data.scheduleHourStart ?? DEFAULT_SCHEDULE_HOUR_START,
+          data.scheduleHourEnd ?? DEFAULT_SCHEDULE_HOUR_END
+        );
 
         // te same dane co już mamy – nic nie rób (nie odświeżaj ekranu)
-        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments, subjectColors: inSubjectColors }) ===
-            stableStringify({ students, schedule, payments, subjectColors })) {
+        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments, subjectColors: inSubjectColors, scheduleHourStart: inHours.start, scheduleHourEnd: inHours.end }) ===
+            stableStringify({ students, schedule, payments, subjectColors, scheduleHourStart, scheduleHourEnd })) {
           lastSyncedSubjectColorsStr = stableStringify(subjectColors);
           saveBackup({ immediate: true });
           setSyncStatus("✓ Zsynchronizowano", "ok");
+          if (data.scheduleHourStart == null || data.scheduleHourEnd == null) {
+            scheduleCloudSave();
+          }
           return;
         }
 
@@ -2140,11 +2225,17 @@
         schedule = inSchedule;
         payments = inPayments;
         subjectColors = inSubjectColors;
+        applyScheduleHours(inHours.start, inHours.end);
         lastSyncedSubjectColorsStr = stableStringify(subjectColors);
 
         saveBackup({ immediate: true });
         setSyncStatus("✓ Zsynchronizowano", "ok");
         renderAll();
+
+        // starsze konta bez pól godzin — dopisz domyślne 14–22 do Firestore
+        if (data.scheduleHourStart == null || data.scheduleHourEnd == null) {
+          scheduleCloudSave();
+        }
       }, (error) => {
         // baza niedostępna – cloudLoaded zostaje false; zmiany tylko lokalnie
         setSyncStatus("Baza niedostępna – tryb lokalny", "error");
@@ -2553,21 +2644,30 @@
 
       const line = document.getElementById("current-time-line");
       const grid = document.getElementById("main-grid");
-      const hourKey = String(nowPoland.getHours()).padStart(2, "0") + ":00";
-      const minutes = nowPoland.getMinutes();
       const todayIndex = getCurrentPolandDayIndex();
       const todayVisible = todayIndex >= viewStart && todayIndex < viewStart + visibleDays;
-      const label = grid.querySelector(`.time-slot-label[data-hour="${hourKey}"]`);
 
-      // linia tylko gdy: jest godzina z grafiku, "dziś" jest widoczne, a zakładka jest otwarta
-      if (!label || !todayVisible || !grid.offsetParent) {
+      // pozycja względem dynamicznej siatki (od scheduleHourStart do końca slotu scheduleHourEnd)
+      const nowMinutes = nowPoland.getHours() * 60 + nowPoland.getMinutes() + nowPoland.getSeconds() / 60;
+      const gridStartMin = scheduleHourStart * 60;
+      const gridEndMin = (scheduleHourEnd + 1) * 60;
+      const inGridRange = nowMinutes >= gridStartMin && nowMinutes < gridEndMin;
+
+      const firstLabel = HOURS.length ? grid.querySelector(`.time-slot-label[data-hour="${HOURS[0]}"]`) : null;
+      const lastLabel = HOURS.length ? grid.querySelector(`.time-slot-label[data-hour="${HOURS[HOURS.length - 1]}"]`) : null;
+
+      if (!inGridRange || !todayVisible || !grid.offsetParent || !firstLabel || !lastLabel) {
         line.style.display = "none";
         return;
       }
 
+      const spanTop = firstLabel.offsetTop;
+      const spanBottom = lastLabel.offsetTop + lastLabel.offsetHeight;
+      const progress = (nowMinutes - gridStartMin) / (gridEndMin - gridStartMin);
+
       line.style.display = "block";
-      line.style.top = `${grid.offsetTop + label.offsetTop + label.offsetHeight * (minutes / 60)}px`;
-      line.style.left = `${grid.offsetLeft + label.offsetLeft + label.offsetWidth + 4}px`;
+      line.style.top = `${grid.offsetTop + spanTop + progress * (spanBottom - spanTop)}px`;
+      line.style.left = `${grid.offsetLeft + firstLabel.offsetLeft + firstLabel.offsetWidth + 4}px`;
     }
     setInterval(updateLiveTimeAndIndicator, 1000);
 
