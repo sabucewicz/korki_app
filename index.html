@@ -1220,7 +1220,7 @@
       </div>
       <div class="modal-btns">
         <button class="btn-m btn-m-cancel" onclick="closeModal('modal-account')">Zamknij</button>
-        <button class="btn-m btn-m-submit" onclick="saveDisplayName()">Zapisz imię</button>
+        <button class="btn-m btn-m-submit" onclick="saveAccountSettings()">Zapisz</button>
       </div>
       <div class="modal-handle" aria-hidden="true"></div>
     </div>
@@ -1875,21 +1875,27 @@
       fill(endSel, scheduleHourEnd);
     }
 
+    // Zmiana selectów = tylko lokalny wybór w UI (bez applyScheduleHours / Firebase).
+    // Zakres trafia do stanu i bazy dopiero po kliknięciu „Zapisz” (saveAccountSettings).
     function onScheduleHoursChange() {
       const startSel = document.getElementById("acc-hour-start");
       const endSel = document.getElementById("acc-hour-end");
       if (!startSel || !endSel) return;
-      let start = Number(startSel.value);
-      let end = Number(endSel.value);
-      if (end < start) {
-        end = start;
-        endSel.value = String(end);
+      const start = Number(startSel.value);
+      const end = Number(endSel.value);
+      if (Number.isInteger(start) && Number.isInteger(end) && end < start) {
+        endSel.value = String(start);
       }
-      applyScheduleHours(start, end);
-      populateScheduleHourSelects();
-      scheduleCloudSave();
-      renderAll();
-      accMessage("", "Zapisano zakres godzin harmonogramu.");
+      accMessage("", "");
+    }
+
+    function readScheduleHoursFromAccountForm() {
+      const startSel = document.getElementById("acc-hour-start");
+      const endSel = document.getElementById("acc-hour-end");
+      if (!startSel || !endSel) {
+        return { start: scheduleHourStart, end: scheduleHourEnd };
+      }
+      return normalizeScheduleHours(startSel.value, endSel.value);
     }
 
     function stableStringify(v) {
@@ -2029,17 +2035,25 @@
       openModal("modal-account");
     }
 
-    async function saveDisplayName() {
+    async function saveAccountSettings() {
       const user = auth.currentUser;
       if (!user) return;
       const name = document.getElementById("acc-name").value.trim().replace(/\s+/g, " ");
       if (name.length < 2) return accMessage("Wpisz imię i nazwisko.", "");
+
+      const hours = readScheduleHoursFromAccountForm();
+      applyScheduleHours(hours.start, hours.end);
+      populateScheduleHourSelects();
+
       try {
         await user.updateProfile({ displayName: name });
         updateUserLabel();
+        // Pełny zapis stanu (w tym zakres godzin). Obiekt schedule NIE jest filtrowany
+        // po widocznych godzinach — ukryte sloty zostają w Firebase bez zmian.
+        await saveState({ render: true });
         accMessage("", "Zapisano.");
       } catch (error) {
-        accMessage(authErrorText(error, "Nie udało się zapisać imienia."), "");
+        accMessage(authErrorText(error, "Nie udało się zapisać ustawień."), "");
       }
     }
 
@@ -2098,6 +2112,8 @@
       }
 
       // snapshot stanu w momencie zapisu (żeby równoległy onSnapshot nie podmienił obiektów w trakcie set)
+      // WAŻNE: schedule kopiujemy w całości — NIGDY nie filtrujemy po HOURS / zakresie widoku.
+      // Ukryte sloty (np. 11:00 przy siatce 13–22) muszą zostać w Firebase.
       const payloadStudents = students;
       const payloadSchedule = Object.assign({}, schedule);
       const payloadPayments = Object.assign({}, payments);
@@ -2361,6 +2377,8 @@
         grid.appendChild(th);
       }
 
+      // Tylko filtrowanie WIDOKU: renderujemy wiersze z HOURS.
+      // Obiekt `schedule` w pamięci/Firebase nie jest tu czyszczony ani nadpisywany.
       HOURS.forEach(hour => {
         const timeCell = document.createElement("div");
         timeCell.className = "time-slot-label";
