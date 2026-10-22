@@ -166,19 +166,20 @@
       border: 1px solid var(--card-border);
       gap: 0;
       overflow: hidden;
-      min-width: 0;
+      flex-shrink: 0;
+      min-width: max-content;
     }
 
     .nav-tab-btn {
-      flex: 1 1 0;
-      min-width: 0;
+      flex: 1 0 auto;
+      min-width: max-content;
       width: auto;
       height: auto;
       background: transparent;
       border: 1px solid transparent;
       border-right-color: rgba(255, 255, 255, 0.08);
       color: var(--text-muted);
-      padding: 8px 14px;
+      padding: 8px 18px;
       border-radius: 0;
       font-size: 0.84rem;
       font-weight: 700;
@@ -209,9 +210,8 @@
       line-height: 1;
     }
     .nav-tab-text {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow: visible;
+      white-space: nowrap;
     }
     .nav-tab-label-short { display: none; }
 
@@ -310,26 +310,32 @@
     .btn-account:hover { background: rgba(255,255,255,.12); }
     .btn-account:active { transform: scale(0.92); }
     .auth-ok { min-height: 20px; color: #6ee7b7; font-size: 0.8rem; line-height: 1.4; margin-top: 6px; }
-    .acc-section { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 18px; padding-top: 18px; }
+    .acc-section { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 14px; padding-top: 14px; }
     .acc-hint { color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin-bottom: 12px; }
     .acc-providers { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
     .acc-activity-options {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       margin-top: 4px;
+      max-height: 168px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 4px;
+      -webkit-overflow-scrolling: touch;
     }
     .acc-activity-option {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      padding: 14px 16px;
+      padding: 12px 14px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
+      border-radius: 14px;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
       user-select: none;
+      flex-shrink: 0;
     }
     .acc-activity-option:hover {
       background: rgba(255, 255, 255, 0.07);
@@ -628,11 +634,9 @@
     }
     .acc-kpi-val.green {
       color: var(--success);
-      text-shadow: 0 0 18px rgba(16, 185, 129, 0.55);
     }
     .acc-kpi-val.amber {
       color: var(--warning);
-      text-shadow: 0 0 18px rgba(245, 158, 11, 0.55);
     }
     .acc-section-panel {
       background: var(--card-bg);
@@ -732,7 +736,6 @@
       font-variant-numeric: tabular-nums;
       text-align: right;
       white-space: nowrap;
-      text-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
     }
     .acc-pend-actions {
       grid-column: 1 / -1;
@@ -1235,6 +1238,37 @@
     .modal-dialog h3 { font-size: 1.25rem; margin-bottom: 20px; font-weight: 800; }
     .modal-handle { display: none; }
     .modal-sheet-body { display: contents; }
+
+    /* Panel ustawień konta — stały rozmiar w viewport, treść ze scrollem */
+    #modal-account .modal-dialog {
+      max-width: 400px;
+      width: min(400px, calc(100vw - 40px));
+      max-height: min(560px, calc(100dvh - 40px));
+      height: min(560px, calc(100dvh - 40px));
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #modal-account .modal-sheet-body {
+      display: block;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 2px;
+    }
+    #modal-account .modal-dialog > .modal-btns {
+      flex-shrink: 0;
+      margin-top: 14px;
+      padding-top: 4px;
+    }
+    #modal-account .modal-dialog h3 {
+      font-size: 1.15rem;
+      margin-bottom: 14px;
+    }
+    #modal-account .fg { margin-bottom: 12px; }
     .fg { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
     .fg label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
     .ctrl-input, .ctrl-select { background: #0d0f16; border: 1px solid var(--card-border); color: var(--text); padding: 14px 16px; border-radius: 16px; font-size: 0.95rem; outline: none; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; appearance: none; }
@@ -1358,14 +1392,12 @@
       header { gap: 10px; padding: 12px 16px; }
       .brand-sub { display: none; }
       .kpi-chip { width: 132px; padding: 8px 12px; }
-      .nav-tab-btn { padding: 8px 10px; font-size: 0.8rem; gap: 5px; }
+      .nav-tab-btn { padding: 8px 14px; font-size: 0.8rem; gap: 5px; }
       .dashboard-body { grid-template-columns: 1fr 320px; }
     }
     @media (max-width: 1250px) {
       .hide-mobile { display: none; }
-      .nav-tab-label-full { display: none; }
-      .nav-tab-label-short { display: inline; }
-      .main-nav-tabs { max-width: 480px; }
+      .main-nav-tabs { max-width: none; }
     }
 
     /* TRYB "JEDNA KOLUMNA": tablet, telefon, bardzo małe okno */
@@ -1393,17 +1425,17 @@
       }
       .brand { width: auto; gap: 16px; }
       .main-nav-tabs {
-        flex: 1 1 280px;
-        max-width: 560px;
+        flex: 0 0 auto;
+        max-width: none;
         width: auto;
-        min-width: 0;
+        min-width: max-content;
       }
       .nav-tab-btn {
-        flex: 1 1 0;
-        min-width: 0;
-        padding: 10px 6px;
+        flex: 1 0 auto;
+        min-width: max-content;
+        padding: 10px 14px;
         font-size: 0.82rem;
-        gap: 4px;
+        gap: 5px;
       }
 
       .kpi-bar { flex: 1 1 100%; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; width: 100%; align-items: stretch; }
@@ -1450,8 +1482,6 @@
       }
       .brand { width: 100%; justify-content: space-between; }
       .hide-mobile { display: none; }
-      .nav-tab-label-full { display: none !important; }
-      .nav-tab-label-short { display: block; }
 
       .main-nav-tabs {
         position: fixed;
@@ -1463,6 +1493,7 @@
         align-items: stretch;
         width: auto;
         max-width: none;
+        min-width: 0;
         border-radius: 22px 22px 0 0;
         border: 1px solid var(--card-border);
         border-width: 1px 0 0 0;
@@ -1496,13 +1527,13 @@
         align-items: center;
         justify-content: center;
         gap: 3px;
-        padding: 8px 4px;
+        padding: 8px 6px;
         border-radius: 14px;
         border: 1px solid transparent;
-        font-size: 0.68rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        letter-spacing: -0.01em;
-        white-space: normal;
+        letter-spacing: -0.02em;
+        white-space: nowrap;
         text-align: center;
         line-height: 1.15;
       }
@@ -1512,9 +1543,9 @@
         line-height: 1;
       }
       .nav-tab-text {
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        width: auto;
+        max-width: 100%;
+        overflow: visible;
         white-space: nowrap;
       }
       .nav-tab-btn.active {
@@ -1575,7 +1606,7 @@
         border-radius: 16px;
         gap: 10px;
       }
-      .acc-pend-amount { text-align: left; font-size: 1.1rem; text-shadow: none; }
+      .acc-pend-amount { text-align: left; font-size: 1.1rem; }
       .acc-pend-actions { gap: 8px; }
       .acc-btn {
         flex: 1 1 auto;
@@ -1606,10 +1637,11 @@
       .nav-tab-btn,
       .nav-tab-btn:first-child,
       .nav-tab-btn:last-child {
-        padding: 7px 2px;
-        font-size: 0.62rem;
+        padding: 7px 4px;
+        font-size: 0.66rem;
         gap: 2px;
         border-radius: 12px;
+        letter-spacing: -0.03em;
       }
       .nav-tab-icon { font-size: 1.05rem; }
       .main-nav-tabs { gap: 2px; padding: 5px 6px calc(5px + env(safe-area-inset-bottom)); }
@@ -1639,6 +1671,16 @@
         overflow: hidden;
         animation: sheetFromTop 0.2s ease-out;
         box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+      }
+      #modal-account .modal-dialog {
+        width: 100%;
+        max-width: none;
+        height: auto;
+        max-height: min(560px, calc(var(--vvh, 100dvh) - 16px));
+        padding: calc(14px + env(safe-area-inset-top)) 16px 8px;
+      }
+      #modal-account .acc-activity-options {
+        max-height: 140px;
       }
       @keyframes sheetFromTop { from { transform: translateY(-100%); } to { transform: translateY(0); } }
       .modal-sheet-body {
