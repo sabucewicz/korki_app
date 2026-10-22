@@ -645,8 +645,8 @@
       flex-shrink: 0;
     }
     .acc-section-panel.grow {
-      flex: 1;
-      min-height: 180px;
+      flex: 1 0 auto;
+      min-height: 360px;
     }
     .acc-section-header {
       padding: 16px 22px;
@@ -682,7 +682,9 @@
       flex-direction: column;
       gap: 14px;
       overflow-y: auto;
-      max-height: min(420px, 48vh);
+      /* ~2 karty widoczne; od 3. pojawia się scroll */
+      max-height: 300px;
+      min-height: 300px;
     }
     .acc-empty {
       color: var(--text-muted);
@@ -1458,7 +1460,13 @@
       }
       .acc-section-panel { margin-bottom: 0; }
       .acc-section-panel.grow { min-height: 0; }
-      .acc-pending-list, .acc-tx-list { max-height: none; overflow: visible; }
+      .acc-tx-list { max-height: none; min-height: 0; overflow: visible; }
+      /* karty 1-kolumnowe są wyższe — ~2 widoczne, od 3. scroll */
+      .acc-pending-list {
+        max-height: 340px;
+        min-height: 0;
+        overflow-y: auto;
+      }
       .acc-pending-card:hover { transform: none; }
     }
 
