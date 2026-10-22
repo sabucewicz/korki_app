@@ -1,7 +1,7 @@
 {
   "id": "/korki_app/",
-  "name": "TutorFlow Pro - Grafik",
-  "short_name": "TutorFlow",
+  "name": "TutedoFlow - Grafik",
+  "short_name": "TutedoFlow",
   "description": "Grafik korepetycji, baza uczniów i rozliczenia",
   "lang": "pl",
   "start_url": "./index.html",

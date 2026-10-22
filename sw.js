@@ -1,5 +1,5 @@
-// TutorFlow Pro – service worker (instalacja jako aplikacja + działanie po chwilowym braku internetu)
-const CACHE_NAME = 'tutorflow-cache-v16';
+// TutedoFlow – service worker (instalacja jako aplikacja + działanie po chwilowym braku internetu)
+const CACHE_NAME = 'tutedoflow-cache-v17';
 const APP_SHELL = [
   './',
   './index.html',
