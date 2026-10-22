@@ -23,6 +23,10 @@
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
 
+  <!-- PDF: Ewidencja sprzedaży (Księgowość) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+
   <!-- Google Font: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -162,44 +166,61 @@
       border: 1px solid var(--card-border);
       gap: 0;
       overflow: hidden;
+      min-width: 0;
     }
 
     .nav-tab-btn {
-      flex: 1;
-      width: 100%;
-      height: 100%;
+      flex: 1 1 0;
+      min-width: 0;
+      width: auto;
+      height: auto;
       background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid transparent;
+      border-right-color: rgba(255, 255, 255, 0.08);
       color: var(--text-muted);
-      padding: 8px 20px;
-      border-radius: 16px;
-      font-size: 0.88rem;
+      padding: 8px 14px;
+      border-radius: 0;
+      font-size: 0.84rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      gap: 0;
-      transition: all 0.2s;
+      gap: 6px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
       white-space: nowrap;
+      line-height: 1.2;
     }
 
+    .nav-tab-btn:last-child { border-right-color: transparent; }
+
     .nav-tab-btn:first-child {
-      border-radius: 16px 0 0 16px;
+      border-radius: 15px 0 0 15px;
     }
 
     .nav-tab-btn:last-child {
-      border-radius: 0 16px 16px 0;
+      border-radius: 0 15px 15px 0;
     }
 
+    .nav-tab-icon {
+      flex-shrink: 0;
+      font-size: 1em;
+      line-height: 1;
+    }
+    .nav-tab-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .nav-tab-label-short { display: none; }
 
-    .nav-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.22); }
-    .nav-tab-btn:active { transform: scale(0.96); }
+    .nav-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .nav-tab-btn:active { transform: scale(0.97); }
     .nav-tab-btn.active {
       background: var(--accent);
       color: #fff;
-      border-color: rgba(129, 140, 248, 0.65);
+      border-color: rgba(129, 140, 248, 0.55);
       box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
     }
 
@@ -486,6 +507,372 @@
     .status-select.opt-missing { border-color: rgba(244, 63, 94, 0.5); color: #fda4af; background: rgba(244, 63, 94, 0.14); }
     .status-select.opt-overpaid { border-color: rgba(245, 158, 11, 0.5); color: #fcd34d; background: rgba(245, 158, 11, 0.14); }
 
+    /* KSIĘGOWOŚĆ I EWIDENCJA — ten sam design system co Harmonogram / Płatności */
+    .accounting-view-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .acc-limit-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 16px 22px 18px;
+      flex-shrink: 0;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .acc-limit-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .acc-limit-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.2px;
+      line-height: 1.35;
+    }
+    .acc-limit-sub {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+    .acc-limit-pct {
+      font-size: 1.4rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--success);
+      flex-shrink: 0;
+      line-height: 1;
+      padding-top: 2px;
+    }
+    .acc-limit-pct.warn { color: var(--warning); }
+    .acc-limit-pct.danger { color: var(--danger); }
+    .acc-progress-track {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      overflow: hidden;
+      position: relative;
+    }
+    .acc-progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #059669, var(--success));
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+      transition: width 0.45s ease, background 0.3s ease, box-shadow 0.3s ease;
+      max-width: 100%;
+    }
+    .acc-progress-fill.warn {
+      background: linear-gradient(90deg, #d97706, var(--warning));
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+    }
+    .acc-progress-fill.danger {
+      background: linear-gradient(90deg, #e11d48, var(--danger));
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.45);
+    }
+    .acc-limit-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      flex-wrap: wrap;
+    }
+    .acc-section-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      flex-shrink: 0;
+    }
+    .acc-section-panel.grow {
+      flex: 1;
+      min-height: 180px;
+    }
+    .acc-section-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: rgba(255, 255, 255, 0.01);
+    }
+    .acc-section-header .panel-title {
+      gap: 10px;
+    }
+    .acc-badge-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.18);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+      font-size: 0.78rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .acc-pending-list {
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
+      max-height: min(420px, 48vh);
+    }
+    .acc-empty {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 30px 10px;
+      line-height: 1.5;
+    }
+    .acc-pending-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px 20px;
+      align-items: center;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    .acc-pending-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.16);
+      transform: translateX(4px);
+    }
+    .acc-pending-card.is-editing {
+      border-color: rgba(99, 102, 241, 0.45);
+      background: rgba(99, 102, 241, 0.1);
+      transform: none;
+    }
+    .acc-pend-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.2px;
+    }
+    .acc-pend-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .acc-pend-amount {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--success);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+    }
+    .acc-pend-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .acc-btn {
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+      font-family: inherit;
+    }
+    .acc-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
+    .acc-btn:active { transform: scale(0.96); }
+    .acc-btn-ok {
+      background: rgba(16, 185, 129, 0.14);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+    .acc-btn-ok:hover {
+      background: rgba(16, 185, 129, 0.26);
+      border-color: rgba(16, 185, 129, 0.55);
+      color: #a7f3d0;
+    }
+    .acc-btn-edit {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+    }
+    .acc-btn-edit:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .acc-btn-reject {
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.28);
+      color: #fda4af;
+    }
+    .acc-btn-reject:hover {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #fff;
+    }
+    .acc-edit-row {
+      grid-column: 1 / -1;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .acc-pending-card.is-editing .acc-edit-row { display: flex; }
+    .acc-pending-card.is-editing .acc-pend-actions { display: none; }
+    .acc-edit-input {
+      background: #0d0f16;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      width: 140px;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .acc-edit-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .acc-tx-list {
+      padding: 14px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .acc-tx-row {
+      display: grid;
+      grid-template-columns: 88px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--card-border);
+      font-size: 0.86rem;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .acc-tx-row:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+    .acc-tx-date { color: var(--text-muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+    .acc-tx-name { font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .acc-tx-amt { font-weight: 800; color: var(--success); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .acc-pdf-panel { padding: 18px 22px 22px; }
+    .acc-pdf-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .acc-pdf-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    .acc-pdf-field { display: flex; flex-direction: column; gap: 6px; min-width: 120px; }
+    .acc-pdf-field label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+    .acc-pdf-field select {
+      background: #0d0f16;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      outline: none;
+      cursor: pointer;
+      min-width: 140px;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .acc-pdf-field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .acc-pdf-field select:disabled,
+    .acc-pdf-field select option:disabled {
+      color: #64748b;
+      cursor: not-allowed;
+    }
+    .acc-pdf-field.is-hidden { display: none !important; }
+    .acc-pdf-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .acc-pdf-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+    }
+    .acc-pdf-btn:active:not(:disabled) { transform: scale(0.95); }
+    .acc-pdf-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .acc-pdf-btn.is-busy { cursor: wait; }
+
     /* Własne okno wyboru (custom select) */
     .csel-field { position: relative; width: 100%; }
     select.csel-native {
@@ -690,6 +1077,11 @@
     .csel-option[aria-selected="true"] {
       background: rgba(99, 102, 241, 0.18);
       color: #fff;
+    }
+    .csel-option.is-disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+      pointer-events: none;
     }
     .csel-option-dot {
       width: 10px;
@@ -933,13 +1325,14 @@
       header { gap: 10px; padding: 12px 16px; }
       .brand-sub { display: none; }
       .kpi-chip { width: 132px; padding: 8px 12px; }
-      .nav-tab-btn { padding: 8px 14px; font-size: 0.84rem; }
+      .nav-tab-btn { padding: 8px 10px; font-size: 0.8rem; gap: 5px; }
       .dashboard-body { grid-template-columns: 1fr 320px; }
     }
     @media (max-width: 1250px) {
       .hide-mobile { display: none; }
       .nav-tab-label-full { display: none; }
       .nav-tab-label-short { display: inline; }
+      .main-nav-tabs { max-width: 480px; }
     }
 
     /* TRYB "JEDNA KOLUMNA": tablet, telefon, bardzo małe okno */
@@ -966,8 +1359,19 @@
         border-width: 0 0 1px 0;
       }
       .brand { width: auto; gap: 16px; }
-      .main-nav-tabs { flex: 1 1 320px; max-width: 520px; width: auto; }
-      .nav-tab-btn { flex: 1; padding: 11px 8px; font-size: 0.92rem; }
+      .main-nav-tabs {
+        flex: 1 1 280px;
+        max-width: 560px;
+        width: auto;
+        min-width: 0;
+      }
+      .nav-tab-btn {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 10px 6px;
+        font-size: 0.82rem;
+        gap: 4px;
+      }
 
       .kpi-bar { flex: 1 1 100%; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; width: 100%; align-items: stretch; }
       .kpi-chip { width: 100%; }
@@ -985,44 +1389,103 @@
       .payments-summary-bar { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
       .payments-table-panel { display: block; height: auto; overflow: visible; }
       .payments-scroll-area { max-height: none; overflow: visible; }
+
+      .accounting-view-wrapper {
+        display: block;
+        height: auto;
+        padding: 14px 12px 0;
+        overflow: visible;
+        gap: 14px;
+      }
+      .acc-section-panel { margin-bottom: 0; }
+      .acc-section-panel.grow { min-height: 0; }
+      .acc-pending-list, .acc-tx-list { max-height: none; overflow: visible; }
+      .acc-pending-card:hover { transform: none; }
     }
 
-    /* telefony */
-    @media (max-width: 700px) {
+    /* Smartfony / wąskie ekrany — dolny pasek 3 zakładek */
+    @media (max-width: 768px) {
       :root { --time-col: 52px; --row-height: 60px; }
 
-      /* dolny pasek zakładek jak w prawdziwej aplikacji */
-      body { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
-      header { display: grid; grid-template-columns: 1fr; backdrop-filter: none; -webkit-backdrop-filter: none; gap: 10px; }
+      body { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+      header {
+        display: grid;
+        grid-template-columns: 1fr;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        gap: 10px;
+      }
       .brand { width: 100%; justify-content: space-between; }
       .hide-mobile { display: none; }
-      .nav-tab-label-full { display: none; }
-      .nav-tab-label-short { display: inline; }
+      .nav-tab-label-full { display: none !important; }
+      .nav-tab-label-short { display: block; }
+
       .main-nav-tabs {
-        position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 900;
+        display: flex;
+        align-items: stretch;
         width: auto;
+        max-width: none;
         border-radius: 22px 22px 0 0;
+        border: 1px solid var(--card-border);
         border-width: 1px 0 0 0;
-        padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+        padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
         background: #0e1118;
-        backdrop-filter: none; -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
         box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45);
-        gap: 8px;
+        gap: 4px;
+        overflow: hidden;
       }
-      .panel, .pay-kpi, .payments-table-panel {
-        backdrop-filter: none; -webkit-backdrop-filter: none;
+
+      .panel, .pay-kpi, .payments-table-panel, .acc-limit-panel, .acc-section-panel {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
         background: #12151f;
       }
       .cal-header-cell {
-        backdrop-filter: none; -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
         background: #0e1118;
       }
+
       .nav-tab-btn,
       .nav-tab-btn:first-child,
       .nav-tab-btn:last-child {
-        padding: 13px 8px;
-        border-radius: 16px;
-        font-size: 0.92rem;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 8px 4px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.15;
+      }
+      .nav-tab-btn:last-child { border-right-color: transparent; }
+      .nav-tab-icon {
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+      .nav-tab-text {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .nav-tab-btn.active {
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
       }
 
       .kpi-bar { grid-template-columns: 1fr 1.2fr auto; gap: 8px; }
@@ -1043,10 +1506,11 @@
       .slot-card .s-name { font-size: 1rem; }
       #current-time-line { right: 6px; }
 
-      .sync-status { left: 12px; right: auto; bottom: calc(84px + env(safe-area-inset-bottom)); }
+      .sync-status { left: 12px; right: auto; bottom: calc(78px + env(safe-area-inset-bottom)); }
 
       /* 16px = iPhone/Android nie powiększa ekranu po kliknięciu w pole */
-      .ctrl-input, .ctrl-select, .search-input, .amount-input, .status-select, .csel-search { font-size: 16px; }
+      .ctrl-input, .ctrl-select, .search-input, .amount-input, .status-select, .csel-search,
+      .acc-edit-input, .acc-pdf-field select { font-size: 16px; }
 
       .student-item { padding: 12px 14px; }
       .btn-icon-edit, .btn-icon-del { width: 38px; height: 38px; }
@@ -1062,7 +1526,61 @@
       .amount-input-box { width: 100%; }
       .amount-input { flex: 1; width: auto; }
 
+      .accounting-view-wrapper { padding: 14px 12px calc(8px + env(safe-area-inset-bottom)); }
+      .acc-limit-panel {
+        padding: 14px 16px 16px;
+        border-radius: 18px;
+      }
+      .acc-limit-title { font-size: 0.88rem; }
+      .acc-limit-pct { font-size: 1.2rem; }
+      .acc-progress-track { height: 10px; }
+      .acc-section-panel { border-radius: 18px; }
+      .acc-section-header, .acc-pdf-panel { padding: 14px 16px; }
+      .acc-pending-list, .acc-tx-list { padding: 12px 14px 16px; gap: 10px; }
+      .acc-pending-card {
+        grid-template-columns: 1fr;
+        padding: 14px 16px;
+        border-radius: 16px;
+        gap: 10px;
+      }
+      .acc-pend-amount { text-align: left; font-size: 1.1rem; text-shadow: none; }
+      .acc-pend-actions { gap: 8px; }
+      .acc-btn {
+        flex: 1 1 auto;
+        min-width: calc(33.33% - 8px);
+        text-align: center;
+        padding: 11px 12px;
+        border-radius: 12px;
+      }
+      .acc-tx-row {
+        grid-template-columns: 72px 1fr auto;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        gap: 8px;
+      }
+      .acc-pdf-controls { flex-direction: column; align-items: stretch; gap: 12px; }
+      .acc-pdf-field { min-width: 0; width: 100%; }
+      .acc-pdf-field select,
+      .acc-pdf-btn { width: 100%; min-width: 0; }
+      .acc-pdf-btn { padding: 12px 16px; border-radius: 14px; white-space: normal; }
+      .acc-edit-input { width: 100%; flex: 1 1 100%; border-radius: 14px; }
+
       .auth-card { padding: 26px 20px; }
+    }
+
+    /* bardzo wąskie telefony — jeszcze ciaśniejszy pasek zakładek */
+    @media (max-width: 380px) {
+      .nav-tab-btn,
+      .nav-tab-btn:first-child,
+      .nav-tab-btn:last-child {
+        padding: 7px 2px;
+        font-size: 0.62rem;
+        gap: 2px;
+        border-radius: 12px;
+      }
+      .nav-tab-icon { font-size: 1.05rem; }
+      .main-nav-tabs { gap: 2px; padding: 5px 6px calc(5px + env(safe-area-inset-bottom)); }
     }
 
     /* telefony wąskie: panele i modale od góry (nad klawiaturą) */
@@ -1265,9 +1783,28 @@
       </div>
 
       <!-- NAWIGACJA ZAKŁADEK -->
-      <nav class="main-nav-tabs">
-        <button class="nav-tab-btn active" id="tab-btn-schedule" onclick="switchMainTab('schedule')"><span class="nav-tab-label-full">📅 Harmonogram&nbsp;&nbsp;i&nbsp;&nbsp;Baza</span><span class="nav-tab-label-short">📅 Harmonogram</span></button>
-        <button class="nav-tab-btn" id="tab-btn-payments" onclick="switchMainTab('payments')"><span class="nav-tab-label-full">💳 Płatności&nbsp;&nbsp;i&nbsp;&nbsp;Rozliczenia</span><span class="nav-tab-label-short">💳 Płatności</span></button>
+      <nav class="main-nav-tabs" aria-label="Główne zakładki">
+        <button class="nav-tab-btn active" id="tab-btn-schedule" onclick="switchMainTab('schedule')" type="button">
+          <span class="nav-tab-icon" aria-hidden="true">📅</span>
+          <span class="nav-tab-text">
+            <span class="nav-tab-label-full">Harmonogram i Baza</span>
+            <span class="nav-tab-label-short">Harmonogram</span>
+          </span>
+        </button>
+        <button class="nav-tab-btn" id="tab-btn-payments" onclick="switchMainTab('payments')" type="button">
+          <span class="nav-tab-icon" aria-hidden="true">💳</span>
+          <span class="nav-tab-text">
+            <span class="nav-tab-label-full">Płatności i Rozliczenia</span>
+            <span class="nav-tab-label-short">Płatności</span>
+          </span>
+        </button>
+        <button class="nav-tab-btn" id="tab-btn-accounting" onclick="switchMainTab('accounting')" type="button">
+          <span class="nav-tab-icon" aria-hidden="true">📒</span>
+          <span class="nav-tab-text">
+            <span class="nav-tab-label-full">Księgowość i Ewidencja</span>
+            <span class="nav-tab-label-short">Księgowość</span>
+          </span>
+        </button>
       </nav>
 
       <div class="kpi-bar">
@@ -1363,6 +1900,89 @@
           </div>
           <div class="payments-scroll-area" id="payments-list-container"></div>
         </div>
+      </div>
+    </main>
+
+    <!-- ZAKŁADKA 3: KSIĘGOWOŚĆ I EWIDENCJA (działalność nierejestrowana) -->
+    <main class="view-content hidden" id="view-accounting">
+      <div class="accounting-view-wrapper">
+
+        <section class="acc-limit-panel" aria-label="Limit kwartalny działalności nierejestrowanej">
+          <div class="acc-limit-head">
+            <div>
+              <div class="acc-limit-title" id="acc-limit-label">Przychód w tym kwartale (Q1): 0 zł z 10 813,50 zł</div>
+              <div class="acc-limit-sub">Limit działalności nierejestrowanej · rozliczenie kwartalne · Europa/Warsaw</div>
+            </div>
+            <div class="acc-limit-pct" id="acc-limit-pct">0%</div>
+          </div>
+          <div class="acc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="acc-progress-bar">
+            <div class="acc-progress-fill" id="acc-progress-fill"></div>
+          </div>
+          <div class="acc-limit-meta">
+            <span id="acc-limit-remaining">Pozostało: 10 813,50 zł</span>
+            <span id="acc-limit-range">Q1 · sty–mar</span>
+          </div>
+        </section>
+
+        <section class="acc-section-panel grow">
+          <div class="acc-section-header">
+            <div class="panel-title">
+              <span>⏳ Oczekujące na zatwierdzenie</span>
+              <span class="acc-badge-count" id="acc-pending-count">0</span>
+            </div>
+          </div>
+          <div class="acc-pending-list" id="acc-pending-list"></div>
+        </section>
+
+        <section class="acc-section-panel">
+          <div class="acc-section-header">
+            <div class="panel-title"><span>✓ Zatwierdzone w tym kwartale</span></div>
+          </div>
+          <div class="acc-tx-list" id="acc-tx-list"></div>
+        </section>
+
+        <section class="acc-section-panel">
+          <div class="acc-section-header">
+            <div class="panel-title"><span>📄 Ewidencja sprzedaży (PDF)</span></div>
+          </div>
+          <div class="acc-pdf-panel">
+            <p class="acc-pdf-hint">
+              Raport PDF powstaje wyłącznie w przeglądarce i od razu trafia na dysk — nic nie jest zapisywane w Firebase.
+              Okresy sprzed założenia konta są niedostępne. Kolumna przychodu narastająco liczy wpłaty w wybranym zakresie.
+            </p>
+            <div class="acc-pdf-controls">
+              <div class="acc-pdf-field">
+                <label for="acc-pdf-type">Typ raportu</label>
+                <select id="acc-pdf-type" onchange="onAccountingPdfTypeChange()">
+                  <option value="month">Miesięczny</option>
+                  <option value="quarter" selected>Kwartalny</option>
+                  <option value="year">Roczny</option>
+                </select>
+              </div>
+              <div class="acc-pdf-field" id="acc-pdf-field-month">
+                <label for="acc-pdf-month">Miesiąc</label>
+                <select id="acc-pdf-month"></select>
+              </div>
+              <div class="acc-pdf-field" id="acc-pdf-field-quarter">
+                <label for="acc-pdf-quarter">Kwartał</label>
+                <select id="acc-pdf-quarter">
+                  <option value="1">Q1 (sty–mar)</option>
+                  <option value="2">Q2 (kwi–cze)</option>
+                  <option value="3">Q3 (lip–wrz)</option>
+                  <option value="4">Q4 (paź–gru)</option>
+                </select>
+              </div>
+              <div class="acc-pdf-field" id="acc-pdf-field-year">
+                <label for="acc-pdf-year">Rok</label>
+                <select id="acc-pdf-year" onchange="onAccountingPdfYearChange()"></select>
+              </div>
+              <button type="button" class="acc-pdf-btn" id="acc-pdf-generate" onclick="generateAccountingPdf()">
+                Generuj raport do Urzędu Skarbowego (PDF)
+              </button>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
   </div>
@@ -1496,6 +2116,7 @@
         try {
           localStorage.setItem(backupKey(currentUser.uid), JSON.stringify({
             students, schedule, payments,
+            accountingPending, accountingTransactions, accountingDismissed,
             scheduleHourStart, scheduleHourEnd,
             savedAt: Date.now()
           }));
@@ -1530,6 +2151,14 @@
           students: migrateStudents(Array.isArray(d.students) ? d.students : []),
           schedule: d.schedule && typeof d.schedule === "object" ? d.schedule : {},
           payments: d.payments && typeof d.payments === "object" ? d.payments : {},
+          accountingPending: normalizeAccountingPending(d.accountingPending),
+          ...(() => {
+            const norm = normalizeAccountingTransactions(d.accountingTransactions);
+            return {
+              accountingTransactions: norm.transactions,
+              accountingDismissed: mergeAccountingHandled(d.accountingDismissed, norm.legacyHandledIds)
+            };
+          })(),
           scheduleHourStart: hours.start,
           scheduleHourEnd: hours.end
         };
@@ -1537,13 +2166,23 @@
     }
 
     function backupHasData(b) {
-      return !!b && (b.students.length > 0 || Object.keys(b.schedule).length > 0 || Object.keys(b.payments).length > 0);
+      return !!b && (
+        b.students.length > 0 ||
+        Object.keys(b.schedule).length > 0 ||
+        Object.keys(b.payments).length > 0 ||
+        (Array.isArray(b.accountingPending) && b.accountingPending.length > 0) ||
+        (Array.isArray(b.accountingTransactions) && b.accountingTransactions.length > 0) ||
+        (b.accountingDismissed && Object.keys(b.accountingDismissed).length > 0)
+      );
     }
 
     function resetState() {
       students = [];
       schedule = {};
       payments = {};
+      accountingPending = [];
+      accountingTransactions = [];
+      accountingDismissed = {};
       applyScheduleHours(DEFAULT_SCHEDULE_HOUR_START, DEFAULT_SCHEDULE_HOUR_END);
     }
 
@@ -1641,6 +2280,78 @@
     let students = [];
     let schedule = {};
     let payments = {};
+    let accountingPending = [];
+    let accountingTransactions = [];
+    let accountingDismissed = {};
+
+    // Działalność nierejestrowana — limit kwartalny (2026)
+    const DN_QUARTER_LIMIT = 10813.50;
+    const DN_QUARTER_WARN_RATIO = 0.8;
+    const QUARTER_MONTH_LABELS = {
+      1: "sty–mar",
+      2: "kwi–cze",
+      3: "lip–wrz",
+      4: "paź–gru"
+    };
+    const MONTH_LABELS_PL = [
+      "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+      "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+    ];
+    const MONTH_LABELS_SHORT_PL = [
+      "sty", "lut", "mar", "kwi", "maj", "cze",
+      "lip", "sie", "wrz", "paź", "lis", "gru"
+    ];
+
+    function normalizeAccountingPending(list) {
+      if (!Array.isArray(list)) return [];
+      return list.filter(item => item && item.id && item.date).map(item => ({
+        id: String(item.id),
+        studentName: item.studentName || "Uczeń",
+        date: String(item.date),
+        amount: Math.round((Number(item.amount) || 0) * 100) / 100,
+        slotKey: item.slotKey || "",
+        hour: item.hour || ""
+      }));
+    }
+
+    /** Historia płatności: tylko studentName, amount, date, timestamp. Legacy id → handledIds. */
+    function normalizeAccountingTransactions(list) {
+      const transactions = [];
+      const legacyHandledIds = {};
+      if (!Array.isArray(list)) return { transactions, legacyHandledIds };
+      list.forEach(item => {
+        if (!item || !item.date) return;
+        if (item.id) legacyHandledIds[String(item.id)] = true;
+        transactions.push({
+          studentName: String(item.studentName || "Uczeń"),
+          amount: Math.round((Number(item.amount) || 0) * 100) / 100,
+          date: String(item.date),
+          timestamp: String(item.timestamp || item.paidAt || "")
+        });
+      });
+      return { transactions, legacyHandledIds };
+    }
+
+    function normalizeAccountingDismissed(obj) {
+      if (!obj || typeof obj !== "object" || Array.isArray(obj)) return {};
+      const out = {};
+      Object.keys(obj).forEach(k => { if (obj[k]) out[k] = true; });
+      return out;
+    }
+
+    function mergeAccountingHandled(dismissed, legacyIds) {
+      return Object.assign({}, normalizeAccountingDismissed(dismissed), normalizeAccountingDismissed(legacyIds));
+    }
+
+    /** Minimalny rekord historii — nigdy nie zawiera PDF / Base64 / zbędnych pól. */
+    function toAccountingHistoryRecord(studentName, amount, date, timestamp) {
+      return {
+        studentName: String(studentName || "Uczeń"),
+        amount: Math.round((Number(amount) || 0) * 100) / 100,
+        date: String(date),
+        timestamp: String(timestamp || new Date().toISOString())
+      };
+    }
 
     let selectedSlotKey = null;
     let editingStudentId = null;
@@ -2081,6 +2792,11 @@
       const payloadStudents = students;
       const payloadSchedule = Object.assign({}, schedule);
       const payloadPayments = Object.assign({}, payments);
+      const payloadAccPending = normalizeAccountingPending(accountingPending);
+      const payloadAccTx = accountingTransactions.map(t =>
+        toAccountingHistoryRecord(t.studentName, t.amount, t.date, t.timestamp)
+      );
+      const payloadAccDismissed = Object.assign({}, accountingDismissed);
       const payloadHourStart = scheduleHourStart;
       const payloadHourEnd = scheduleHourEnd;
 
@@ -2091,6 +2807,9 @@
           students: payloadStudents,
           schedule: payloadSchedule,
           payments: payloadPayments,
+          accountingPending: payloadAccPending,
+          accountingTransactions: payloadAccTx,
+          accountingDismissed: payloadAccDismissed,
           scheduleHourStart: payloadHourStart,
           scheduleHourEnd: payloadHourEnd,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -2134,12 +2853,16 @@
         students = backup.students;
         schedule = backup.schedule;
         payments = backup.payments;
+        accountingPending = backup.accountingPending || [];
+        accountingTransactions = backup.accountingTransactions || [];
+        accountingDismissed = backup.accountingDismissed || {};
         applyScheduleHours(
           backup.scheduleHourStart ?? DEFAULT_SCHEDULE_HOUR_START,
           backup.scheduleHourEnd ?? DEFAULT_SCHEDULE_HOUR_END
         );
       }
       renderAll();
+      scanFinishedLessons();
 
       if (unsubscribeState) unsubscribeState();
       unsubscribeState = stateRef.onSnapshot(async (snap) => {
@@ -2159,13 +2882,15 @@
 
         if (!snap.exists) {
           // baza pusta: nowe konto (zostaje puste) albo baza została wyczyszczona (odtwarzamy z kopii tego konta)
-          if (backupHasData(backup) || students.length || Object.keys(schedule).length || Object.keys(payments).length) {
+          if (backupHasData(backup) || students.length || Object.keys(schedule).length || Object.keys(payments).length ||
+              accountingPending.length || accountingTransactions.length || Object.keys(accountingDismissed).length) {
             setSyncStatus("Odtwarzanie danych z kopii…", "saving");
             await saveState({ render: false });
           } else {
             setSyncStatus("✓ Nowe, puste konto", "ok");
           }
           renderAll();
+          scanFinishedLessons();
           return;
         }
 
@@ -2173,6 +2898,10 @@
         const inStudents = migrateStudents(Array.isArray(data.students) ? data.students : []);
         const inSchedule = data.schedule && typeof data.schedule === "object" ? data.schedule : {};
         const inPayments = data.payments && typeof data.payments === "object" ? data.payments : {};
+        const inAccPending = normalizeAccountingPending(data.accountingPending);
+        const inAccTxNorm = normalizeAccountingTransactions(data.accountingTransactions);
+        const inAccTx = inAccTxNorm.transactions;
+        const inAccDismissed = mergeAccountingHandled(data.accountingDismissed, inAccTxNorm.legacyHandledIds);
         // brak pól u starych użytkowników → domyślnie 14:00–22:00
         const inHours = normalizeScheduleHours(
           data.scheduleHourStart ?? DEFAULT_SCHEDULE_HOUR_START,
@@ -2180,27 +2909,40 @@
         );
 
         // te same dane co już mamy – nic nie rób (nie odświeżaj ekranu)
-        if (stableStringify({ students: inStudents, schedule: inSchedule, payments: inPayments, scheduleHourStart: inHours.start, scheduleHourEnd: inHours.end }) ===
-            stableStringify({ students, schedule, payments, scheduleHourStart, scheduleHourEnd })) {
+        if (stableStringify({
+              students: inStudents, schedule: inSchedule, payments: inPayments,
+              accountingPending: inAccPending, accountingTransactions: inAccTx, accountingDismissed: inAccDismissed,
+              scheduleHourStart: inHours.start, scheduleHourEnd: inHours.end
+            }) ===
+            stableStringify({
+              students, schedule, payments,
+              accountingPending, accountingTransactions, accountingDismissed,
+              scheduleHourStart, scheduleHourEnd
+            })) {
           saveBackup({ immediate: true });
           setSyncStatus("✓ Zsynchronizowano", "ok");
-          if (data.scheduleHourStart == null || data.scheduleHourEnd == null) {
+          if (data.scheduleHourStart == null || data.scheduleHourEnd == null || data.accountingPending == null) {
             scheduleCloudSave();
           }
+          scanFinishedLessons();
           return;
         }
 
         students = inStudents;
         schedule = inSchedule;
         payments = inPayments;
+        accountingPending = inAccPending;
+        accountingTransactions = inAccTx;
+        accountingDismissed = inAccDismissed;
         applyScheduleHours(inHours.start, inHours.end);
 
         saveBackup({ immediate: true });
         setSyncStatus("✓ Zsynchronizowano", "ok");
         renderAll();
+        scanFinishedLessons();
 
-        // starsze konta bez pól godzin — dopisz domyślne 14–22 do Firestore
-        if (data.scheduleHourStart == null || data.scheduleHourEnd == null) {
+        // starsze konta bez pól godzin / księgowości — dopisz do Firestore
+        if (data.scheduleHourStart == null || data.scheduleHourEnd == null || data.accountingPending == null) {
           scheduleCloudSave();
         }
       }, (error) => {
@@ -2230,22 +2972,22 @@
 
     function switchMainTab(tabName) {
       currentMainTab = tabName;
-      const schedTabBtn = document.getElementById("tab-btn-schedule");
-      const payTabBtn = document.getElementById("tab-btn-payments");
-      const schedView = document.getElementById("view-schedule");
-      const payView = document.getElementById("view-payments");
-
-      if (tabName === 'schedule') {
-        schedTabBtn.classList.add("active");
-        payTabBtn.classList.remove("active");
-        schedView.classList.remove("hidden");
-        payView.classList.add("hidden");
-      } else {
-        schedTabBtn.classList.remove("active");
-        payTabBtn.classList.add("active");
-        schedView.classList.add("hidden");
-        payView.classList.remove("hidden");
-        renderPaymentsView();
+      const tabs = {
+        schedule: { btn: "tab-btn-schedule", view: "view-schedule" },
+        payments: { btn: "tab-btn-payments", view: "view-payments" },
+        accounting: { btn: "tab-btn-accounting", view: "view-accounting" }
+      };
+      Object.keys(tabs).forEach(key => {
+        const btn = document.getElementById(tabs[key].btn);
+        const view = document.getElementById(tabs[key].view);
+        const on = key === tabName;
+        if (btn) btn.classList.toggle("active", on);
+        if (view) view.classList.toggle("hidden", !on);
+      });
+      if (tabName === "payments") renderPaymentsView();
+      if (tabName === "accounting") {
+        scanFinishedLessons();
+        renderAccountingView();
       }
     }
 
@@ -2265,7 +3007,8 @@
       renderStudentsList();
       updateKPIs();
       updateLiveTimeAndIndicator();
-      if (currentMainTab === 'payments') renderPaymentsView();
+      if (currentMainTab === "payments") renderPaymentsView();
+      if (currentMainTab === "accounting") renderAccountingView();
     }
 
     const SHORT_DAYS = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"];
@@ -2638,6 +3381,641 @@
       line.style.left = `${grid.offsetLeft + firstLabel.offsetLeft + firstLabel.offsetWidth + 4}px`;
     }
     setInterval(updateLiveTimeAndIndicator, 1000);
+
+    // =========================================================
+    // KSIĘGOWOŚĆ — działalność nierejestrowana (limit kwartalny)
+    // =========================================================
+
+    function formatMoneyPl(n) {
+      return (Math.round((Number(n) || 0) * 100) / 100).toLocaleString("pl-PL", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function polandDateISO(d) {
+      const x = d || getPolandDate();
+      const y = x.getFullYear();
+      const m = String(x.getMonth() + 1).padStart(2, "0");
+      const day = String(x.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatDatePl(iso) {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || "";
+      const [y, m, d] = iso.split("-");
+      return `${d}.${m}.${y}`;
+    }
+
+    function getQuarterFromDate(d) {
+      const x = d || getPolandDate();
+      return Math.floor(x.getMonth() / 3) + 1;
+    }
+
+    function isIsoInQuarter(iso, quarter, year) {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
+      const [y, m] = iso.split("-").map(Number);
+      if (y !== year) return false;
+      const qStart = (quarter - 1) * 3 + 1;
+      return m >= qStart && m <= qStart + 2;
+    }
+
+    function parseSlotParts(slotKey) {
+      const i = String(slotKey || "").indexOf("_");
+      if (i < 0) return null;
+      return { hour: slotKey.slice(0, i), dayName: slotKey.slice(i + 1) };
+    }
+
+    function lessonEndMinutes(hourStr) {
+      const h = parseInt(String(hourStr).split(":")[0], 10);
+      if (!Number.isFinite(h)) return null;
+      return (h + 1) * 60;
+    }
+
+    function accountingEventExists(id) {
+      if (accountingDismissed[id]) return true;
+      if (accountingPending.some(p => p.id === id)) return true;
+      return false;
+    }
+
+    /** Wykrywa zakończone lekcje (dziś + wczoraj) i tworzy wpisy „do zatwierdzenia” — raz na lekcję/dzień. */
+    function scanFinishedLessons() {
+      if (!currentUser) return;
+      const now = getPolandDate();
+      let changed = false;
+
+      for (let daysAgo = 0; daysAgo <= 1; daysAgo++) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo);
+        const jsDay = d.getDay();
+        const dayIndex = jsDay === 0 ? 6 : jsDay - 1;
+        const dayName = DAYS[dayIndex];
+        const dateISO = polandDateISO(d);
+        const nowMinutes = daysAgo === 0
+          ? now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60
+          : 24 * 60;
+
+        Object.keys(schedule).forEach(slotKey => {
+          const parts = parseSlotParts(slotKey);
+          if (!parts || parts.dayName !== dayName) return;
+
+          const slotData = schedule[slotKey];
+          if (!slotData) return;
+          const studentId = slotData.studentId || slotData;
+          const student = students.find(s => s.id === studentId);
+          if (!student) return;
+
+          const endMin = lessonEndMinutes(parts.hour);
+          if (endMin == null || nowMinutes < endMin) return;
+
+          const id = `${dateISO}_${slotKey}`;
+          if (accountingEventExists(id)) return;
+
+          accountingPending.push({
+            id,
+            studentName: student.name,
+            date: dateISO,
+            amount: Math.round((Number(student.rate) || 0) * 100) / 100,
+            slotKey,
+            hour: parts.hour
+          });
+          changed = true;
+        });
+      }
+
+      if (changed) {
+        accountingPending.sort((a, b) => {
+          if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+          return String(a.hour).localeCompare(String(b.hour));
+        });
+        scheduleCloudSave();
+        if (currentMainTab === "accounting") renderAccountingView();
+      }
+    }
+
+    function sortAccountingTransactions(list) {
+      return list.slice().sort((a, b) => {
+        if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+        return String(a.timestamp || "").localeCompare(String(b.timestamp || ""));
+      });
+    }
+
+    function isIsoInMonth(iso, month, year) {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
+      const [y, m] = iso.split("-").map(Number);
+      return y === year && m === month;
+    }
+
+    function isIsoInYear(iso, year) {
+      if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return false;
+      return parseInt(iso.slice(0, 4), 10) === year;
+    }
+
+    function getQuarterTransactions(quarter, year) {
+      return sortAccountingTransactions(
+        accountingTransactions.filter(t => isIsoInQuarter(t.date, quarter, year))
+      );
+    }
+
+    function getMonthTransactions(month, year) {
+      return sortAccountingTransactions(
+        accountingTransactions.filter(t => isIsoInMonth(t.date, month, year))
+      );
+    }
+
+    function getYearTransactions(year) {
+      return sortAccountingTransactions(
+        accountingTransactions.filter(t => isIsoInYear(t.date, year))
+      );
+    }
+
+    function getTransactionsForReport(type, year, quarter, month) {
+      if (type === "month") return getMonthTransactions(month, year);
+      if (type === "year") return getYearTransactions(year);
+      return getQuarterTransactions(quarter, year);
+    }
+
+    function sumQuarterRevenue(quarter, year) {
+      return getQuarterTransactions(quarter, year).reduce((s, t) => s + (Number(t.amount) || 0), 0);
+    }
+
+    function toPolandCalendarDate(dateLike) {
+      const raw = dateLike instanceof Date ? dateLike : new Date(dateLike);
+      if (Number.isNaN(raw.getTime())) return null;
+      const pl = new Date(raw.toLocaleString("en-US", { timeZone: "Europe/Warsaw" }));
+      return new Date(pl.getFullYear(), pl.getMonth(), pl.getDate());
+    }
+
+    /** Najwcześniejsza data aktywności konta (creationTime lub najstarsza transakcja). */
+    function getAccountStartDate() {
+      let start = null;
+      if (currentUser && currentUser.metadata && currentUser.metadata.creationTime) {
+        start = toPolandCalendarDate(currentUser.metadata.creationTime);
+      }
+      accountingTransactions.forEach(t => {
+        if (!t.date || !/^\d{4}-\d{2}-\d{2}$/.test(t.date)) return;
+        const d = new Date(+t.date.slice(0, 4), +t.date.slice(5, 7) - 1, +t.date.slice(8, 10));
+        if (!start || d < start) start = d;
+      });
+      if (!start) start = toPolandCalendarDate(getPolandDate());
+      return start;
+    }
+
+    function lastDayOfMonth(year, month1to12) {
+      return new Date(year, month1to12, 0);
+    }
+
+    function isYearSelectable(year, accountStart, now) {
+      if (year > now.getFullYear()) return false;
+      if (year < accountStart.getFullYear()) return false;
+      return true;
+    }
+
+    function isQuarterSelectable(quarter, year, accountStart, now) {
+      if (!isYearSelectable(year, accountStart, now)) return false;
+      const qStart = new Date(year, (quarter - 1) * 3, 1);
+      const qEnd = lastDayOfMonth(year, quarter * 3);
+      if (qEnd < accountStart) return false;
+      const nowQ = getQuarterFromDate(now);
+      if (year === now.getFullYear() && quarter > nowQ) return false;
+      return true;
+    }
+
+    function isMonthSelectable(month, year, accountStart, now) {
+      if (!isYearSelectable(year, accountStart, now)) return false;
+      const mEnd = lastDayOfMonth(year, month);
+      if (mEnd < accountStart) return false;
+      if (year === now.getFullYear() && month > now.getMonth() + 1) return false;
+      return true;
+    }
+
+    function updateAccountingProgressBar() {
+      const now = getPolandDate();
+      const q = getQuarterFromDate(now);
+      const year = now.getFullYear();
+      const total = Math.round(sumQuarterRevenue(q, year) * 100) / 100;
+      const pctRaw = DN_QUARTER_LIMIT > 0 ? (total / DN_QUARTER_LIMIT) * 100 : 0;
+      const pct = Math.min(100, pctRaw);
+      const ratio = DN_QUARTER_LIMIT > 0 ? total / DN_QUARTER_LIMIT : 0;
+      const warn = ratio >= DN_QUARTER_WARN_RATIO;
+      const danger = ratio >= 1;
+
+      const label = document.getElementById("acc-limit-label");
+      const pctEl = document.getElementById("acc-limit-pct");
+      const fill = document.getElementById("acc-progress-fill");
+      const bar = document.getElementById("acc-progress-bar");
+      const remainingEl = document.getElementById("acc-limit-remaining");
+      const rangeEl = document.getElementById("acc-limit-range");
+      if (!label || !fill) return;
+
+      label.textContent = `Przychód w tym kwartale (Q${q}): ${formatMoneyPl(total)} zł z ${formatMoneyPl(DN_QUARTER_LIMIT)} zł`;
+      pctEl.textContent = `${Math.round(pctRaw)}%`;
+      pctEl.className = "acc-limit-pct" + (danger ? " danger" : warn ? " warn" : "");
+      fill.style.width = `${pct}%`;
+      fill.className = "acc-progress-fill" + (danger ? " danger" : warn ? " warn" : "");
+      if (bar) bar.setAttribute("aria-valuenow", String(Math.round(pct)));
+      const left = Math.max(0, Math.round((DN_QUARTER_LIMIT - total) * 100) / 100);
+      if (remainingEl) {
+        remainingEl.textContent = danger
+          ? `Przekroczono limit o ${formatMoneyPl(total - DN_QUARTER_LIMIT)} zł`
+          : `Pozostało: ${formatMoneyPl(left)} zł`;
+      }
+      if (rangeEl) rangeEl.textContent = `Q${q} · ${QUARTER_MONTH_LABELS[q]} · ${year}`;
+    }
+
+    function renderAccountingPendingList() {
+      const list = document.getElementById("acc-pending-list");
+      const countEl = document.getElementById("acc-pending-count");
+      if (!list) return;
+      if (countEl) countEl.textContent = String(accountingPending.length);
+
+      if (!accountingPending.length) {
+        list.innerHTML = `<div class="acc-empty">Brak lekcji oczekujących na zatwierdzenie.<br>Po zakończeniu zaplanowanej godziny pojawią się tu automatycznie.</div>`;
+        return;
+      }
+
+      const sorted = accountingPending.slice().sort((a, b) => {
+        if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+        return String(a.hour).localeCompare(String(b.hour));
+      });
+
+      list.innerHTML = sorted.map(item => {
+        const idAttr = encodeURIComponent(item.id);
+        return `
+          <div class="acc-pending-card" data-acc-id="${escapeHtml(item.id)}">
+            <div>
+              <div class="acc-pend-name">${escapeHtml(item.studentName)}</div>
+              <div class="acc-pend-meta">${escapeHtml(formatDatePl(item.date))}${item.hour ? " · " + escapeHtml(item.hour) : ""}</div>
+            </div>
+            <div class="acc-pend-amount">${formatMoneyPl(item.amount)} zł</div>
+            <div class="acc-pend-actions">
+              <button type="button" class="acc-btn acc-btn-ok" onclick="approveAccountingPending('${idAttr}')">Zatwierdź</button>
+              <button type="button" class="acc-btn acc-btn-edit" onclick="toggleAccountingEdit('${idAttr}')">Edytuj</button>
+              <button type="button" class="acc-btn acc-btn-reject" onclick="rejectAccountingPending('${idAttr}')">Odrzuć</button>
+            </div>
+            <div class="acc-edit-row">
+              <input type="number" class="acc-edit-input" min="0" step="0.01" value="${Number(item.amount) || 0}" inputmode="decimal" />
+              <button type="button" class="acc-btn acc-btn-ok" onclick="approveAccountingPending('${idAttr}', true)">Zapisz i zatwierdź</button>
+              <button type="button" class="acc-btn" onclick="toggleAccountingEdit('${idAttr}', false)">Anuluj</button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    function renderAccountingTxList() {
+      const list = document.getElementById("acc-tx-list");
+      if (!list) return;
+      const now = getPolandDate();
+      const rows = getQuarterTransactions(getQuarterFromDate(now), now.getFullYear()).slice().reverse();
+
+      if (!rows.length) {
+        list.innerHTML = `<div class="acc-empty">Brak zatwierdzonych transakcji w bieżącym kwartale.</div>`;
+        return;
+      }
+
+      list.innerHTML = rows.map(t => `
+        <div class="acc-tx-row">
+          <span class="acc-tx-date">${escapeHtml(formatDatePl(t.date))}</span>
+          <span class="acc-tx-name">${escapeHtml(t.studentName)}</span>
+          <span class="acc-tx-amt">${formatMoneyPl(t.amount)} zł</span>
+        </div>
+      `).join("");
+    }
+
+    function notifyPdfSelectChanged(el) {
+      if (el && typeof notifyCselSelectChanged === "function") notifyCselSelectChanged(el);
+    }
+
+    function fillSelectKeepingValue(select, buildOptions, preferredValue) {
+      if (!select) return null;
+      const prev = preferredValue != null ? String(preferredValue) : select.value;
+      select.innerHTML = "";
+      buildOptions(select);
+      const enabled = Array.from(select.options).filter(o => !o.disabled);
+      if (prev && Array.from(select.options).some(o => o.value === prev && !o.disabled)) {
+        select.value = prev;
+      } else if (enabled.length) {
+        select.value = enabled[0].value;
+      }
+      notifyPdfSelectChanged(select);
+      return select.value;
+    }
+
+    function syncAccountingPdfTypeFields() {
+      const type = (document.getElementById("acc-pdf-type") || {}).value || "quarter";
+      const monthField = document.getElementById("acc-pdf-field-month");
+      const quarterField = document.getElementById("acc-pdf-field-quarter");
+      if (monthField) monthField.classList.toggle("is-hidden", type !== "month");
+      if (quarterField) quarterField.classList.toggle("is-hidden", type !== "quarter");
+    }
+
+    function rebuildAccountingPdfYearOptions() {
+      const yearSel = document.getElementById("acc-pdf-year");
+      if (!yearSel) return;
+      const now = getPolandDate();
+      const accountStart = getAccountStartDate();
+      const startYear = accountStart.getFullYear();
+      const endYear = now.getFullYear();
+      fillSelectKeepingValue(yearSel, (sel) => {
+        for (let yr = endYear; yr >= startYear; yr--) {
+          const opt = document.createElement("option");
+          opt.value = String(yr);
+          opt.textContent = String(yr);
+          opt.disabled = !isYearSelectable(yr, accountStart, now);
+          sel.appendChild(opt);
+        }
+        if (!sel.options.length) {
+          const opt = document.createElement("option");
+          opt.value = String(endYear);
+          opt.textContent = String(endYear);
+          sel.appendChild(opt);
+        }
+      }, yearSel.value || String(endYear));
+    }
+
+    function rebuildAccountingPdfQuarterOptions() {
+      const qSel = document.getElementById("acc-pdf-quarter");
+      const yearSel = document.getElementById("acc-pdf-year");
+      if (!qSel) return;
+      const now = getPolandDate();
+      const accountStart = getAccountStartDate();
+      const year = parseInt((yearSel && yearSel.value) || now.getFullYear(), 10);
+      const preferred = qSel.value || String(getQuarterFromDate(now));
+      fillSelectKeepingValue(qSel, (sel) => {
+        for (let q = 1; q <= 4; q++) {
+          const opt = document.createElement("option");
+          opt.value = String(q);
+          opt.textContent = `Q${q} (${QUARTER_MONTH_LABELS[q]})`;
+          opt.disabled = !isQuarterSelectable(q, year, accountStart, now);
+          sel.appendChild(opt);
+        }
+      }, preferred);
+    }
+
+    function rebuildAccountingPdfMonthOptions() {
+      const mSel = document.getElementById("acc-pdf-month");
+      const yearSel = document.getElementById("acc-pdf-year");
+      if (!mSel) return;
+      const now = getPolandDate();
+      const accountStart = getAccountStartDate();
+      const year = parseInt((yearSel && yearSel.value) || now.getFullYear(), 10);
+      const preferred = mSel.value || String(now.getMonth() + 1);
+      fillSelectKeepingValue(mSel, (sel) => {
+        for (let m = 1; m <= 12; m++) {
+          const opt = document.createElement("option");
+          opt.value = String(m);
+          opt.textContent = MONTH_LABELS_PL[m - 1];
+          opt.disabled = !isMonthSelectable(m, year, accountStart, now);
+          sel.appendChild(opt);
+        }
+      }, preferred);
+    }
+
+    function refreshAccountingPdfSelectors() {
+      syncAccountingPdfTypeFields();
+      rebuildAccountingPdfYearOptions();
+      rebuildAccountingPdfQuarterOptions();
+      rebuildAccountingPdfMonthOptions();
+      updateAccountingPdfGenerateButton();
+    }
+
+    function onAccountingPdfTypeChange() {
+      syncAccountingPdfTypeFields();
+      refreshAccountingPdfSelectors();
+    }
+
+    function onAccountingPdfYearChange() {
+      rebuildAccountingPdfQuarterOptions();
+      rebuildAccountingPdfMonthOptions();
+      updateAccountingPdfGenerateButton();
+    }
+
+    function getSelectedPdfPeriod() {
+      const type = (document.getElementById("acc-pdf-type") || {}).value || "quarter";
+      const year = parseInt((document.getElementById("acc-pdf-year") || {}).value, 10);
+      const quarter = parseInt((document.getElementById("acc-pdf-quarter") || {}).value, 10);
+      const month = parseInt((document.getElementById("acc-pdf-month") || {}).value, 10);
+      return { type, year, quarter, month };
+    }
+
+    function isSelectedPdfPeriodAllowed() {
+      const { type, year, quarter, month } = getSelectedPdfPeriod();
+      const now = getPolandDate();
+      const accountStart = getAccountStartDate();
+      if (!Number.isFinite(year) || !isYearSelectable(year, accountStart, now)) return false;
+      if (type === "month") return Number.isFinite(month) && isMonthSelectable(month, year, accountStart, now);
+      if (type === "year") return true;
+      return Number.isFinite(quarter) && isQuarterSelectable(quarter, year, accountStart, now);
+    }
+
+    function updateAccountingPdfGenerateButton() {
+      const btn = document.getElementById("acc-pdf-generate");
+      if (!btn || btn.classList.contains("is-busy")) return;
+      btn.disabled = !isSelectedPdfPeriodAllowed();
+    }
+
+    function describePdfPeriod(type, year, quarter, month) {
+      if (type === "month") {
+        return {
+          title: `Ewidencja sprzedaży — ${MONTH_LABELS_PL[month - 1]} ${year}`,
+          subtitle: `Raport miesięczny · ${MONTH_LABELS_SHORT_PL[month - 1]} ${year}`,
+          sumLabel: `Suma przychodu w ${MONTH_LABELS_PL[month - 1].toLowerCase()} ${year}`,
+          file: `ewidencja-sprzedazy-${year}-${String(month).padStart(2, "0")}.pdf`,
+          runningCol: "Przychód narastająco w miesiącu (zł)"
+        };
+      }
+      if (type === "year") {
+        return {
+          title: `Ewidencja sprzedaży — rok ${year}`,
+          subtitle: `Raport roczny · ${year}`,
+          sumLabel: `Suma przychodu w roku ${year}`,
+          file: `ewidencja-sprzedazy-${year}.pdf`,
+          runningCol: "Przychód narastająco w roku (zł)"
+        };
+      }
+      return {
+        title: `Ewidencja sprzedaży — Q${quarter} ${year}`,
+        subtitle: `Raport kwartalny · ${QUARTER_MONTH_LABELS[quarter]} · limit DN ${formatMoneyPl(DN_QUARTER_LIMIT)} zł`,
+        sumLabel: `Suma przychodu w kwartale Q${quarter} ${year}`,
+        file: `ewidencja-sprzedazy-Q${quarter}-${year}.pdf`,
+        runningCol: "Przychód narastająco w kwartale (zł)"
+      };
+    }
+
+    function renderAccountingView() {
+      refreshAccountingPdfSelectors();
+      updateAccountingProgressBar();
+      renderAccountingPendingList();
+      renderAccountingTxList();
+    }
+
+    function getPendingCardByEncodedId(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      const esc = (typeof CSS !== "undefined" && CSS.escape) ? CSS.escape(id) : id.replace(/"/g, '\\"');
+      return {
+        id,
+        card: document.querySelector(`.acc-pending-card[data-acc-id="${esc}"]`)
+      };
+    }
+
+    function toggleAccountingEdit(encodedId, forceOpen) {
+      const { card } = getPendingCardByEncodedId(encodedId);
+      if (!card) return;
+      const open = forceOpen === false ? false : forceOpen === true ? true : !card.classList.contains("is-editing");
+      document.querySelectorAll(".acc-pending-card.is-editing").forEach(el => {
+        if (el !== card) el.classList.remove("is-editing");
+      });
+      card.classList.toggle("is-editing", open);
+      if (open) {
+        const input = card.querySelector(".acc-edit-input");
+        if (input) { input.focus(); input.select(); }
+      }
+    }
+
+    function approveAccountingPending(encodedId, fromEdit) {
+      const { id, card } = getPendingCardByEncodedId(encodedId);
+      const idx = accountingPending.findIndex(p => p.id === id);
+      if (idx < 0) return;
+
+      let amount = accountingPending[idx].amount;
+      if (fromEdit) {
+        const input = card && card.querySelector(".acc-edit-input");
+        const parsed = parseFloat(input && input.value);
+        if (!Number.isFinite(parsed) || parsed < 0) {
+          alert("Wprowadź prawidłową kwotę.");
+          return;
+        }
+        amount = Math.round(parsed * 100) / 100;
+      }
+
+      const item = accountingPending[idx];
+      accountingPending.splice(idx, 1);
+      // lekcja zamknięta (bez ponownego pending) + minimalny rekord historii (bez PDF / Base64)
+      accountingDismissed[id] = true;
+      accountingTransactions.push(
+        toAccountingHistoryRecord(item.studentName, amount, item.date, new Date().toISOString())
+      );
+      saveState();
+      renderAccountingView();
+    }
+
+    function rejectAccountingPending(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      const before = accountingPending.length;
+      accountingPending = accountingPending.filter(p => p.id !== id);
+      if (accountingPending.length === before) return;
+      accountingDismissed[id] = true;
+      saveState();
+      renderAccountingView();
+    }
+
+    let pdfFontCache = null;
+
+    async function loadPdfUnicodeFont(doc) {
+      if (!pdfFontCache) {
+        const res = await fetch("https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf");
+        if (!res.ok) throw new Error("Nie udało się pobrać czcionki PDF");
+        const buf = await res.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let binary = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+        }
+        // cache wyłącznie w pamięci przeglądarki — nigdy w Firestore/Storage
+        pdfFontCache = btoa(binary);
+      }
+      doc.addFileToVFS("DejaVuSans.ttf", pdfFontCache);
+      doc.addFont("DejaVuSans.ttf", "DejaVuSans", "normal");
+      return "DejaVuSans";
+    }
+
+    async function generateAccountingPdf() {
+      const btn = document.getElementById("acc-pdf-generate");
+      const { type, year, quarter, month } = getSelectedPdfPeriod();
+
+      if (!isSelectedPdfPeriodAllowed()) {
+        alert("Wybrany okres jest niedostępny (sprzed założenia konta lub z przyszłości).");
+        return;
+      }
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert("Biblioteka jsPDF nie jest załadowana. Sprawdź połączenie z internetem / tagi CDN.");
+        return;
+      }
+
+      const rows = getTransactionsForReport(type, year, quarter, month);
+      if (!rows.length) {
+        alert("Brak zatwierdzonych transakcji w wybranym okresie.");
+        return;
+      }
+
+      const meta = describePdfPeriod(type, year, quarter, month);
+      if (btn) {
+        btn.disabled = true;
+        btn.classList.add("is-busy");
+        btn.textContent = "Generowanie…";
+      }
+      try {
+        // Strict client-side: jsPDF → doc.save() na dysk. Żadnego zapisu PDF/Base64 do Firebase.
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const font = await loadPdfUnicodeFont(doc);
+        doc.setFont(font, "normal");
+
+        doc.setFontSize(14);
+        doc.text(meta.title, 14, 18);
+        doc.setFontSize(9);
+        doc.setTextColor(90);
+        doc.text(meta.subtitle, 14, 25);
+        doc.setTextColor(0);
+
+        let running = 0;
+        const body = rows.map((t, i) => {
+          running = Math.round((running + (Number(t.amount) || 0)) * 100) / 100;
+          return [
+            String(i + 1),
+            formatDatePl(t.date),
+            `Korepetycje - ${t.studentName}`,
+            formatMoneyPl(t.amount),
+            formatMoneyPl(running)
+          ];
+        });
+
+        doc.autoTable({
+          startY: 32,
+          head: [["Lp.", "Data", "Opis", "Kwota (zł)", meta.runningCol]],
+          body,
+          styles: { font, fontSize: 8, cellPadding: 2.2 },
+          headStyles: { fillColor: [99, 102, 241], textColor: 255, font, fontStyle: "normal" },
+          columnStyles: {
+            0: { cellWidth: 12, halign: "center" },
+            1: { cellWidth: 24 },
+            3: { cellWidth: 28, halign: "right" },
+            4: { cellWidth: 48, halign: "right" }
+          },
+          margin: { left: 14, right: 14 }
+        });
+
+        const finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY) || 40;
+        doc.setFontSize(10);
+        doc.text(`${meta.sumLabel}: ${formatMoneyPl(running)} zł`, 14, finalY + 10);
+        doc.setFontSize(8);
+        doc.setTextColor(110);
+        doc.text(`Wygenerowano: ${getPolandDate().toLocaleString("pl-PL")} (Europe/Warsaw)`, 14, finalY + 16);
+
+        doc.save(meta.file);
+      } catch (err) {
+        console.error(err);
+        alert("Nie udało się wygenerować PDF. Sprawdź połączenie z internetem (czcionka Unicode).");
+      } finally {
+        if (btn) {
+          btn.classList.remove("is-busy");
+          btn.textContent = "Generuj raport do Urzędu Skarbowego (PDF)";
+          updateAccountingPdfGenerateButton();
+        }
+      }
+    }
+
+    setInterval(scanFinishedLessons, 30000);
 
     function openAssignModal(slotKey, hour, day) {
       selectedSlotKey = slotKey;
@@ -3193,6 +4571,8 @@
     function pickCselOption(value) {
       const select = cselActiveSelect;
       if (!select) return;
+      const nativeOpt = Array.from(select.options).find(o => o.value === value);
+      if (nativeOpt && nativeOpt.disabled) return;
       const prev = select.value;
       select.value = value;
       if (select.value !== value) {
@@ -3227,12 +4607,16 @@
       Array.from(select.options).forEach((opt) => {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "csel-option";
+        btn.className = "csel-option" + (opt.disabled ? " is-disabled" : "");
         btn.setAttribute("role", "option");
         btn.setAttribute("aria-selected", opt.selected ? "true" : "false");
         btn.dataset.value = opt.value;
         btn.dataset.searchHay = cselNorm([opt.textContent, opt.dataset.subtitle || "", opt.value].join(" "));
         if (opt.dataset.subtitle) btn.classList.add("has-sub");
+        if (opt.disabled) {
+          btn.disabled = true;
+          btn.setAttribute("aria-disabled", "true");
+        }
 
         const labelText = (opt.textContent || "").trim() || "—";
         let mainLabel = labelText;
@@ -3255,12 +4639,13 @@
 
         btn.addEventListener("click", (e) => {
           e.preventDefault();
+          if (opt.disabled) return;
           pickCselOption(opt.value);
         });
 
         cselList.appendChild(btn);
         cselOptionEls.push(btn);
-        if (opt.selected) cselActiveIndex = cselOptionEls.length - 1;
+        if (opt.selected && !opt.disabled) cselActiveIndex = cselOptionEls.length - 1;
       });
 
       if (!cselOptionEls.length) {
@@ -3394,20 +4779,20 @@
       }
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        const visible = cselOptionEls.map((el, i) => (!el.hidden ? i : -1)).filter(i => i >= 0);
+        const visible = cselOptionEls.map((el, i) => (!el.hidden && !el.disabled ? i : -1)).filter(i => i >= 0);
         const pos = visible.indexOf(cselActiveIndex);
         const next = visible[Math.min(visible.length - 1, Math.max(0, pos) + 1)];
         if (next != null) highlightCselOption(next, true);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        const visible = cselOptionEls.map((el, i) => (!el.hidden ? i : -1)).filter(i => i >= 0);
+        const visible = cselOptionEls.map((el, i) => (!el.hidden && !el.disabled ? i : -1)).filter(i => i >= 0);
         const pos = visible.indexOf(cselActiveIndex);
         const prev = visible[Math.max(0, (pos < 0 ? 0 : pos) - 1)];
         if (prev != null) highlightCselOption(prev, true);
       } else if (e.key === "Enter") {
         e.preventDefault();
         const el = cselOptionEls[cselActiveIndex];
-        if (el && !el.hidden) pickCselOption(el.dataset.value);
+        if (el && !el.hidden && !el.disabled) pickCselOption(el.dataset.value);
       }
     });
 
@@ -3417,9 +4802,11 @@
     if (paymentSearchEl) paymentSearchEl.addEventListener("input", onPaymentSearchInput);
 
     enhanceAllSelects();
+    refreshAccountingPdfSelectors();
 
     renderAll();
     initResponsive();
+    scanFinishedLessons();
   </script>
 </body>
 </html>

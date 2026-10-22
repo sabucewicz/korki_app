@@ -1,5 +1,5 @@
 // TutedoFlow – service worker (instalacja jako aplikacja + działanie po chwilowym braku internetu)
-const CACHE_NAME = 'tutedoflow-cache-v17';
+const CACHE_NAME = 'tutedoflow-cache-v20';
 const APP_SHELL = [
   './',
   './index.html',
