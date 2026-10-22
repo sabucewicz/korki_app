@@ -571,109 +571,68 @@
       overflow-y: auto;
       padding-right: 2px;
     }
-    .acc-limit-panel {
+    .acc-kpi-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      flex-shrink: 0;
+      width: 100%;
+    }
+    .acc-kpi-row.is-registered {
+      grid-template-columns: 1fr 1fr;
+    }
+    .acc-kpi-row.is-registered .acc-kpi-remaining {
+      display: none;
+    }
+    .acc-kpi {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 16px 22px 18px;
-      flex-shrink: 0;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-      transition: background 0.2s ease, border-color 0.2s ease;
-    }
-    .acc-limit-head {
+      border-radius: 20px;
+      padding: 18px 22px;
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      min-width: 0;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .acc-limit-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.2px;
-      line-height: 1.35;
+    .acc-kpi-earned {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.18);
     }
-    .acc-limit-sub {
+    .acc-kpi-remaining {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.35);
+      box-shadow: 0 0 28px rgba(245, 158, 11, 0.18);
+    }
+    .acc-kpi-label {
       font-size: 0.72rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--text-muted);
-      margin-top: 6px;
-      line-height: 1.4;
     }
-    .acc-limit-pct {
-      font-size: 1.4rem;
+    .acc-kpi-val {
+      font-size: 1.55rem;
       font-weight: 800;
       font-variant-numeric: tabular-nums;
-      color: var(--success);
-      flex-shrink: 0;
-      line-height: 1;
-      padding-top: 2px;
-    }
-    .acc-limit-pct.warn { color: var(--warning); }
-    .acc-limit-pct.danger { color: var(--danger); }
-    .acc-progress-track {
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
-      overflow: hidden;
-      position: relative;
-    }
-    .acc-progress-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, #059669, var(--success));
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
-      transition: width 0.45s ease, background 0.3s ease, box-shadow 0.3s ease;
-      max-width: 100%;
-    }
-    .acc-progress-fill.warn {
-      background: linear-gradient(90deg, #d97706, var(--warning));
-      box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
-    }
-    .acc-progress-fill.danger {
-      background: linear-gradient(90deg, #e11d48, var(--danger));
-      box-shadow: 0 0 14px rgba(244, 63, 94, 0.45);
-    }
-    .acc-limit-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      font-variant-numeric: tabular-nums;
-      flex-wrap: wrap;
-    }
-    /* Tryb: działalność rejestrowana — pełna szerokość, bez limitu DN */
-    .acc-limit-panel.is-registered .acc-limit-pct,
-    .acc-limit-panel.is-registered .acc-progress-track,
-    .acc-limit-panel.is-registered .acc-limit-remaining {
-      display: none !important;
-    }
-    .acc-limit-panel.is-registered .acc-limit-head {
-      margin-bottom: 0;
-    }
-    .acc-limit-panel.is-registered .acc-limit-head > div:first-child {
-      width: 100%;
-      flex: 1 1 100%;
-    }
-    .acc-limit-panel.is-registered .acc-limit-title {
-      font-size: 1.15rem;
       letter-spacing: -0.3px;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .acc-limit-panel.is-registered .acc-limit-meta {
-      justify-content: flex-end;
-      margin-top: 12px;
+    .acc-kpi-val.green {
+      color: var(--success);
+      text-shadow: 0 0 18px rgba(16, 185, 129, 0.55);
+    }
+    .acc-kpi-val.amber {
+      color: var(--warning);
+      text-shadow: 0 0 18px rgba(245, 158, 11, 0.55);
     }
     .acc-section-panel {
       background: var(--card-bg);
@@ -1516,7 +1475,7 @@
         overflow: hidden;
       }
 
-      .panel, .pay-kpi, .payments-table-panel, .acc-limit-panel, .acc-section-panel {
+      .panel, .pay-kpi, .payments-table-panel, .acc-kpi, .acc-section-panel {
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
         background: #12151f;
@@ -1601,14 +1560,12 @@
       .amount-input { flex: 1; width: auto; }
 
       .accounting-view-wrapper { padding: 14px 12px calc(8px + env(safe-area-inset-bottom)); }
-      .acc-limit-panel {
-        padding: 14px 16px 16px;
+      .acc-kpi-row { gap: 10px; }
+      .acc-kpi {
+        padding: 14px 16px;
         border-radius: 18px;
       }
-      .acc-limit-title { font-size: 0.88rem; }
-      .acc-limit-panel.is-registered .acc-limit-title { font-size: 1.02rem; }
-      .acc-limit-pct { font-size: 1.2rem; }
-      .acc-progress-track { height: 10px; }
+      .acc-kpi-val { font-size: 1.2rem; }
       .acc-section-panel { border-radius: 18px; }
       .acc-section-header, .acc-pdf-panel { padding: 14px 16px; }
       .acc-pending-list, .acc-tx-list { padding: 12px 14px 16px; gap: 10px; }
@@ -2002,22 +1959,16 @@
     <main class="view-content hidden" id="view-accounting">
       <div class="accounting-view-wrapper">
 
-        <section class="acc-limit-panel" id="acc-limit-panel" aria-label="Przychód w bieżącym kwartale">
-          <div class="acc-limit-head">
-            <div>
-              <div class="acc-limit-title" id="acc-limit-label">Przychód w tym kwartale (Q1): 0 zł z 10 813,50 zł</div>
-              <div class="acc-limit-sub" id="acc-limit-sub">Limit działalności nierejestrowanej · rozliczenie kwartalne · Europa/Warsaw</div>
-            </div>
-            <div class="acc-limit-pct" id="acc-limit-pct">0%</div>
+        <div class="acc-kpi-row" id="acc-kpi-row" aria-label="Podsumowanie kwartału">
+          <div class="acc-kpi acc-kpi-earned">
+            <span class="acc-kpi-label">Zarobione w kwartale</span>
+            <span class="acc-kpi-val green" id="acc-kpi-earned">0,00 zł</span>
           </div>
-          <div class="acc-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="acc-progress-bar">
-            <div class="acc-progress-fill" id="acc-progress-fill"></div>
+          <div class="acc-kpi acc-kpi-remaining" id="acc-kpi-remaining-card">
+            <span class="acc-kpi-label">Pozostało do limitu</span>
+            <span class="acc-kpi-val amber" id="acc-kpi-remaining">10 813,50 zł</span>
           </div>
-          <div class="acc-limit-meta">
-            <span class="acc-limit-remaining" id="acc-limit-remaining">Pozostało: 10 813,50 zł</span>
-            <span id="acc-limit-range">Q1 · sty–mar</span>
-          </div>
-        </section>
+        </div>
 
         <section class="acc-section-panel grow">
           <div class="acc-section-header">
@@ -2381,7 +2332,6 @@
 
     // Działalność nierejestrowana — limit kwartalny (2026)
     const DN_QUARTER_LIMIT = 10813.50;
-    const DN_QUARTER_WARN_RATIO = 0.8;
     const ACTIVITY_TYPE_UNREGISTERED = "unregistered";
     const ACTIVITY_TYPE_REGISTERED = "registered";
     const DEFAULT_ACTIVITY_TYPE = ACTIVITY_TYPE_UNREGISTERED;
@@ -3733,67 +3683,26 @@
       const q = getQuarterFromDate(now);
       const year = now.getFullYear();
       const total = Math.round(sumQuarterRevenue(q, year) * 100) / 100;
+      const left = Math.max(0, Math.round((DN_QUARTER_LIMIT - total) * 100) / 100);
       const registered = isRegisteredBusiness();
 
-      const panel = document.getElementById("acc-limit-panel");
-      const label = document.getElementById("acc-limit-label");
-      const subEl = document.getElementById("acc-limit-sub");
-      const pctEl = document.getElementById("acc-limit-pct");
-      const fill = document.getElementById("acc-progress-fill");
-      const bar = document.getElementById("acc-progress-bar");
-      const remainingEl = document.getElementById("acc-limit-remaining");
-      const rangeEl = document.getElementById("acc-limit-range");
-      if (!label) return;
+      const row = document.getElementById("acc-kpi-row");
+      const earnedEl = document.getElementById("acc-kpi-earned");
+      const remainingEl = document.getElementById("acc-kpi-remaining");
+      if (!earnedEl) return;
 
-      if (panel) {
-        panel.classList.toggle("is-registered", registered);
-        panel.setAttribute(
+      if (row) {
+        row.classList.toggle("is-registered", registered);
+        row.setAttribute(
           "aria-label",
           registered
-            ? "Przychód w bieżącym kwartale"
-            : "Limit kwartalny działalności nierejestrowanej"
+            ? "Zarobione w bieżącym kwartale"
+            : "Zarobione i pozostało do limitu w bieżącym kwartale"
         );
       }
 
-      if (rangeEl) rangeEl.textContent = `Q${q} · ${QUARTER_MONTH_LABELS[q]} · ${year}`;
-
-      if (registered) {
-        label.textContent = `Przychód w tym kwartale (Q${q}): ${formatMoneyPl(total)} zł`;
-        if (subEl) {
-          subEl.textContent = `Działalność rejestrowana · rozliczenie kwartalne · Europa/Warsaw`;
-        }
-        if (pctEl) pctEl.textContent = "";
-        if (fill) fill.style.width = "0%";
-        if (bar) bar.setAttribute("aria-valuenow", "0");
-        if (remainingEl) remainingEl.textContent = "";
-        return;
-      }
-
-      const pctRaw = DN_QUARTER_LIMIT > 0 ? (total / DN_QUARTER_LIMIT) * 100 : 0;
-      const pct = Math.min(100, pctRaw);
-      const ratio = DN_QUARTER_LIMIT > 0 ? total / DN_QUARTER_LIMIT : 0;
-      const warn = ratio >= DN_QUARTER_WARN_RATIO;
-      const danger = ratio >= 1;
-
-      label.textContent = `Przychód w tym kwartale (Q${q}): ${formatMoneyPl(total)} zł z ${formatMoneyPl(DN_QUARTER_LIMIT)} zł`;
-      if (subEl) {
-        subEl.textContent = "Limit działalności nierejestrowanej · rozliczenie kwartalne · Europa/Warsaw";
-      }
-      if (pctEl) {
-        pctEl.textContent = `${Math.round(pctRaw)}%`;
-        pctEl.className = "acc-limit-pct" + (danger ? " danger" : warn ? " warn" : "");
-      }
-      if (fill) {
-        fill.style.width = `${pct}%`;
-        fill.className = "acc-progress-fill" + (danger ? " danger" : warn ? " warn" : "");
-      }
-      if (bar) bar.setAttribute("aria-valuenow", String(Math.round(pct)));
-      const left = Math.max(0, Math.round((DN_QUARTER_LIMIT - total) * 100) / 100);
-      if (remainingEl) {
-        remainingEl.textContent = danger
-          ? `Przekroczono limit o ${formatMoneyPl(total - DN_QUARTER_LIMIT)} zł`
-          : `Pozostało: ${formatMoneyPl(left)} zł`;
-      }
+      earnedEl.textContent = `${formatMoneyPl(total)} zł`;
+      if (remainingEl) remainingEl.textContent = `${formatMoneyPl(left)} zł`;
     }
 
     function renderAccountingPendingList() {
