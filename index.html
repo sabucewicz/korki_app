@@ -313,6 +313,59 @@
     .acc-section { border-top: 1px solid rgba(255,255,255,0.08); margin-top: 18px; padding-top: 18px; }
     .acc-hint { color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin-bottom: 12px; }
     .acc-providers { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+    .acc-activity-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .acc-activity-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      user-select: none;
+    }
+    .acc-activity-option:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+    .acc-activity-option:has(input:checked) {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.45);
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.2);
+    }
+    .acc-activity-option input {
+      accent-color: var(--accent);
+      width: 20px;
+      height: 20px;
+      margin-top: 1px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .acc-activity-option-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .acc-activity-option-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .acc-activity-option-sub {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
 
     /* ZAKŁADKI */
     .view-content {
@@ -600,6 +653,27 @@
       color: var(--text-muted);
       font-variant-numeric: tabular-nums;
       flex-wrap: wrap;
+    }
+    /* Tryb: działalność rejestrowana — pełna szerokość, bez limitu DN */
+    .acc-limit-panel.is-registered .acc-limit-pct,
+    .acc-limit-panel.is-registered .acc-progress-track,
+    .acc-limit-panel.is-registered .acc-limit-remaining {
+      display: none !important;
+    }
+    .acc-limit-panel.is-registered .acc-limit-head {
+      margin-bottom: 0;
+    }
+    .acc-limit-panel.is-registered .acc-limit-head > div:first-child {
+      width: 100%;
+      flex: 1 1 100%;
+    }
+    .acc-limit-panel.is-registered .acc-limit-title {
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+    .acc-limit-panel.is-registered .acc-limit-meta {
+      justify-content: flex-end;
+      margin-top: 12px;
     }
     .acc-section-panel {
       background: var(--card-bg);
@@ -1532,6 +1606,7 @@
         border-radius: 18px;
       }
       .acc-limit-title { font-size: 0.88rem; }
+      .acc-limit-panel.is-registered .acc-limit-title { font-size: 1.02rem; }
       .acc-limit-pct { font-size: 1.2rem; }
       .acc-progress-track { height: 10px; }
       .acc-section-panel { border-radius: 18px; }
@@ -1753,6 +1828,26 @@
           </div>
         </div>
 
+        <div class="acc-section">
+          <div class="acc-hint">Forma działalności wpływa na widok limitu kwartalnego w zakładce Księgowość.</div>
+          <div class="acc-activity-options" role="radiogroup" aria-label="Forma działalności">
+            <label class="acc-activity-option">
+              <input type="radio" name="acc-activity-type" value="unregistered" checked onchange="onActivityTypeChange()" />
+              <span class="acc-activity-option-text">
+                <span class="acc-activity-option-title">Działalność nierejestrowana</span>
+                <span class="acc-activity-option-sub">Śledzenie limitu kwartalnego oraz pozostałej kwoty do progu DN</span>
+              </span>
+            </label>
+            <label class="acc-activity-option">
+              <input type="radio" name="acc-activity-type" value="registered" onchange="onActivityTypeChange()" />
+              <span class="acc-activity-option-text">
+                <span class="acc-activity-option-title">Działalność rejestrowana (Firma)</span>
+                <span class="acc-activity-option-sub">Tylko suma zarobków w bieżącym kwartale — bez limitu DN</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
         <div id="acc-error" class="auth-error"></div>
         <div id="acc-ok" class="auth-ok"></div>
       </div>
@@ -1907,11 +2002,11 @@
     <main class="view-content hidden" id="view-accounting">
       <div class="accounting-view-wrapper">
 
-        <section class="acc-limit-panel" aria-label="Limit kwartalny działalności nierejestrowanej">
+        <section class="acc-limit-panel" id="acc-limit-panel" aria-label="Przychód w bieżącym kwartale">
           <div class="acc-limit-head">
             <div>
               <div class="acc-limit-title" id="acc-limit-label">Przychód w tym kwartale (Q1): 0 zł z 10 813,50 zł</div>
-              <div class="acc-limit-sub">Limit działalności nierejestrowanej · rozliczenie kwartalne · Europa/Warsaw</div>
+              <div class="acc-limit-sub" id="acc-limit-sub">Limit działalności nierejestrowanej · rozliczenie kwartalne · Europa/Warsaw</div>
             </div>
             <div class="acc-limit-pct" id="acc-limit-pct">0%</div>
           </div>
@@ -1919,7 +2014,7 @@
             <div class="acc-progress-fill" id="acc-progress-fill"></div>
           </div>
           <div class="acc-limit-meta">
-            <span id="acc-limit-remaining">Pozostało: 10 813,50 zł</span>
+            <span class="acc-limit-remaining" id="acc-limit-remaining">Pozostało: 10 813,50 zł</span>
             <span id="acc-limit-range">Q1 · sty–mar</span>
           </div>
         </section>
@@ -2287,12 +2382,56 @@
     // Działalność nierejestrowana — limit kwartalny (2026)
     const DN_QUARTER_LIMIT = 10813.50;
     const DN_QUARTER_WARN_RATIO = 0.8;
+    const ACTIVITY_TYPE_UNREGISTERED = "unregistered";
+    const ACTIVITY_TYPE_REGISTERED = "registered";
+    const DEFAULT_ACTIVITY_TYPE = ACTIVITY_TYPE_UNREGISTERED;
     const QUARTER_MONTH_LABELS = {
       1: "sty–mar",
       2: "kwi–cze",
       3: "lip–wrz",
       4: "paź–gru"
     };
+
+    function activityTypeStorageKey(uid) {
+      return `tutedoflow_activity_type_${uid || "guest"}`;
+    }
+
+    function getActivityType() {
+      const uid = currentUser && currentUser.uid;
+      try {
+        const v = localStorage.getItem(activityTypeStorageKey(uid));
+        if (v === ACTIVITY_TYPE_REGISTERED || v === ACTIVITY_TYPE_UNREGISTERED) return v;
+      } catch (_) { /* ignore */ }
+      return DEFAULT_ACTIVITY_TYPE;
+    }
+
+    function isRegisteredBusiness() {
+      return getActivityType() === ACTIVITY_TYPE_REGISTERED;
+    }
+
+    function syncActivityTypeRadios() {
+      const type = getActivityType();
+      document.querySelectorAll('input[name="acc-activity-type"]').forEach(el => {
+        el.checked = el.value === type;
+      });
+    }
+
+    function setActivityType(type) {
+      const normalized = type === ACTIVITY_TYPE_REGISTERED
+        ? ACTIVITY_TYPE_REGISTERED
+        : ACTIVITY_TYPE_UNREGISTERED;
+      const uid = currentUser && currentUser.uid;
+      try {
+        localStorage.setItem(activityTypeStorageKey(uid), normalized);
+      } catch (_) { /* ignore */ }
+      syncActivityTypeRadios();
+      updateAccountingProgressBar();
+    }
+
+    function onActivityTypeChange() {
+      const selected = document.querySelector('input[name="acc-activity-type"]:checked');
+      setActivityType(selected ? selected.value : DEFAULT_ACTIVITY_TYPE);
+    }
     const MONTH_LABELS_PL = [
       "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
       "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
@@ -2708,6 +2847,7 @@
       document.getElementById("acc-password").value = "";
       refreshAccountModal();
       populateScheduleHourSelects();
+      syncActivityTypeRadios();
       openModal("modal-account");
     }
 
@@ -3593,25 +3733,60 @@
       const q = getQuarterFromDate(now);
       const year = now.getFullYear();
       const total = Math.round(sumQuarterRevenue(q, year) * 100) / 100;
+      const registered = isRegisteredBusiness();
+
+      const panel = document.getElementById("acc-limit-panel");
+      const label = document.getElementById("acc-limit-label");
+      const subEl = document.getElementById("acc-limit-sub");
+      const pctEl = document.getElementById("acc-limit-pct");
+      const fill = document.getElementById("acc-progress-fill");
+      const bar = document.getElementById("acc-progress-bar");
+      const remainingEl = document.getElementById("acc-limit-remaining");
+      const rangeEl = document.getElementById("acc-limit-range");
+      if (!label) return;
+
+      if (panel) {
+        panel.classList.toggle("is-registered", registered);
+        panel.setAttribute(
+          "aria-label",
+          registered
+            ? "Przychód w bieżącym kwartale"
+            : "Limit kwartalny działalności nierejestrowanej"
+        );
+      }
+
+      if (rangeEl) rangeEl.textContent = `Q${q} · ${QUARTER_MONTH_LABELS[q]} · ${year}`;
+
+      if (registered) {
+        label.textContent = `Przychód w tym kwartale (Q${q}): ${formatMoneyPl(total)} zł`;
+        if (subEl) {
+          subEl.textContent = `Działalność rejestrowana · rozliczenie kwartalne · Europa/Warsaw`;
+        }
+        if (pctEl) pctEl.textContent = "";
+        if (fill) fill.style.width = "0%";
+        if (bar) bar.setAttribute("aria-valuenow", "0");
+        if (remainingEl) remainingEl.textContent = "";
+        return;
+      }
+
       const pctRaw = DN_QUARTER_LIMIT > 0 ? (total / DN_QUARTER_LIMIT) * 100 : 0;
       const pct = Math.min(100, pctRaw);
       const ratio = DN_QUARTER_LIMIT > 0 ? total / DN_QUARTER_LIMIT : 0;
       const warn = ratio >= DN_QUARTER_WARN_RATIO;
       const danger = ratio >= 1;
 
-      const label = document.getElementById("acc-limit-label");
-      const pctEl = document.getElementById("acc-limit-pct");
-      const fill = document.getElementById("acc-progress-fill");
-      const bar = document.getElementById("acc-progress-bar");
-      const remainingEl = document.getElementById("acc-limit-remaining");
-      const rangeEl = document.getElementById("acc-limit-range");
-      if (!label || !fill) return;
-
       label.textContent = `Przychód w tym kwartale (Q${q}): ${formatMoneyPl(total)} zł z ${formatMoneyPl(DN_QUARTER_LIMIT)} zł`;
-      pctEl.textContent = `${Math.round(pctRaw)}%`;
-      pctEl.className = "acc-limit-pct" + (danger ? " danger" : warn ? " warn" : "");
-      fill.style.width = `${pct}%`;
-      fill.className = "acc-progress-fill" + (danger ? " danger" : warn ? " warn" : "");
+      if (subEl) {
+        subEl.textContent = "Limit działalności nierejestrowanej · rozliczenie kwartalne · Europa/Warsaw";
+      }
+      if (pctEl) {
+        pctEl.textContent = `${Math.round(pctRaw)}%`;
+        pctEl.className = "acc-limit-pct" + (danger ? " danger" : warn ? " warn" : "");
+      }
+      if (fill) {
+        fill.style.width = `${pct}%`;
+        fill.className = "acc-progress-fill" + (danger ? " danger" : warn ? " warn" : "");
+      }
       if (bar) bar.setAttribute("aria-valuenow", String(Math.round(pct)));
       const left = Math.max(0, Math.round((DN_QUARTER_LIMIT - total) * 100) / 100);
       if (remainingEl) {
@@ -3619,7 +3794,6 @@
           ? `Przekroczono limit o ${formatMoneyPl(total - DN_QUARTER_LIMIT)} zł`
           : `Pozostało: ${formatMoneyPl(left)} zł`;
       }
-      if (rangeEl) rangeEl.textContent = `Q${q} · ${QUARTER_MONTH_LABELS[q]} · ${year}`;
     }
 
     function renderAccountingPendingList() {
