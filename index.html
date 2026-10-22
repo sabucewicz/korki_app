@@ -1451,15 +1451,26 @@
       .payments-table-panel { display: block; height: auto; overflow: visible; }
       .payments-scroll-area { max-height: none; overflow: visible; }
 
+      /* Jak payments-view-wrapper: strona scrolluje body, odstępy przez margin */
       .accounting-view-wrapper {
         display: block;
-        height: auto;
+        height: auto !important;
+        max-height: none;
         padding: 14px 12px 0;
-        overflow: visible;
-        gap: 14px;
+        overflow: visible !important;
       }
-      .acc-section-panel { margin-bottom: 0; }
-      .acc-section-panel.grow { min-height: 0; }
+      .acc-kpi-row { margin-bottom: 14px; }
+      .acc-section-panel {
+        display: block;
+        height: auto;
+        overflow: visible;
+        margin-bottom: 14px;
+        flex: none;
+      }
+      .acc-section-panel.grow {
+        flex: none;
+        min-height: 0;
+      }
       .acc-tx-list { max-height: none; min-height: 0; overflow: visible; }
       /* karty 1-kolumnowe są wyższe — ~2 widoczne, od 3. scroll */
       .acc-pending-list {
@@ -1592,8 +1603,8 @@
       .amount-input-box { width: 100%; }
       .amount-input { flex: 1; width: auto; }
 
-      .accounting-view-wrapper { padding: 14px 12px calc(8px + env(safe-area-inset-bottom)); }
-      .acc-kpi-row { gap: 10px; }
+      .accounting-view-wrapper { padding: 14px 12px 0; }
+      .acc-kpi-row { gap: 10px; margin-bottom: 14px; }
       .acc-kpi {
         padding: 14px 16px;
         border-radius: 18px;
